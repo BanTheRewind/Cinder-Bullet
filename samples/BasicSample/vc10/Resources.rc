@@ -1,0 +1,7 @@
+#include "Resources.h"
+
+ID ICON "cinder_app_icon.ico"
+
+RES_IMAGE_HEIGHTFIELD
+RES_OBJ_SPHERE
+RES_OBJ_TORUS

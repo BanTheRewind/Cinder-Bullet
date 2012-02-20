@@ -1,0 +1,34 @@
+This is a work in progress. It wraps the Bullet
+3D physics engine for Cinder. It has a lot of features 
+but there is a lot to go.
+
+Some notable features include...
+
+- VBO representations of all bodies
+- Convenience methods for most rigid primitives
+- Converts TriMesh into a convex or concave physics body
+- Creates interactive terrain from heightfield (bitmap)
+- Easy to use body manager
+- Soft body dynamics ready
+- Creates VBOs for all bodies for fast rendering
+
+TO DO LIST
+
+- Soft body dynamics to mirror rigid body convenience 
+  methods
+- Method for applying force to a collision object
+- Mouse/screen to world method for interacting with objects
+- Add params to sample project to control "brush"
+- Code cleanup
+- Static lib
+- XCode static lib + samples 
+
+More about Bullet here:
+http://bulletphysics.org/wordpress/
+
+-----------------------------------------
+
+http://www.bantherewind.com
+http://www.libcinder.org
+
+bantherewind@gmail.com
