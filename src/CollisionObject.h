@@ -39,51 +39,58 @@
 
 // Includes
 #include "BulletUtils.h"
-#include "TetraCube.h"
 
 namespace bullet
 {
 
-	/*! Collision object base class */
-	class CollisionObject 
+	class DynamicsWorld;
+	
+	class CollisionObjectBase
 	{
 
 	public:
 
-		// Con/de-structor
-		explicit CollisionObject() {}
-		virtual ~CollisionObject() {}
+		CollisionObjectBase() {}		// Default constructor allows reserve in ptr_vector
+		~CollisionObjectBase();
 
-		// Extend this to draw
-		virtual void draw(bool wireframe = false) const = 0;
+		void							update( double step );
 
-		// Getters
-		virtual int32_t getId() = 0;
-		virtual int32_t getId() const = 0;
-		virtual double getLifespan() = 0;
-		virtual double getLifespan() const = 0;
-		virtual double getLifetime() = 0;
-		virtual double getLifetime() const = 0;
-		virtual ci::Vec3f getPosition() = 0;
-		virtual ci::Vec3f getPosition() const = 0;
-		virtual ci::Quatf getRotation() = 0;
-		virtual ci::Quatf getRotation() const = 0;
-		virtual ci::gl::VboMesh getVboMesh() = 0;
-		virtual ci::gl::VboMesh getVboMesh() const = 0;
-		virtual btDynamicsWorld * getWorld() = 0;
-		virtual btDynamicsWorld * getWorld() const = 0;
+		double							getAge();
+		double							getAge() const;
+		btCollisionObject*				getBulletBody();
+		btCollisionObject*				getBulletBody() const;
+		double							getLifespan();
+		double							getLifespan() const;
+		ci::Matrix44f					getMatrix();
+		ci::Matrix44f					getMatrix() const;
+		ci::Vec3f&						getPosition();
+		const ci::Vec3f&				getPosition() const;
+		ci::Quatf&						getRotation();
+		const ci::Quatf&				getRotation() const;
+		ci::gl::VboMesh&				getVboMesh();
+		const ci::gl::VboMesh&			getVboMesh() const;
 
-		// Setters
-		virtual void setId(int32_t id) = 0;
-		virtual void setLifespan(double time) = 0;
+	protected:
 
-		// Runs update logic
-		virtual void update(double step) = 0;
+		CollisionObjectBase( btDynamicsWorld* world, const ci::Vec3f &position = ci::Vec3f::zero(), const ci::Quatf &rotation = ci::Quatf() );
+
+		double							mAge;
+		btRigidBody						*mRigidBody;
+		btSoftBody						*mSoftBody;
+		ci::Vec3f						mPosition;
+		ci::Quatf						mRotation;
+		btDynamicsWorld					*mWorld;
+
+		void							clearVboData();
+		void							setVboData( GLenum primitiveType = GL_TRIANGLES );
+		std::vector<uint32_t>			mVboIndices;
+		ci::gl::VboMesh::Layout			mVboLayout;
+		ci::gl::VboMesh					mVboMesh;
+		std::vector<ci::Vec3f>			mVboNormals;
+		std::vector<ci::Vec3f>			mVboPositions;
+
+		friend class					DynamicsWorld;
 
 	};
-
-	// Aliases
-	typedef std::shared_ptr<CollisionObject> CollisionObjectRef;
-	typedef std::vector<CollisionObjectRef> CollisionObjectRefList;
 
 }

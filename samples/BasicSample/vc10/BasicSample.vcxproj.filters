@@ -61,6 +61,9 @@
     <ClCompile Include="..\..\..\src\SoftObject.cpp">
       <Filter>blocks\bullet</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\CollisionObject.cpp">
+      <Filter>blocks\bullet</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Resources.rc">

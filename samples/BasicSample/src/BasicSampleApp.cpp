@@ -59,38 +59,32 @@ class BasicSampleApp : public ci::app::AppBasic
 public:
 
 	// Cinder callbacks
-	void draw();
-	void keyDown(ci::app::KeyEvent event);
-	void mouseDown(ci::app::MouseEvent event);
-	void mouseWheel(ci::app::MouseEvent event);
-	void prepareSettings(ci::app::AppBasic::Settings * settings);
-	void resize(ci::app::ResizeEvent event);
-	void setup();
-	void shutdown();
-	void update();
+	void						draw();
+	void						keyDown( ci::app::KeyEvent event );
+	void						mouseDown( ci::app::MouseEvent event );
+	void						mouseWheel( ci::app::MouseEvent event );
+	void						prepareSettings( ci::app::AppBasic::Settings * settings );
+	void						resize( ci::app::ResizeEvent event );
+	void						setup();
+	void						shutdown();
+	void						update();
 	
 private:
 
-	// Bullet
-	bullet::DynamicsWorldRef mDynamicsWorld;
-	
 	// Lifespan of objects, in seconds
-	float mLifespan;
+	float						mLifespan;
 
 	// Camera
-	ci::CameraPersp mCamera;
+	ci::CameraPersp				mCamera;
 
 	// Shading
-	ci::gl::Light * mLight;
+	ci::gl::Light				*mLight;
 
 	// 3D objects
-	ci::TriMesh mConcave;
-	ci::TriMesh mConvex;
-	void loadModels();
-	void loadTerrain();
-
-	// Wireframe flag
-	bool mWireframe;
+	void						loadModels();
+	void						loadTerrain();
+	ci::TriMesh					mConcave;
+	ci::TriMesh					mConvex;
 
 };
 
@@ -105,16 +99,21 @@ void BasicSampleApp::draw()
 {
 
 	// Set up screen	
-	gl::setViewport(getWindowBounds());
-	gl::setMatrices(mCamera);
-	gl::clear(ColorAf::black());
+	gl::setViewport( getWindowBounds() );
+	gl::setMatrices( mCamera );
+	gl::clear( ColorAf::black() );
 
 	// Rotate
 	gl::pushMatrices();
-	gl::rotate(Vec3f(-45.0f, math<float>::sin((float)getElapsedSeconds() * 0.3333f) * 20.0f, 0.0f));
+	gl::rotate( Vec3f( -45.0f, math<float>::sin( ( float )getElapsedSeconds() * 0.3333f ) * 20.0f, 0.0f ) );
 
-	// Draw world
-	mDynamicsWorld->draw(mWireframe);
+	for ( bullet::Iter objectIt = bullet::begin(); objectIt != bullet::end(); ++objectIt ) {
+		gl::pushMatrices();
+		//glMultMatrixf( objectIt->getMatrix() );
+		//gl::draw( objectIt->getVboMesh() );
+		gl::popMatrices();
+	}
+
 
 	// End rotation
 	gl::popMatrices();
@@ -122,20 +121,17 @@ void BasicSampleApp::draw()
 }
 
 // Handles key press
-void BasicSampleApp::keyDown(KeyEvent event)
+void BasicSampleApp::keyDown( KeyEvent event )
 {
 
 	// Key on key...
-	switch (event.getCode())
+	switch ( event.getCode() )
 	{
 	case KeyEvent::KEY_ESCAPE:
 		quit();
 		break;
 	case KeyEvent::KEY_SPACE:
-		writeImage(getAppPath() + "\\frame_" + toString(getElapsedFrames()) + ".png", copyWindowSurface());
-		break;
-	case KeyEvent::KEY_w:
-		mWireframe = !mWireframe;
+		writeImage( getAppPath() + "\\frame_" + toString( getElapsedFrames() ) + ".png", copyWindowSurface() );
 		break;
 	}
 
@@ -146,10 +142,10 @@ void BasicSampleApp::loadModels()
 {
 
 	// Load OBJ files as meshes
-	ObjLoader loader(loadResource(RES_OBJ_SPHERE)->createStream());
-	loader.load(& mConvex);
-	loader = ObjLoader(loadResource(RES_OBJ_TORUS)->createStream());
-	loader.load(& mConcave);
+	ObjLoader loader( loadResource( RES_OBJ_SPHERE )->createStream() );
+	loader.load( & mConvex );
+	loader = ObjLoader( loadResource( RES_OBJ_TORUS )->createStream() );
+	loader.load( & mConcave );
 
 }
 
@@ -158,93 +154,97 @@ void BasicSampleApp::loadTerrain()
 {
 
 	// Load heightfield image from resources
-	Surface32f heightField = (Surface32f)Surface(loadImage(loadResource(RES_IMAGE_HEIGHTFIELD)));
+	Surface32f heightField = ( Surface32f )Surface( loadImage( loadResource( RES_IMAGE_HEIGHTFIELD ) ) );
+
+	// Set random size and position
+	float size = Rand::randFloat( 5.0f, 20.0f );
+	Vec3f position = Vec3f( 
+		( float )( ( rand() % 400 ) - 200 ), 
+		( float )( ( rand() % 100 ) + 150 ), 
+		( float )( ( rand() % 400 ) - 200 )
+		 );
+
+	bullet::createRigidBox( Vec3f( size, size, size ), position );
 
 	// Add terrain
-	RigidObjectRef terrain = RigidTerrain::create(mDynamicsWorld, heightField, heightField.getWidth(), heightField.getHeight(), -200, 200, 1, Vec3f(6.0f, 210.0f, 6.0f));
-	terrain->getBody()->setMassProps(0, btVector3(0, 0, 0));
-	mDynamicsWorld->insert((CollisionObjectRef)terrain);
-
-	// Clean up
-	heightField.reset();
+	/*CollisionObjectRef terrain = bullet::createRigidTerrain( heightField, heightField.getWidth(), heightField.getHeight(), -200, 200, 1, Vec3f( 6.0f, 210.0f, 6.0f ) );*/
+	//( (btRigidBody*)( terrain.getBulletBody() ) )->setMassProps( 0, btVector3( 0.0f, 0.0f, 0.0f ) );
 
 }
 
 // Handles mouse button press
-void BasicSampleApp::mouseDown(MouseEvent event)
+void BasicSampleApp::mouseDown( MouseEvent event )
 {
 
 	// Set random size and position
-	float size = Rand::randFloat(5.0f, 20.0f);
-	Vec3f position = Vec3f(
-		(float)((rand() % 400) - 200), 
-		(float)((rand() % 100) + 150), 
-		(float)((rand() % 400) - 200)
-		);
+	float size = Rand::randFloat( 5.0f, 20.0f );
+	Vec3f position = Vec3f( 
+		( float )( ( rand() % 400 ) - 200 ), 
+		( float )( ( rand() % 100 ) + 150 ), 
+		( float )( ( rand() % 400 ) - 200 )
+		 );
 
 	// Drop primitive into terrain
-	switch (Rand::randInt(0, 5))
+	/*switch ( Rand::randInt( 0, 5 ) )
 	{
 	case 0:
-		mDynamicsWorld->insert(RigidSphere::create(mDynamicsWorld, size, 16, position, Quatf()))->setLifespan((double)mLifespan);
+		mDynamicsWorld->insert( RigidSphere( mDynamicsWorld, size, 16, position, Quatf() ) ).setLifespan( ( double )mLifespan );
 		break;
 	case 1:
-		mDynamicsWorld->insert(RigidBox::create(mDynamicsWorld, Vec3f(size, size, size), position, Quatf()))->setLifespan((double)mLifespan);
+		mDynamicsWorld->insert( RigidBox( mDynamicsWorld, Vec3f( size, size, size ), position, Quatf() ) ).setLifespan( ( double )mLifespan );
 		break;
 	case 2:
-		mDynamicsWorld->insert(RigidHull::create(mDynamicsWorld, mConvex, Vec3f(size, size, size) * 0.5f, position, Quatf()))->setLifespan((double)mLifespan);
+		mDynamicsWorld->insert( RigidHull( mDynamicsWorld, mConvex, Vec3f( size, size, size ) * 0.5f, position, Quatf() ) ).setLifespan( ( double )mLifespan );
 		break;
 	case 3:
-		mDynamicsWorld->insert(RigidMesh::create(mDynamicsWorld, mConcave, Vec3f(size, size, size) * 0.12f, 0.0f, position, Quatf()))->setLifespan((double)mLifespan);
+		mDynamicsWorld->insert( RigidMesh( mDynamicsWorld, mConcave, Vec3f( size, size, size ) * 0.12f, 0.0f, position, Quatf() ) ).setLifespan( ( double )mLifespan );
 		break;
 	case 4:
-		mDynamicsWorld->insert(RigidCylinder::create(mDynamicsWorld, size * 0.5f, size, size * 2.0f, 12, position, Quatf()))->setLifespan((double)mLifespan);
+		mDynamicsWorld->insert( RigidCylinder( mDynamicsWorld, size * 0.5f, size, size * 2.0f, 12, position, Quatf() ) ).setLifespan( ( double )mLifespan );
 		break;
-	}
+	}*/
 
 }
 
 // Handles mouse wheel
-void BasicSampleApp::mouseWheel(MouseEvent event)
+void BasicSampleApp::mouseWheel( MouseEvent event )
 {
 
 	// Zoom
-	mCamera.setEyePoint(mCamera.getEyePoint() + Vec3f(0.0f, 0.0f, event.getWheelIncrement() * 20.0f));
+	mCamera.setEyePoint( mCamera.getEyePoint() + Vec3f( 0.0f, 0.0f, event.getWheelIncrement() * 20.0f ) );
 
 }
 
 // Set up window
-void BasicSampleApp::prepareSettings(Settings * settings)
+void BasicSampleApp::prepareSettings( Settings * settings )
 {
 
 	// DO IT!
-	settings->setFrameRate(60.0f);
-	settings->setFullScreen(false);
-	settings->setWindowSize(640, 480);
+	settings->setFrameRate( 60.0f );
+	settings->setFullScreen( false );
+	settings->setWindowSize( 640, 480 );
 
 }
 
 // Handles window resize
-void BasicSampleApp::resize(ResizeEvent event)
+void BasicSampleApp::resize( ResizeEvent event )
 {
 
 	// Reset camera
-	mCamera.setPerspective(60.0f, getWindowAspectRatio(), 1.0f, 2000.0f);
-	mCamera.lookAt(Vec3f(0.0f, 0.0f, -600.0f), Vec3f::zero());
-	gl::setMatrices(mCamera);
+	mCamera.setPerspective( 60.0f, getWindowAspectRatio(), 1.0f, 2000.0f );
+	mCamera.lookAt( Vec3f( 0.0f, 0.0f, -600.0f ), Vec3f::zero() );
+	gl::setMatrices( mCamera );
 
 	// Set up OpenGL
-	glEnable(GL_BLEND);
-	glEnable(GL_DEPTH_TEST);
-	glShadeModel(GL_SMOOTH);
-	glEnable(GL_LINE_SMOOTH);
-	glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
-	glEnable(GL_POLYGON_SMOOTH);
-	glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
-	glEnable(GL_LIGHTING);
-	glEnable(GL_NORMALIZE);
+	glEnable( GL_BLEND );
+	glEnable( GL_DEPTH_TEST );
+	glShadeModel( GL_SMOOTH );
+	glEnable( GL_POLYGON_SMOOTH );
+	glHint( GL_POLYGON_SMOOTH_HINT, GL_NICEST );
+	glEnable( GL_LIGHTING );
+	glEnable( GL_NORMALIZE );
 	gl::enableAlphaBlending();
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 
 }
 
@@ -254,16 +254,12 @@ void BasicSampleApp::setup()
 
 	// Set default properties
 	mLifespan = 5.0f;
-	mWireframe = false;
-
-	// Create Bullet world
-	mDynamicsWorld = DynamicsWorld::create();
 
 	// Set up OpenGL lighting
-	mLight = new gl::Light(gl::Light::DIRECTIONAL, 0);
-	mLight->setDirection(Vec3f(0.0f, 0.1f, 0.3f).normalized());
-	mLight->setAmbient(ColorAf(0.2f, 0.2f, 0.2f, 1.0f));
-	mLight->setDiffuse(ColorAf(1.0f, 1.0f, 1.0f, 1.0f));
+	mLight = new gl::Light( gl::Light::DIRECTIONAL, 0 );
+	mLight->setDirection( Vec3f( 0.0f, 0.1f, 0.3f ).normalized() );
+	mLight->setAmbient( ColorAf( 0.2f, 0.2f, 0.2f, 1.0f ) );
+	mLight->setDiffuse( ColorAf( 1.0f, 1.0f, 1.0f, 1.0f ) );
 	mLight->enable();
 
 	// Load 3D objects
@@ -271,7 +267,7 @@ void BasicSampleApp::setup()
 	loadTerrain();
 
 	// Run first resize to initialize camera
-	resize(ResizeEvent(getWindowSize()));
+	resize( ResizeEvent( getWindowSize() ) );
 
 }
 
@@ -280,8 +276,9 @@ void BasicSampleApp::shutdown()
 {
 
 	// Clean up
-	if (mLight)
+	if ( mLight ) {
 		delete mLight;
+	}
 
 }
 
@@ -290,12 +287,12 @@ void BasicSampleApp::update()
 {
 
 	// Update light
-	mLight->update(mCamera);
+	mLight->update( mCamera );
 
 	// Update dynamics world
-	mDynamicsWorld->update();
+	bullet::update();
 
 }
 
 // Run application
-CINDER_APP_BASIC(BasicSampleApp, RendererGl)
+CINDER_APP_BASIC( BasicSampleApp, RendererGl )

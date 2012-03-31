@@ -45,136 +45,197 @@ namespace bullet
 	using namespace ci;
 	using namespace std;
 
-	// Constructor
-	SoftObject::SoftObject(DynamicsWorldRef world, const Vec3f & position, const Quatf & rotation) 
+	// Create soft body from arbitrary collision shape
+	/*btSoftBody* SoftBody::create( btDynamicsWorld* world, btSoftBodyWorldInfo& info, btCollisionShape* shape, const Vec3f& position, const Quatf& rotation )
 	{
 
-		// Initialize VBO layout
-		mVboLayout.setStaticIndices();
-		mVboLayout.setDynamicNormals();
-		mVboLayout.setDynamicPositions();
+		// Create soft body
+		btSoftBody* body = new btSoftBody( &info );
+		btTransform transform;
+		transform.setIdentity();
+		transform.setOrigin( bullet::toBulletVector3( position ) );
+		body->transform( transform );
 
-		// Define properties
-		mInfo = & (world->getInfo());
-		mRotation = rotation;
-		mWorld = world->getWorld();
-		mLifespan = 0.0;
-		mLifetime = 0.0;
+		// Add and return body
+		( (btSoftRigidDynamicsWorld*)world )->addSoftBody( body );
+		return body;
 
 	}
 
-	// Destructor
-	SoftObject::~SoftObject() 
+	// Create soft mesh
+	btSoftBody* SoftBody::create( btDynamicsWorld* world, btSoftBodyWorldInfo& info, btConvexHullShape* shape, const Vec3f& position, const Quatf& rotation, float mass )
 	{
 
-		// Clean up
-		if (mBody)
+		// Set vertex positions
+		btVector3 vertices;
+		shape->getVertex( shape->getNumPoints(), vertices );
+
+		// Create soft body
+		btSoftBody* body = btSoftBodyHelpers::CreateFromConvexHull( info,& vertices, shape->getNumPoints(), false );
+
+		// Set mass and position
+		btTransform transform;
+		transform.setIdentity();
+		transform.setOrigin( bullet::toBulletVector3( position ) );
+		body->transform( transform );
+		body->setTotalMass( mass, true );
+
+		// Add and return soft body
+		( (btSoftRigidDynamicsWorld*)world )->addSoftBody( body );
+		return body;
+
+	}*/
+
+	// Create soft box
+	/*btSoftBody* SoftBody::create( btDynamicsWorld* world, btSoftBodyWorldInfo& info, const Vec3f& dimensions, const Vec3f& position, const Quatf& rotation )
+	{
+
+		// Define cube
+		const btVector3	hull = bullet::toBulletVector3( dimensions ) * 0.5f;
+		const btVector3	cube [] = {
+			hull* btVector3( -1.0f, -1.0f, -1.0f ), 
+			hull* btVector3( +1.0f, -1.0f, -1.0f ), 
+			hull* btVector3( -1.0f, +1.0f, -1.0f ), 
+			hull* btVector3( +1.0f, +1.0f, -1.0f ), 
+			hull* btVector3( -1.0f, -1.0f, +1.0f ), 
+			hull* btVector3( +1.0f, -1.0f, +1.0f ), 
+			hull* btVector3( -1.0f, +1.0f, +1.0f ), 
+			hull* btVector3( +1.0f, +1.0f, +1.0f )
+		};
+
+		// Create soft cube
+		btSoftBody* body = btSoftBodyHelpers::CreateFromConvexHull( info, cube, 8 );
+
+		// Set position, rotation, and mass
+		btTransform transform;
+		transform.setIdentity();
+		transform.setRotation( bullet::toBulletQuaternion( rotation ) );
+		transform.setOrigin( bullet::toBulletVector3( position ) );
+		body->transform( transform );
+		body->setTotalMass( ( dimensions.x * 0.5f ) * ( dimensions.y * 0.5f ) * ( dimensions.z * 0.5f ) * (float)M_PI * 4.0f / 3.0f, true );
+
+		// Add and return soft body
+		( (btSoftRigidDynamicsWorld*)world )->addSoftBody( body );
+		return body;
+
+	}
+
+	// Creates a soft sphere
+	btSoftBody* SoftBody::create( btDynamicsWorld* world, btSoftBodyWorldInfo& info, float radius, int32_t segments, const Vec3f& position, const Quatf& rotation )
+	{
+
+		// Create soft sphere
+		btSoftBody* body = btSoftBodyHelpers::CreateEllipsoid( info, btVector3( 0.0f, 0.0f, 0.0f ), btVector3( radius, radius, radius ), segments );
+
+		// Set position, rotation, and mass
+		btTransform transform;
+		transform.setIdentity();
+		transform.setRotation( bullet::toBulletQuaternion( rotation ) );
+		transform.setOrigin( bullet::toBulletVector3( position ) );
+		body->transform( transform );
+		body->setTotalMass( radius * radius * radius * (float)M_PI * 4.0f / 3.0f, true );
+
+		// Add and return soft body
+		( (btSoftRigidDynamicsWorld*)world )->addSoftBody( body );
+		return body;
+
+	}
+
+	// Create soft tetra box
+	btSoftBody* SoftBody::create( btDynamicsWorld* world, btSoftBodyWorldInfo& info, const TetraCube& tetraCube, 
+		const Vec3f& dimensions, const Vec3f& position, const Quatf& rotation )
+	{
+
+		// Define cube
+		const btVector3	hull = bullet::toBulletVector3( dimensions )* 0.5f;
+		const btVector3	cube [] = 
 		{
-			((btSoftRigidDynamicsWorld *)mWorld)->removeSoftBody(mBody);
-			delete mBody;
-		}
+			hull* btVector3( -1.0f, -1.0f, -1.0f ), 
+			hull* btVector3( +1.0f, -1.0f, -1.0f ), 
+			hull* btVector3( -1.0f, +1.0f, -1.0f ), 
+			hull* btVector3( +1.0f, +1.0f, -1.0f ), 
+			hull* btVector3( -1.0f, -1.0f, +1.0f ), 
+			hull* btVector3( +1.0f, -1.0f, +1.0f ), 
+			hull* btVector3( -1.0f, +1.0f, +1.0f ), 
+			hull* btVector3( +1.0f, +1.0f, +1.0f )
+		};
 
-	}
+		// Create soft cube
+		btSoftBody* body = btSoftBodyHelpers::CreateFromConvexHull( info, cube, 8 );
 
-	// Draw
-	void SoftObject::draw(bool wireframe) const
+		// Set position, rotation, and mass
+		btTransform transform;
+		transform.setIdentity();
+		transform.setRotation( bullet::toBulletQuaternion( rotation ) );
+		transform.setOrigin( bullet::toBulletVector3( position ) );
+		body->transform( transform );
+		body->setTotalMass( ( dimensions.x * 0.5f ) * ( dimensions.y * 0.5f )* ( dimensions.z * 0.5f ) * (float)M_PI * 4.0f / 3.0f, true );
+			
+		// Add and return soft body
+		( (btSoftRigidDynamicsWorld*)world )->addSoftBody( body );
+		return body;
+
+	}*/
+	/*
+	// Create a soft box from AxisAlignedBox3f
+	btSoftBody* SoftBody::create( btDynamicsWorld* world, btSoftBodyWorldInfo& info, const AxisAlignedBox3f& box, const Vec3f& position, const Quatf& rotation )
 	{
 
-		// Draw VBO mesh
-		gl::pushMatrices();
-		if (wireframe)
-			gl::enableWireframe();
-		glMultMatrixf(bullet::getWorldTransform(mBody).m);
-		gl::draw(mVboMesh);
-		if (wireframe)
-			gl::disableWireframe();
-		gl::popMatrices();
+		// Determine box size
+		Vec3f min = box.getMin();
+		Vec3f max = box.getMax();
+		Vec3f size = Vec3f( math<float>::abs( max.x - min.x ), math<float>::abs( max.y - min.y ), math<float>::abs( max.z - min.z ) );
+
+		// Create and return box
+		return create( world, info, size, position, rotation );
 
 	}
 
-	// Runs update logic
-	void SoftObject::update(double step)
+	// Create a soft sphere from Sphere
+	btSoftBody* SoftBody::create( btDynamicsWorld* world, btSoftBodyWorldInfo& info, const Sphere& sphere, int32_t segments, const Vec3f& position, const Quatf& rotation )
 	{
 
-		// Add time step to lifetime
-		mLifetime += step;
-		
-		// Update position and rotation
-		mPosition = bullet::fromBulletVector3(mBody->m_bounds[0].lerp(mBody->m_bounds[1], 0.5f));
-		mRotation = Quatf(bullet::getWorldTransform(mBody));
+		// Create and return soft sphere
+		return create( world, info, sphere.getRadius(), segments, position, rotation );		
 
-		// TO DO update VBO mesh
-
-	}
+	}*/
 
 	/****** CONSTRUCTORS ******/
 
 	// Soft box
-	SoftBox::SoftBox(DynamicsWorldRef world, const Vec3f & dimensions, const Vec3f & position, const Quatf & rotation) 
-		: SoftObject(world, position, rotation)
+	/*SoftBox::SoftBox( DynamicsWorldRef world, const Vec3f &dimensions, const Vec3f &position, const Quatf &rotation ) 
+		: SoftObject( world, position, rotation )
 	{
 
 		// Set object dimensions
-		mBody = bullet::create(world->getWorld(), world->getInfo(), dimensions, position, rotation);
+		mSoftBody = SoftBody::create( world->getWorld(), world->getInfo(), dimensions, position, rotation );
 
 		// TO DO create VBO mesh
 
 	}
 
 	// Soft sphere
-	SoftSphere::SoftSphere(DynamicsWorldRef world, float radius, int32_t segments, const Vec3f & position, const Quatf & rotation) 
-		: SoftObject(world, position, rotation)
+	SoftSphere::SoftSphere( DynamicsWorldRef world, float radius, int32_t segments, const Vec3f &position, const Quatf &rotation ) 
+		: SoftObject( world, position, rotation )
 	{
 
 		// Set object dimensions
-		mBody = bullet::create(world->getWorld(), world->getInfo(), radius, segments, position, rotation);
+		mSoftBody = SoftBody::create( world->getWorld(), world->getInfo(), radius, segments, position, rotation );
 
 		// TO DO create VBO mesh
 
 	}
 
 	// Soft tetra cube
-	SoftTetraBox::SoftTetraBox(DynamicsWorldRef world, const Vec3f & dimensions, const Vec3f & position, const Quatf & rotation) 
-		: SoftObject(world, position, rotation)
+	SoftTetraBox::SoftTetraBox( DynamicsWorldRef world, const Vec3f &dimensions, const Vec3f &position, const Quatf &rotation ) 
+		: SoftObject( world, position, rotation )
 	{
 
 		// Set object dimensions
-		mBody = bullet::create(world->getWorld(), world->getInfo(), mTetraCube, dimensions, position, rotation);
+		mSoftBody = SoftBody::create( world->getWorld(), world->getInfo(), mTetraCube, dimensions, position, rotation );
 
 		// TO DO create VBO mesh
 
-	}
-
-	/****** Methods for creating object pointers ******/
-
-	// Box
-	SoftObjectRef SoftBox::create(DynamicsWorldRef world, const Vec3f & dimensions, const Vec3f & position, const Quatf & rotation)
-	{
-		return SoftObjectRef(new SoftBox(world, dimensions, position, rotation));
-	}
-	CollisionObjectRef createSoftBox(DynamicsWorldRef world, const Vec3f & dimensions, const Vec3f & position, const Quatf & rotation)
-	{
-		return (CollisionObjectRef)SoftBox::create(world, dimensions, position, rotation);
-	}
-
-	// Sphere
-	SoftObjectRef SoftSphere::create(DynamicsWorldRef world, float radius, int32_t segments, const Vec3f & position, const Quatf & rotation)
-	{
-		return SoftObjectRef(new SoftSphere(world, radius, segments, position, rotation));
-	}
-	CollisionObjectRef createSoftSoftSphere(DynamicsWorldRef world, float radius, int32_t segments, const Vec3f & position, const Quatf & rotation)
-	{
-		return (CollisionObjectRef)SoftSphere::create(world, radius, segments, position, rotation);
-	}
-
-	// Tetra box
-	SoftObjectRef SoftTetraBox::create(DynamicsWorldRef world, const Vec3f & dimensions, const Vec3f & position, const Quatf & rotation)
-	{
-		return SoftObjectRef(new SoftTetraBox(world, dimensions, position, rotation));
-	}
-	CollisionObjectRef createSoftTetraBox(DynamicsWorldRef world, const Vec3f & dimensions, const Vec3f & position, const Quatf & rotation)
-	{
-		return (CollisionObjectRef)SoftTetraBox::create(world, dimensions, position, rotation);
-	}
+	}*/
 
 }

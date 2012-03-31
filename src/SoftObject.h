@@ -45,100 +45,73 @@
 namespace bullet
 {
 
-	/*! Soft object base class */
-	class SoftObject : public CollisionObject
+	class SoftObject
 	{
 
-	public:
-
-		// Destructor
-		~SoftObject();
-		
-		// Draw
-		void draw(bool wireframe) const;
-
-		// Runs update logic
-		void update(double step);
-
-		// Getters
-		btSoftBody * getBody() { return mBody; }
-		btSoftBody * getBody() const { return mBody; }
-		int32_t getId() { return mId; }
-		int32_t getId() const { return mId; }
-		btSoftBodyWorldInfo * getInfo() { return mInfo; }
-		btSoftBodyWorldInfo * getInfo() const { return mInfo; }
-		double getLifespan() { return mLifespan; }
-		double getLifespan() const { return mLifespan; }
-		double getLifetime() { return mLifetime; }
-		double getLifetime() const { return mLifetime; }
-		ci::Vec3f getPosition() { return mPosition; }
-		ci::Vec3f getPosition() const { return mPosition; }
-		ci::Quatf getRotation() { return mRotation; }
-		ci::Quatf getRotation() const { return mRotation; }
-		ci::gl::VboMesh getVboMesh() { return mVboMesh; }
-		ci::gl::VboMesh getVboMesh() const { return mVboMesh; }
-		btDynamicsWorld * getWorld() { return mWorld; }
-		btDynamicsWorld * getWorld() const { return mWorld; }
-
-		// Setters
-		void setId(int32_t id) { mId = id; }
-		void setLifespan(double time) { mLifespan = time; }
-
-	protected:
-
-		// Con/de-structor
-		SoftObject(DynamicsWorldRef world, const ci::Vec3f & position = ci::Vec3f::zero(), const ci::Quatf & rotation = ci::Quatf());
-		
-		// Properties
-		btSoftBody * mBody;
-		int32_t mId;
-		btSoftBodyWorldInfo * mInfo;
-		double mLifespan;
-		double mLifetime;
-		ci::Vec3f mPosition;
-		ci::Quatf mRotation;
-		ci::gl::VboMesh::Layout mVboLayout;
-		ci::gl::VboMesh mVboMesh;
-		btDynamicsWorld * mWorld;
-
-	};
-
-	// Aliases
-	typedef std::shared_ptr<SoftObject> SoftObjectRef;
-	typedef std::vector<SoftObjectRef> SoftObjectRefList;
-
-	/*! Soft box */
-	class SoftBox : public SoftObject 
-	{
-	public:
-		static SoftObjectRef create(DynamicsWorldRef world, const ci::Vec3f & dimensions = ci::Vec3f(10.0f, 10.0f, 10.0f), const ci::Vec3f & position = ci::Vec3f::zero(), const ci::Quatf & rotation = ci::Quatf());
 	private:
-		SoftBox(DynamicsWorldRef world, const ci::Vec3f & dimensions = ci::Vec3f(10.0f, 10.0f, 10.0f), const ci::Vec3f & position = ci::Vec3f::zero(), const ci::Quatf & rotation = ci::Quatf());
+
+		/*! Create soft body from arbitrary collision shape */
+		//btSoftBody* create( btDynamicsWorld* world, btSoftBodyWorldInfo &info, btCollisionShape* shape, const Vec3f &position = Vec3f::zero(), const Quatf &rotation = Quatf() );
+
+		/*! Creates soft body from triangle mesh */
+		//btSoftBody* create( btDynamicsWorld* world, btSoftBodyWorldInfo &info, btBvhTriangleMeshShape* shape, const Vec3f &position = Vec3f::zero(), const Quatf &rotation = Quatf() );
+
+		/*! Creates soft concave mesh */
+		//btSoftBody* create( btDynamicsWorld* world, btSoftBodyWorldInfo &info, btConvexHullShape* shape, const Vec3f &position = Vec3f::zero(), const Quatf &rotation = Quatf() );
+
+		/*! Create a soft box from AxisAlignedBox3f */
+		//btSoftBody* create( btDynamicsWorld* world, btSoftBodyWorldInfo &info, const AxisAlignedBox3f &box, const Vec3f &position = Vec3f::zero(), const Quatf &rotation = Quatf() );
+
+		/*! Creates a soft box from two Rectfs */
+		//btRigidBody* create( btDynamicsWorld* world, btSoftBodyWorldInfo &info, const Rectf &top, const Rectf &bottom, float height = 10.0f, const Vec3f &position = Vec3f::zero(), const Quatf &rotation = Quatf() );
+
+		/*! Creates soft box */
+		//static btSoftBody* create( btDynamicsWorld* world, btSoftBodyWorldInfo &info, const ci::Vec3f &dimensions = ci::Vec3f( 10.0f, 10.0f, 10.0f ), 
+			//const ci::Vec3f &position = ci::Vec3f::zero(), const ci::Quatf &rotation = ci::Quatf() );
+
+		/*! Creates a soft cylinder */
+		//btRigidBody* create( btDynamicsWorld* world, float topRadius = 10.0f, float bottomRadius = 10.0f, float height = 20.0f, int32_t segments = 16, const Vec3f &position = Vec3f::zero(), const Quatf &rotation = Quatf() );
+
+		/*! Creates a soft sphere from Sphere */
+		//btSoftBody* create( btDynamicsWorld* world, btSoftBodyWorldInfo &info, const Sphere &sphere, int32_t segments = 16, const Vec3f &position = Vec3f::zero(), const Quatf &rotation = Quatf() );
+
+		/*! Creates a soft sphere */
+		//static btSoftBody* create( btDynamicsWorld* world, btSoftBodyWorldInfo &info, float radius = 10.0f, int32_t segments = 16, 
+			//const ci::Vec3f &position = ci::Vec3f::zero(), const ci::Quatf &rotation = ci::Quatf() );
+
+		/*! Creates soft tetra box */
+		/*static btSoftBody* create( btDynamicsWorld* world, btSoftBodyWorldInfo &info, const TetraCube &tetraCube, 
+			const ci::Vec3f &dimensions = ci::Vec3f( 10.0f, 10.0f, 10.0f ), const ci::Vec3f &position = ci::Vec3f::zero(), 
+			const ci::Quatf &rotation = ci::Quatf() );*/
+
+		/*! Creates a soft torus */
+		//static btSoftBody* create( btDynamicsWorld* world, btSoftBodyWorldInfo &info, float innerRadius = 5.0f, float outerRadius = 10.0f, int32_t segments = 16, const Vec3f &position = Vec3f::zero(), const Quatf &rotation = Quatf() );
+
+		friend class CollisionObjectBase;
+
 	};
 
-	/*! Soft sphere */
+	/*class SoftBox : public SoftObject 
+	{
+	public:
+		SoftBox( DynamicsWorldRef world, const ci::Vec3f &dimensions = ci::Vec3f( 10.0f, 10.0f, 10.0f ), 
+			const ci::Vec3f &position = ci::Vec3f::zero(), const ci::Quatf &rotation = ci::Quatf() );
+	};
+
 	class SoftSphere : public SoftObject 
 	{
 	public:
-		static SoftObjectRef create(DynamicsWorldRef world, float radius = 10.0f, int32_t segments = 16, const ci::Vec3f & position = ci::Vec3f::zero(), const ci::Quatf & rotation = ci::Quatf());
-	private:
-		SoftSphere(DynamicsWorldRef world, float radius = 10.0f, int32_t segments = 16, const ci::Vec3f & position = ci::Vec3f::zero(), const ci::Quatf & rotation = ci::Quatf());
+		SoftSphere( DynamicsWorldRef world, float radius = 10.0f, int32_t segments = 16, 
+			const ci::Vec3f &position = ci::Vec3f::zero(), const ci::Quatf &rotation = ci::Quatf() );
 	};
 
-	/*! Soft tetra cube */
 	class SoftTetraBox : public SoftObject 
 	{
 	public:
-		static SoftObjectRef create(DynamicsWorldRef world, const ci::Vec3f & dimensions = ci::Vec3f(10.0f, 10.0f, 10.0f), const ci::Vec3f & position = ci::Vec3f::zero(), const ci::Quatf & rotation = ci::Quatf());
+		SoftTetraBox( DynamicsWorldRef world, const ci::Vec3f &dimensions = ci::Vec3f( 10.0f, 10.0f, 10.0f ), 
+			const ci::Vec3f &position = ci::Vec3f::zero(), const ci::Quatf &rotation = ci::Quatf() );
 	private:
-		SoftTetraBox(DynamicsWorldRef world, const ci::Vec3f & dimensions = ci::Vec3f(10.0f, 10.0f, 10.0f), const ci::Vec3f & position = ci::Vec3f::zero(), const ci::Quatf & rotation = ci::Quatf());
 		TetraCube mTetraCube;
-	};
-
-	// These methods return the object as the base type for 
-	// compatibility with the dynamics world class
-	CollisionObjectRef createSoftBox(DynamicsWorldRef world, const ci::Vec3f & dimensions = ci::Vec3f(10.0f, 10.0f, 10.0f), const ci::Vec3f & position = ci::Vec3f::zero(), const ci::Quatf & rotation = ci::Quatf());
-	CollisionObjectRef createSoftSphere(DynamicsWorldRef world, float radius = 10.0f, int32_t segments = 16, const ci::Vec3f & position = ci::Vec3f::zero(), const ci::Quatf & rotation = ci::Quatf());
-	CollisionObjectRef createSoftTetraBox(DynamicsWorldRef world, const ci::Vec3f & dimensions = ci::Vec3f(10.0f, 10.0f, 10.0f), const ci::Vec3f & position = ci::Vec3f::zero(), const ci::Quatf & rotation = ci::Quatf());
+	};*/
 
 }

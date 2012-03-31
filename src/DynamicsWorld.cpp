@@ -1,19 +1,23 @@
 // Include header
 #include "DynamicsWorld.h"
-#include "RigidObject.h"
 
-namespace bullet
-{
+#include "RigidObject.h"
+#include "SoftObject.h"
+
+namespace bullet {
 
 	// Import namespaces
 	using namespace ci;
 	using namespace ci::app;
 	using namespace std;
 
-	// Creates world pointer
-	DynamicsWorldRef DynamicsWorld::create() 
-	{ 
-		return DynamicsWorldRef(new DynamicsWorld());
+	DynamicsWorldRef DynamicsWorld::getInstance()
+	{
+		static DynamicsWorldRef world;
+		if ( !world ) {
+			world = DynamicsWorldRef( new DynamicsWorld() );
+		}
+		return world;
 	}
 
 	// Constructor
@@ -22,162 +26,135 @@ namespace bullet
 
 		// Setup physics environment
 		mCollisionConfiguration = new btSoftBodyRigidBodyCollisionConfiguration();
-		mDispatcher = new btCollisionDispatcher(mCollisionConfiguration);
+		mDispatcher = new btCollisionDispatcher( mCollisionConfiguration );
 		mBroadphase = new btDbvtBroadphase();
 		mSolver = new btSequentialImpulseConstraintSolver();
 	
-		// Soft body dynamics
-		mSoftBodyWorldInfo.air_density = (btScalar)1.2f;
+		// Default dynamics
+		mSoftBodyWorldInfo.air_density = 1.2f;
 		mSoftBodyWorldInfo.m_broadphase = mBroadphase;
 		mSoftBodyWorldInfo.m_dispatcher = mDispatcher;
-		mSoftBodyWorldInfo.m_gravity.setValue(0, -10, 0);
-		mSoftBodyWorldInfo.water_density = 0;
-		mSoftBodyWorldInfo.water_offset = 0;
-		mSoftBodyWorldInfo.water_normal = btVector3(0, 0, 0);
+		mSoftBodyWorldInfo.m_gravity.setValue( 0.0f, -10.0f, 0.0f );
+		mSoftBodyWorldInfo.water_density = 0.0f;
+		mSoftBodyWorldInfo.water_offset = 0.0f;
+		mSoftBodyWorldInfo.water_normal = btVector3( 0.0f, 0.0f, 0.0f );
 		mSoftBodyWorldInfo.m_sparsesdf.Initialize();
 
 		// Build world
-		mDynamicsWorld = new btSoftRigidDynamicsWorld(mDispatcher, mBroadphase, mSolver, mCollisionConfiguration);
-		mDynamicsWorld->setGravity(btVector3(0, -10, 0));
-		mDynamicsWorld->getDispatchInfo().m_enableSPU = true;
+		mWorld = new btSoftRigidDynamicsWorld( mDispatcher, mBroadphase, mSolver, mCollisionConfiguration );
+		mWorld->setGravity( btVector3( 0.0f, -10.0f, 0.0f ) );
+		mWorld->getDispatchInfo().m_enableSPU = true;
 
-		// Set timeline
-		mElapsedSeconds = 0.0;
+		// Set tracking properties
+		mElapsedSeconds = getElapsedSeconds();
+		mNumObjects = 0;
 
 	}
 
 	// Destructor
 	DynamicsWorld::~DynamicsWorld()
 	{
-
-		// Clear object list
-		mObjects.clear();
-
-		// Delete Bullet objects
-		if (mBroadphase)
+		if ( mBroadphase != 0 ) {
 			delete mBroadphase;
-		if (mCollisionConfiguration)
+		}
+		if ( mCollisionConfiguration != 0 ) {
 			delete mCollisionConfiguration;
-		if (mDispatcher)
+		}
+		if ( mDispatcher != 0 ) {
 			delete mDispatcher;
-		if (mDynamicsWorld)
-			delete mDynamicsWorld;
-		if (mSolver)
+		}
+		if ( mWorld != 0 ) {
+			delete mWorld;
+		}
+		if ( mSolver != 0 ) {
 			delete mSolver;
-
+		}
 	}
 
-	// Draws everything
-	void DynamicsWorld::draw(bool wireframe)
+	Iter DynamicsWorld::begin()
 	{
-
-		// Draw all items
-		int32_t i = 0;
-		for (CollisionObjectRefList::const_iterator objectIt = mObjects.cbegin(); objectIt != mObjects.cend(); ++objectIt, i++)
-			if (!wireframe || (wireframe && i > 0))
-				(* objectIt)->draw(wireframe);
-
+		return mObjects.begin();
 	}
-
-	// Erase object
-	void DynamicsWorld::erase(const CollisionObjectRefList::iterator & object)
+	Iter DynamicsWorld::end()
 	{
-
-		// DO IT!
-		mObjects.erase(object);
-
+		return mObjects.end();
 	}
-
-	// Erase an item using its index
-	void DynamicsWorld::erase(uint32_t index)
+	Iter DynamicsWorld::erase( Iter pos )
 	{
-		if (index > 0 && index < mObjects.size())
-			mObjects.erase(mObjects.begin() + index);
+		return mObjects.erase( pos );
 	}
 
-	// Erase an item using its ID
-	bool DynamicsWorld::eraseById(int32_t id)
+	CollisionObject DynamicsWorld::createRigidBox( const ci::Vec3f &dimensions, const ci::Vec3f &position, const ci::Quatf &rotation )
 	{
-
-		// Find and erase item
-		int32_t i = 0;
-		for (CollisionObjectRefList::const_iterator objectIt = mObjects.cbegin(); objectIt != mObjects.cend(); ++objectIt, i++)
-			if ((* objectIt)->getId() == id)
-			{
-				erase(i);
-				return true;
-			}
-		return false;
-
+		mObjects.push_back( new RigidBox( mWorld, dimensions, position, rotation ) );
+		return mObjects.back();
+	}
+	CollisionObject DynamicsWorld::createRigidCylinder( float topRadius, float bottomRadius, float height, int32_t segments, 
+		const ci::Vec3f &position, const ci::Quatf &rotation )
+	{
+		mObjects.push_back( new RigidCylinder( mWorld, topRadius, bottomRadius, height, segments, position, rotation ) );
+		return mObjects.back();
+	}
+	CollisionObject DynamicsWorld::createRigidHull( const ci::TriMesh &mesh, const ci::Vec3f &scale, const ci::Vec3f &position, const ci::Quatf &rotation )
+	{
+		mObjects.push_back( new RigidHull( mWorld, mesh, scale, position, rotation ) );
+		return mObjects.back();
+	}
+	CollisionObject DynamicsWorld::createRigidMesh( const ci::TriMesh &mesh, const ci::Vec3f &scale, float margin, 
+		const ci::Vec3f &position, const ci::Quatf &rotation )
+	{
+		mObjects.push_back( new RigidMesh( mWorld, mesh, scale, margin, position, rotation ) );
+		return mObjects.back();
+	}
+	CollisionObject DynamicsWorld::createRigidSphere( float radius, int32_t segments, const ci::Vec3f &position, const ci::Quatf &rotation )
+	{
+		mObjects.push_back( new RigidSphere( mWorld, radius, segments, position, rotation ) );
+		return mObjects.back();
+	}
+	CollisionObject DynamicsWorld::createRigidTerrain( const ci::Surface32f &heightField, int32_t stickWidth, int32_t stickLength, float minHeight, 
+		float maxHeight, int32_t upAxis, const ci::Vec3f &scale, const ci::Vec3f &position, const ci::Quatf &rotation )
+	{
+		mObjects.push_back( new RigidTerrain( mWorld, heightField, stickWidth, stickLength, minHeight, maxHeight, upAxis, scale, position, rotation ) );
+		return mObjects.back();
 	}
 
-	// Get object from index
-	CollisionObjectRef DynamicsWorld::getObject(uint32_t index) 
+	btBroadphaseInterface* DynamicsWorld::getBroadphase() 
 	{ 
-		if (index > 0 && index < mObjects.size())
-			return mObjects[index];
-		else
-			return 0;
+		return mBroadphase; 
 	}
-
-	// Retrieve object using its ID
-	CollisionObjectRef DynamicsWorld::getObjectById(int32_t id)
-	{
-		for (CollisionObjectRefList::const_iterator objectIt = mObjects.cbegin(); objectIt != mObjects.cend(); ++objectIt)
-			if ((* objectIt)->getId() == id)
-				return (* objectIt);
-		return 0;
+	btSoftBodyRigidBodyCollisionConfiguration* DynamicsWorld::getCollisionConfiguration() 
+	{ 
+		return mCollisionConfiguration; 
 	}
-
-	// Add an object
-	CollisionObjectRef DynamicsWorld::insert(const CollisionObjectRef & object)
-	{
-
-		// Assign ID
-		int32_t id = -1;
-		for (CollisionObjectRefList::const_iterator objectIt = mObjects.cbegin(); objectIt != mObjects.cend(); ++objectIt)
-			if ((* objectIt)->getId() > id)
-				id = (* objectIt)->getId();
-		object->setId(id + 1);
-
-		// Add and return object
-		mObjects.push_back(object);
-		return object;
-
+	btCollisionDispatcher* DynamicsWorld::getDispatcher() 
+	{ 
+		return mDispatcher; 
 	}
-
-	// Handles contact down
-	void DynamicsWorld::contactDown(const Vec2i & position)
-	{
-
-		// TO DO
-
+	btSoftBodyWorldInfo& DynamicsWorld::getInfo() 
+	{ 
+		return mSoftBodyWorldInfo; 
 	}
-
-	// Handles contact drag
-	void DynamicsWorld::contactDrag(const Vec2i & position)
+	uint32_t DynamicsWorld::getNumObjects()
 	{
-
-		// TO DO
-
+		return mNumObjects;
 	}
-
-	// Converts screen coordinates to Bullet world
-	btVector3 DynamicsWorld::screenToWorld(const Vec2i & position)
+	CollisionObjectList& DynamicsWorld::getObjects()
 	{
-
-		// TO DO math
-		return btVector3(0, 0, 0);
-
+		return mObjects;
+	}
+	btConstraintSolver* DynamicsWorld::getSolver() 
+	{ 
+		return mSolver; 
+	}
+	btDynamicsWorld* DynamicsWorld::getWorld() 
+	{ 
+		return mWorld; 
 	}
 
 	// Set soft body info
-	void DynamicsWorld::setInfo(const btSoftBodyWorldInfo & info)
+	void DynamicsWorld::setInfo( const btSoftBodyWorldInfo &info )
 	{
-
-		// DO IT!
 		mSoftBodyWorldInfo = info;
-
 	}
 
 	// Runs update logic
@@ -190,71 +167,120 @@ namespace bullet
 		mElapsedSeconds = elapsedSeconds;
 
 		// Update Bullet world
-		mDynamicsWorld->stepSimulation(1.0f, 10, 1.0f / math<float>::max(1.0f, getFrameRate()));
+		mWorld->stepSimulation( 1.0f, 10, 1.0f / math<float>::max( 1.0f, getFrameRate() ) );
 
-		// Get object counts
-		uint32_t numObjects = mObjects.size();
-
-		// Update bodies in parallel on Windows
-#ifdef CINDER_MSW
-		Concurrency::parallel_for(0, (int32_t)numObjects, [=](int32_t i)
-		{
-			mObjects[i]->update(step);
-		});
-#endif
-
-		// Remove bodies (update here if not on Windows)
-		for (CollisionObjectRefList::iterator objectIt = mObjects.begin(); objectIt != mObjects.end();)
-		{
-#ifndef CINDER_MSW
-			(* objectIt)->update(step);
-#endif
-			if ((* objectIt)->getLifespan() > 0.0 && (* objectIt)->getLifetime() > (* objectIt)->getLifespan())
-				objectIt = mObjects.erase(objectIt);
-			else
-				++objectIt;
-		}
-
-		// Object count has changed
-		if (numObjects != mObjects.size())
-		{
-	
-			// Iterate through objects to activate them again
-			numObjects = mDynamicsWorld->getNumCollisionObjects();
+		// Check if object count has changed
+		uint32_t numObjects = mWorld->getNumCollisionObjects();
+		if ( mNumObjects != numObjects ) {
 
 			// Nothing to do, bail
-			if (numObjects <= 0)
+			if ( numObjects <= 0 ) {
 				return;
-
-
-#ifdef CINDER_MSW
-			Concurrency::parallel_for(0, (int32_t)numObjects, [=](int32_t i)
-#else
-			for (uint32_t i = 0; i < numObjects; i++)
-#endif
-			{
-
-				// Activate object if it is a rigid or soft body
-				btCollisionObject * collisionObject = mDynamicsWorld->getCollisionObjectArray()[i];
-				btRigidBody * rigidBody = btRigidBody::upcast(collisionObject);
-				if (rigidBody)
-					rigidBody->activate(true);
-				else
-				{
-					btSoftBody * softBody = btSoftBody::upcast(collisionObject);
-					if (softBody)
-						softBody->activate(true);
-				}
-
-#ifdef CINDER_MSW
-			});
-#else
 			}
-#endif
 
+			// Activate all bodies
+			for ( uint32_t i = 0; i < numObjects; i++ ) {
+				btCollisionObject * collisionObject = mWorld->getCollisionObjectArray().at( i );
+				btRigidBody* rigidBody = btRigidBody::upcast( collisionObject );
+				if ( rigidBody ) {
+					rigidBody->activate(true);
+				} else {
+					btSoftBody* softBody = btSoftBody::upcast( collisionObject );
+					if ( softBody ) {
+						softBody->activate(true);
+					}
+				}
+			}
 
 		}
 
+		// Update object count
+		mNumObjects = numObjects;
+
+	}
+
+	Iter begin() 
+	{
+		return DynamicsWorld::getInstance()->begin();
+	}
+	Iter end()
+	{
+		return DynamicsWorld::getInstance()->end();
+	}
+	Iter erase( Iter pos )
+	{
+		return DynamicsWorld::getInstance()->erase( pos );
+	}
+
+	CollisionObject createRigidBox( const ci::Vec3f &dimensions, const ci::Vec3f &position, const ci::Quatf &rotation )
+	{
+		return DynamicsWorld::getInstance()->createRigidBox( dimensions, position, rotation );
+	}
+	CollisionObject createRigidCylinder( float topRadius, float bottomRadius, float height, int32_t segments, 
+		const ci::Vec3f &position, const ci::Quatf &rotation )
+	{
+		return DynamicsWorld::getInstance()->createRigidCylinder( topRadius, bottomRadius, height, segments, position, rotation );
+	}
+	CollisionObject createRigidHull( const ci::TriMesh &mesh, const ci::Vec3f &scale, const ci::Vec3f &position, const ci::Quatf &rotation )
+	{
+		return DynamicsWorld::getInstance()->createRigidHull( mesh, scale, position, rotation );
+	}
+	CollisionObject createRigidMesh( const ci::TriMesh &mesh, const ci::Vec3f &scale, float margin, 
+		const ci::Vec3f &position, const ci::Quatf &rotation )
+	{
+		return DynamicsWorld::getInstance()->createRigidMesh( mesh, scale, margin, position, rotation );
+	}
+	CollisionObject createRigidSphere( float radius, int32_t segments, const ci::Vec3f &position, const ci::Quatf &rotation )
+	{
+		return DynamicsWorld::getInstance()->createRigidSphere( radius, segments, position, rotation );
+	}
+	CollisionObject createRigidTerrain( const ci::Surface32f &heightField, int32_t stickWidth, int32_t stickLength, float minHeight, 
+		float maxHeight, int32_t upAxis, const ci::Vec3f &scale, const ci::Vec3f &position, const ci::Quatf &rotation )
+	{
+		return DynamicsWorld::getInstance()->createRigidTerrain( heightField, stickWidth, stickLength, minHeight, maxHeight, upAxis, scale, position, rotation );
+	}
+
+	btBroadphaseInterface* getBroadphase()
+	{
+		return DynamicsWorld::getInstance()->getBroadphase();
+	}
+	btSoftBodyRigidBodyCollisionConfiguration* getCollisionConfiguration()
+	{
+		return DynamicsWorld::getInstance()->getCollisionConfiguration();
+	}
+	btCollisionDispatcher* getDispatcher()
+	{
+		return DynamicsWorld::getInstance()->getDispatcher();
+	}
+	btSoftBodyWorldInfo& getInfo()
+	{
+		return DynamicsWorld::getInstance()->getInfo();
+	}
+	uint32_t getNumObjects()
+	{
+		return DynamicsWorld::getInstance()->getNumObjects();
+	}
+	CollisionObjectList& getObjects()
+	{
+		return DynamicsWorld::getInstance()->getObjects();
+	}
+	btConstraintSolver* getSolver()
+	{
+		return DynamicsWorld::getInstance()->getSolver();
+	}
+	btDynamicsWorld* getWorld()
+	{
+		return DynamicsWorld::getInstance()->getWorld();
+	}
+
+	void setInfo( const btSoftBodyWorldInfo &info )
+	{
+		DynamicsWorld::getInstance()->setInfo( info );
+	}
+
+	void update() 
+	{
+		DynamicsWorld::getInstance()->update();
 	}
 
 }
