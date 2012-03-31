@@ -177,6 +177,9 @@ namespace bullet {
 
 	void													setInfo( const btSoftBodyWorldInfo &info );
 
+	btRigidBody*											toBulletRigidBody( const CollisionObject &object );
+	btSoftBody*												toBulletSoftBody( const CollisionObject &object );
+
 	void													update();
 
 }

@@ -48,7 +48,7 @@ namespace bullet
 	/****** TRANSFORM ******/
 
 	// Convert Bullet matrix to Cinder matrix for rigid bodies
-	Matrix44f getWorldTransform( const btRigidBody* body )
+	Matrix44f Utilities::getWorldTransform( const btRigidBody* body )
 	{
 		btTransform trans;
 		body->getMotionState()->getWorldTransform( trans );
@@ -58,7 +58,7 @@ namespace bullet
 	}
 
 	// Convert Bullet matrix to Cinder matrix for soft bodies
-	Matrix44f getWorldTransform( const btSoftBody* body )
+	Matrix44f Utilities::getWorldTransform( const btSoftBody* body )
 	{
 		btTransform trans = body->getWorldTransform();
 		Matrix44f matrix;
@@ -67,31 +67,31 @@ namespace bullet
 	}
 
 	// Convert Cinder vector to Bullet vector
-	btVector3 toBulletVector3( const Vec3f& v )
+	btVector3 Utilities::toBulletVector3( const Vec3f& v )
 	{
 		return btVector3( v.x, v.y, v.z );
 	}
 
 	// Convert Bullet vector to Cinder vector
-	Vec3f fromBulletVector3( const btVector3& v )
+	Vec3f Utilities::fromBulletVector3( const btVector3& v )
 	{
 		return Vec3f( v.x(), v.y(), v.z() );
 	}
 
 	// Convert Cinder quaternion to Bullet quaternion
-	btQuaternion toBulletQuaternion( const Quatf& q )
+	btQuaternion Utilities::toBulletQuaternion( const Quatf& q )
 	{
 		return btQuaternion( q.v.x, q.v.y, q.v.z, q.w );
 	}
 
 	// Convert Bullet quaternion to Cinder quaternion
-	Quatf fromBulletQuaternion( const btQuaternion& q )
+	Quatf Utilities::fromBulletQuaternion( const btQuaternion& q )
 	{
 		return ci::Quatf( q.getX(), q.getY(), q.getZ(), q.getW() );
 	}
 
 	// Calculate mass using shape's bounding sphere
-	float getMass( const btCollisionShape* shape )
+	float Utilities::getMass( const btCollisionShape* shape )
 	{
 
 		// Get sphere
@@ -105,10 +105,8 @@ namespace bullet
 
 	}
 
-	/****** MESH ******/
-
 	// Create terrain from color channel
-	btHeightfieldTerrainShape* createHeightfieldTerrainShape( const Surface32f& heightField, int32_t stickWidth, int32_t stickLength, 
+	btHeightfieldTerrainShape* Utilities::createHeightfieldTerrainShape( const Surface32f& heightField, int32_t stickWidth, int32_t stickLength, 
 		float heightScale, float minHeight, float maxHeight, int32_t upAxis, const Vec3f& scale )
 	{
 
@@ -117,13 +115,13 @@ namespace bullet
 		btHeightfieldTerrainShape* hfShape = new btHeightfieldTerrainShape( stickWidth, stickLength, channel.getData(), heightScale, minHeight, maxHeight, upAxis, PHY_FLOAT, false );
 
 		// Scale and return shape
-		hfShape->setLocalScaling( bullet::toBulletVector3( scale ) );
+		hfShape->setLocalScaling( toBulletVector3( scale ) );
 		return hfShape;
 
 	}
 
 	// Creates a concave Bullet mesh from a TriMesh
-	btBvhTriangleMeshShape* createConcaveMeshShape( const TriMesh& mesh, const Vec3f& scale, float margin )
+	btBvhTriangleMeshShape* Utilities::createConcaveMeshShape( const TriMesh& mesh, const Vec3f& scale, float margin )
 	{
 
 		// Create Bullet mesh
@@ -134,9 +132,9 @@ namespace bullet
 		vector<size_t> indices = mesh.getIndices();
 		for ( uint32_t i = 0; i < mesh.getNumTriangles(); i += 3 )
 			triMesh->addTriangle( 
-			bullet::toBulletVector3( *( vertices.begin() +  indices[ i + 0 ] ) ), 
-			bullet::toBulletVector3( *( vertices.begin() +  indices[ i + 1 ] ) ), 
-			bullet::toBulletVector3( *( vertices.begin() +  indices[ i + 2 ] ) ), 
+			toBulletVector3( *( vertices.begin() +  indices[ i + 0 ] ) ), 
+			toBulletVector3( *( vertices.begin() +  indices[ i + 1 ] ) ), 
+			toBulletVector3( *( vertices.begin() +  indices[ i + 2 ] ) ), 
 			true
 			 );
 
@@ -144,14 +142,14 @@ namespace bullet
 		btBvhTriangleMeshShape* shape = new btBvhTriangleMeshShape( triMesh, true, true );
 
 		// Scale and return shape
-		shape->setLocalScaling( bullet::toBulletVector3( scale ) );
+		shape->setLocalScaling( toBulletVector3( scale ) );
 		shape->setMargin( margin );
 		return shape;
 
 	}
 
 	// Creates a concave Bullet mesh from a list of vertices and indices
-	btBvhTriangleMeshShape* createConcaveMeshShape( const vector<Vec3f>& vertices, const vector<uint32_t>& indices, const Vec3f& scale, float margin )
+	btBvhTriangleMeshShape* Utilities::createConcaveMeshShape( const vector<Vec3f>& vertices, const vector<uint32_t>& indices, const Vec3f& scale, float margin )
 	{
 
 		// Create Bullet mesh
@@ -161,9 +159,9 @@ namespace bullet
 		uint32_t numTriangles = indices.size() / 3;
 		for ( uint32_t i = 0; i < numTriangles; i += 3 )
 			triMesh->addTriangle( 
-			bullet::toBulletVector3( *( vertices.begin() +  indices[ i + 0 ] ) ), 
-			bullet::toBulletVector3( *( vertices.begin() +  indices[ i + 1 ] ) ), 
-			bullet::toBulletVector3( *( vertices.begin() +  indices[ i + 2 ] ) ), 
+			toBulletVector3( *( vertices.begin() +  indices[ i + 0 ] ) ), 
+			toBulletVector3( *( vertices.begin() +  indices[ i + 1 ] ) ), 
+			toBulletVector3( *( vertices.begin() +  indices[ i + 2 ] ) ), 
 			true
 			 );
 
@@ -171,14 +169,14 @@ namespace bullet
 		btBvhTriangleMeshShape* shape = new btBvhTriangleMeshShape( triMesh, true, true );
 
 		// Scale and return shape
-		shape->setLocalScaling( bullet::toBulletVector3( scale ) );
+		shape->setLocalScaling( toBulletVector3( scale ) );
 		shape->setMargin( margin );
 		return shape;
 
 	}
 
 	// Creates a convex Bullet hull from a TriMesh
-	btConvexHullShape* createConvexHullShape( const TriMesh& mesh, const Vec3f& scale )
+	btConvexHullShape* Utilities::createConvexHullShape( const TriMesh& mesh, const Vec3f& scale )
 	{
 
 		// Create hull
@@ -187,17 +185,17 @@ namespace bullet
 		// Add points
 		vector<Vec3f> vertices = mesh.getVertices();
 		for ( uint32_t i = 0; i < mesh.getNumVertices(); i++ ) {
-			shape->addPoint( bullet::toBulletVector3( *( vertices.begin() + i ) ) );
+			shape->addPoint( toBulletVector3( *( vertices.begin() + i ) ) );
 		}
 
 		// Scale and return shape
-		shape->setLocalScaling( bullet::toBulletVector3( scale ) );
+		shape->setLocalScaling( toBulletVector3( scale ) );
 		return shape;
 
 	}
 
 	// Creates a convex Bullet hull from a list of vertices
-	btConvexHullShape* createConvexHullShape( const vector<Vec3f>& vertices, const Vec3f& scale )
+	btConvexHullShape* Utilities::createConvexHullShape( const vector<Vec3f>& vertices, const Vec3f& scale )
 	{
 
 		// Create hull
@@ -205,11 +203,11 @@ namespace bullet
 
 		// Add points
 		for ( uint32_t i = 0; i < vertices.size(); i++ ) {
-			shape->addPoint( bullet::toBulletVector3( *( vertices.begin() + i ) ) );
+			shape->addPoint( toBulletVector3( *( vertices.begin() + i ) ) );
 		}
 
 		// Scale and return shape
-		shape->setLocalScaling( bullet::toBulletVector3( scale ) );
+		shape->setLocalScaling( toBulletVector3( scale ) );
 		return shape;
 
 	}

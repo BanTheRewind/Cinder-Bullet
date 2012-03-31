@@ -109,16 +109,16 @@ namespace bullet
 	ci::Matrix44f CollisionObjectBase::getMatrix() 
 	{ 
 		if ( mSoftBody != 0 ) {
-			return bullet::getWorldTransform( mSoftBody ).m; 
+			return Utilities::getWorldTransform( mSoftBody ).m; 
 		}
-		return bullet::getWorldTransform( mRigidBody ).m; 
+		return Utilities::getWorldTransform( mRigidBody ).m; 
 	}
 	ci::Matrix44f CollisionObjectBase::getMatrix() const 
 	{ 
 		if ( mSoftBody != 0 ) {
-			return bullet::getWorldTransform( mSoftBody ).m; 
+			return Utilities::getWorldTransform( mSoftBody ).m; 
 		}
-		return bullet::getWorldTransform( mRigidBody ).m; 
+		return Utilities::getWorldTransform( mRigidBody ).m; 
 	}
 
 	ci::Vec3f& CollisionObjectBase::getPosition() 
@@ -160,11 +160,11 @@ namespace bullet
 	{
 		mAge += step;
 		if ( mSoftBody != 0 ) {
-			mPosition = bullet::fromBulletVector3( mSoftBody->m_bounds[ 0 ].lerp( mSoftBody->m_bounds[ 1 ], 0.5f ) );
-			mRotation = ci::Quatf( bullet::getWorldTransform( mSoftBody ) );
+			mPosition = Utilities::fromBulletVector3( mSoftBody->m_bounds[ 0 ].lerp( mSoftBody->m_bounds[ 1 ], 0.5f ) );
+			mRotation = ci::Quatf( Utilities::getWorldTransform( mSoftBody ) );
 		} else {
-			mPosition = bullet::fromBulletVector3( mRigidBody->getCenterOfMassPosition() );
-			mRotation = ci::Quatf( bullet::getWorldTransform( mRigidBody ) );
+			mPosition = Utilities::fromBulletVector3( mRigidBody->getCenterOfMassPosition() );
+			mRotation = ci::Quatf( Utilities::getWorldTransform( mRigidBody ) );
 		}
 	}
 

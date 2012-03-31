@@ -52,12 +52,12 @@ namespace bullet
 	{
 
 		// Calculate inertia
-		float mass = getMass( shape );
+		float mass = Utilities::getMass( shape );
 		btVector3 inertia( 0.0f, 0.0f, 0.0f );
 		shape->calculateLocalInertia( mass, inertia );
 
 		// Create, add, and return rigid body
-		btRigidBody* body = new btRigidBody( btRigidBody::btRigidBodyConstructionInfo( mass, new btDefaultMotionState( btTransform( bullet::toBulletQuaternion( rotation ), bullet::toBulletVector3( position ) ) ), shape, inertia ) );
+		btRigidBody* body = new btRigidBody( btRigidBody::btRigidBodyConstructionInfo( mass, new btDefaultMotionState( btTransform( Utilities::toBulletQuaternion( rotation ), Utilities::toBulletVector3( position ) ) ), shape, inertia ) );
 		world->addRigidBody( body );
 		return body;
 
@@ -68,7 +68,7 @@ namespace bullet
 	{
 
 		// Calculate inertia
-		float mass = getMass( shape );
+		float mass = Utilities::getMass( shape );
 		btVector3 inertia( 0.0f, 0.0f, 0.0f );
 		shape->calculateLocalInertia( mass, inertia );
 
@@ -76,8 +76,8 @@ namespace bullet
 		btRigidBody* body = new btRigidBody( 
 			btRigidBody::btRigidBodyConstructionInfo( 
 			mass, 
-			new btDefaultMotionState( btTransform( bullet::toBulletQuaternion( Quatf() ), 
-			bullet::toBulletVector3( position ) ) ), 
+			new btDefaultMotionState( btTransform( Utilities::toBulletQuaternion( Quatf() ), 
+			Utilities::toBulletVector3( position ) ) ), 
 			shape, 
 			inertia 
 			) 
@@ -92,7 +92,7 @@ namespace bullet
 	{
 
 		// Calculate inertia
-		float mass = getMass( shape );
+		float mass = Utilities::getMass( shape );
 		btVector3 inertia( 0.0f, 0.0f, 0.0f );
 		shape->calculateLocalInertia( mass, inertia );
 
@@ -100,7 +100,7 @@ namespace bullet
 		btRigidBody* body = new btRigidBody( 
 			btRigidBody::btRigidBodyConstructionInfo( 
 			mass, 
-			new btDefaultMotionState( btTransform( bullet::toBulletQuaternion( Quatf() ), bullet::toBulletVector3( position ) ) ), 
+			new btDefaultMotionState( btTransform( Utilities::toBulletQuaternion( Quatf() ), Utilities::toBulletVector3( position ) ) ), 
 			shape, 
 			inertia ) );
 		world->addRigidBody( body );
@@ -113,7 +113,7 @@ namespace bullet
 	{
 
 		// Create Bullet box
-		btCollisionShape* shape = new btBoxShape( bullet::toBulletVector3( size ) * 0.5f );
+		btCollisionShape* shape = new btBoxShape( Utilities::toBulletVector3( size ) * 0.5f );
 
 		// Calculate inertia
 		float mass = size.x * size.y * size.z;
@@ -121,7 +121,7 @@ namespace bullet
 		shape->calculateLocalInertia( mass, inertia );
 
 		// Create, add, and return rigid body
-		btRigidBody* body = new btRigidBody( btRigidBody::btRigidBodyConstructionInfo( mass, new btDefaultMotionState( btTransform( bullet::toBulletQuaternion( rotation ), bullet::toBulletVector3( position ) ) ), shape, inertia ) );
+		btRigidBody* body = new btRigidBody( btRigidBody::btRigidBodyConstructionInfo( mass, new btDefaultMotionState( btTransform( Utilities::toBulletQuaternion( rotation ), Utilities::toBulletVector3( position ) ) ), shape, inertia ) );
 		world->addRigidBody( body );
 		return body;
 
@@ -140,7 +140,7 @@ namespace bullet
 		shape->calculateLocalInertia( mass, inertia );
 
 		// Create, add, and return rigid body
-		btRigidBody* body = new btRigidBody( btRigidBody::btRigidBodyConstructionInfo( mass, new btDefaultMotionState( btTransform( bullet::toBulletQuaternion( rotation ), bullet::toBulletVector3( position ) ) ), shape, inertia ) );
+		btRigidBody* body = new btRigidBody( btRigidBody::btRigidBodyConstructionInfo( mass, new btDefaultMotionState( btTransform( Utilities::toBulletQuaternion( rotation ), Utilities::toBulletVector3( position ) ) ), shape, inertia ) );
 		world->addRigidBody( body );
 		return body;
 
@@ -162,7 +162,7 @@ namespace bullet
 		btRigidBody* body = new btRigidBody( 
 			btRigidBody::btRigidBodyConstructionInfo( 
 			mass, 
-			new btDefaultMotionState( btTransform( bullet::toBulletQuaternion( rotation ), bullet::toBulletVector3( position ) ) ), 
+			new btDefaultMotionState( btTransform( Utilities::toBulletQuaternion( rotation ), Utilities::toBulletVector3( position ) ) ), 
 			shape, 
 			inertia ) );
 		world->addRigidBody( body );
@@ -176,12 +176,17 @@ namespace bullet
 
 	}*/
 
-	RigidBox::RigidBox( btDynamicsWorld* world, const Vec3f &dimensions, const Vec3f &position, const Quatf &rotation ) 
+	RigidObject::RigidObject( btDynamicsWorld* world, const Vec3f &position, const Quatf &rotation )
 		: CollisionObjectBase( world, position, rotation )
+	{
+	}
+
+	RigidBox::RigidBox( btDynamicsWorld* world, const Vec3f &dimensions, const Vec3f &position, const Quatf &rotation ) 
+		: RigidObject( world, position, rotation )
 	{
 
 		// Create body
-		mRigidBody = RigidObject::create( world, dimensions, position, rotation );
+		mRigidBody = create( world, dimensions, position, rotation );
 
 		// Define vertices
 		Vec3f size = dimensions * 0.5f;
@@ -278,11 +283,11 @@ namespace bullet
 
 	RigidCylinder::RigidCylinder( btDynamicsWorld* world, float topRadius, float bottomRadius, float height, int32_t segments, 
 		const Vec3f &position, const Quatf &rotation )
-		: CollisionObjectBase( world, position, rotation )
+		: RigidObject( world, position, rotation )
 	{
 
 		// Create body
-		mRigidBody = RigidObject::create( world, topRadius, bottomRadius, height, segments, position, rotation );
+		mRigidBody = create( world, topRadius, bottomRadius, height, segments, position, rotation );
 
 		// Set delta size
 		float delta = 1.0f / (float)segments;
@@ -350,14 +355,14 @@ namespace bullet
 
 	// Convex hull mesh
 	RigidHull::RigidHull( btDynamicsWorld* world, const TriMesh &mesh, const Vec3f &scale, const Vec3f &position, const Quatf &rotation )
-		: CollisionObjectBase( world, position, rotation )
+		: RigidObject( world, position, rotation )
 	{
 
 		// Change positions to dynamic
 		mVboLayout.setDynamicPositions();
 
 		// Define body and VBO
-		mRigidBody = RigidObject::create( world, createConvexHullShape( mesh, scale ), position, rotation );
+		mRigidBody = create( world, Utilities::createConvexHullShape( mesh, scale ), position, rotation );
 		mVboMesh = gl::VboMesh( mesh, mVboLayout );
 
 		// Scale VBO
@@ -370,7 +375,7 @@ namespace bullet
 
 	// Concave mesh
 	RigidMesh::RigidMesh( btDynamicsWorld* world, const TriMesh &mesh, const Vec3f &scale, float margin, const Vec3f &position, const Quatf &rotation )
-		: CollisionObjectBase( world, position, rotation )
+		: RigidObject( world, position, rotation )
 	{
 
 		// Change positions to dynamic so we can scale the VBO
@@ -378,7 +383,7 @@ namespace bullet
 
 		// Define body and VBO
 		Vec3f halfScale = scale * 0.5f;
-		mRigidBody = RigidObject::create( world, createConcaveMeshShape( mesh, scale, margin ), position, rotation );
+		mRigidBody = create( world, Utilities::createConcaveMeshShape( mesh, scale, margin ), position, rotation );
 		mVboMesh = gl::VboMesh( mesh, mVboLayout );
 
 		// Scale VBO
@@ -391,11 +396,11 @@ namespace bullet
 
 	// Sphere
 	RigidSphere::RigidSphere( btDynamicsWorld* world, float radius, int32_t segments, const Vec3f &position, const Quatf &rotation ) 
-		: CollisionObjectBase( world, position, rotation )
+		: RigidObject( world, position, rotation )
 	{
 
 		// Create body
-		mRigidBody = RigidObject::create( world, radius, position, rotation );
+		mRigidBody = create( world, radius, position, rotation );
 
 		// Define steps
 		int32_t layers = segments / 2;
@@ -444,11 +449,11 @@ namespace bullet
 	// Terrain from Surface data
 	RigidTerrain::RigidTerrain( btDynamicsWorld* world, const Surface32f &heightField, int32_t stickWidth, int32_t stickLength, 
 		float minHeight, float maxHeight, int32_t upAxis, const Vec3f &scale, const Vec3f &position, const Quatf &rotation )
-		: CollisionObjectBase( world, position, rotation )
+		: RigidObject( world, position, rotation )
 	{
 
 		// Create body
-		mRigidBody = RigidObject::create( world, createHeightfieldTerrainShape( heightField, stickWidth, stickLength, 1.0f, minHeight, maxHeight, 1, scale ), position, rotation );
+		mRigidBody = create( world, Utilities::createHeightfieldTerrainShape( heightField, stickWidth, stickLength, 1.0f, minHeight, maxHeight, 1, scale ), position, rotation );
 
 		// Get image dimensions
 		int32_t height = heightField.getHeight();

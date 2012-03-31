@@ -44,13 +44,14 @@ namespace bullet
 {
 
 	class DynamicsWorld;
+	class RigidObject;
+	class SoftObject;
 	
 	class CollisionObjectBase
 	{
 
 	public:
 
-		CollisionObjectBase() {}		// Default constructor allows reserve in ptr_vector
 		~CollisionObjectBase();
 
 		void							update( double step );

@@ -56,44 +56,71 @@
 namespace bullet 
 {
 
-	// Get mass for a collision shape
-	float getMass( const btCollisionShape* shape );
+	// Forward declarations
+	class CollisionObjectBase;
+	class RigidBox;
+	class RigidCylinder;
+	class RigidHull;
+	class RigidMesh;
+	class RigidObject;
+	class RigidSphere;
+	class RigidTerrain;
+	class SoftObject;
 
-	// Convert Bullet matrix to Cinder matrix for rigid bodies
-	ci::Matrix44f getWorldTransform( const btRigidBody* body );
+	class Utilities
+	{
 
-	// Convert Bullet matrix to Cinder matrix for soft bodies
-	ci::Matrix44f getWorldTransform( const btSoftBody* body );
+	private:
 
-	// Convert Cinder vector to Bullet vector
-	btVector3 toBulletVector3( const ci::Vec3f &v );
+		// Get mass for a collision shape
+		static float						getMass( const btCollisionShape* shape );
 
-	// Convert Bullet vector to Cinder vector
-	ci::Vec3f fromBulletVector3( const btVector3 &v );
+		// Convert Bullet matrix to Cinder matrix for rigid bodies
+		static ci::Matrix44f				getWorldTransform( const btRigidBody* body );
 
-	// Convert Cinder quaternion to Bullet quaternion
-	btQuaternion toBulletQuaternion( const ci::Quatf &q );
+		// Convert Bullet matrix to Cinder matrix for soft bodies
+		static ci::Matrix44f				getWorldTransform( const btSoftBody* body );
 
-	// Convert Bullet quaternion to Cinder quaternion
-	ci::Quatf fromBulletQuaternion( const btQuaternion &q );
+		// Convert Cinder vector to Bullet vector
+		static btVector3					toBulletVector3( const ci::Vec3f &v );
 
-	// Create terrain from color channel
-	btHeightfieldTerrainShape* createHeightfieldTerrainShape( const ci::Surface32f &heightField, int32_t stickWidth, int32_t stickLength, 
-		float heightScale, float minHeight, float maxHeight, int32_t upAxis, const ci::Vec3f &scale );
+		// Convert Bullet vector to Cinder vector
+		static ci::Vec3f					fromBulletVector3( const btVector3 &v );
 
-	// Creates a concave Bullet mesh from a TriMesh
-	btBvhTriangleMeshShape* createConcaveMeshShape( const ci::TriMesh &mesh, 
-		const ci::Vec3f &scale = ci::Vec3f( 1.0f, 1.0f, 1.0f ), float margin = 0.0f );
+		// Convert Cinder quaternion to Bullet quaternion
+		static btQuaternion					toBulletQuaternion( const ci::Quatf &q );
 
-	// Creates a concave Bullet mesh from a list of vertices and indices
-	btBvhTriangleMeshShape* createConcaveMeshShape( const std::vector<ci::Vec3f> &vertices, const std::vector<uint32_t> &indices, 
-		const ci::Vec3f &scale = ci::Vec3f( 1.0f, 1.0f, 1.0f ), float margin = 0.0f );
+		// Convert Bullet quaternion to Cinder quaternion
+		static ci::Quatf					fromBulletQuaternion( const btQuaternion &q );
 
-	// Creates a convex Bullet hull from a TriMesh
-	btConvexHullShape* createConvexHullShape( const ci::TriMesh &mesh, const ci::Vec3f &scale = ci::Vec3f( 1.0f, 1.0f, 1.0f ) );
+		// Create terrain from color channel
+		static btHeightfieldTerrainShape*	createHeightfieldTerrainShape( const ci::Surface32f &heightField, int32_t stickWidth, int32_t stickLength, 
+			float heightScale, float minHeight, float maxHeight, int32_t upAxis, const ci::Vec3f &scale );
 
-	// Creates a convex Bullet hull from a list of vertices
-	btConvexHullShape* createConvexHullShape( const std::vector<ci::Vec3f> &vertices, 
-		const ci::Vec3f &scale = ci::Vec3f( 1.0f, 1.0f, 1.0f ) );
+		// Creates a concave Bullet mesh from a TriMesh
+		static btBvhTriangleMeshShape*		createConcaveMeshShape( const ci::TriMesh &mesh, const ci::Vec3f &scale, float margin );
+
+		// Creates a concave Bullet mesh from a list of vertices and indices
+		static btBvhTriangleMeshShape*		createConcaveMeshShape( const std::vector<ci::Vec3f> &vertices, const std::vector<uint32_t> &indices, 
+			const ci::Vec3f &scale, float margin );
+
+		// Creates a convex Bullet hull from a TriMesh
+		static btConvexHullShape*			createConvexHullShape( const ci::TriMesh &mesh, const ci::Vec3f &scale );
+
+		// Creates a convex Bullet hull from a list of vertices
+		static btConvexHullShape*			createConvexHullShape( const std::vector<ci::Vec3f> &vertices, const ci::Vec3f &scale );
+
+		// Grant classes permission to private methods
+		friend class						CollisionObjectBase;
+		friend class						RigidBox;
+		friend class						RigidCylinder;
+		friend class						RigidHull;
+		friend class						RigidMesh;
+		friend class						RigidObject;
+		friend class						RigidSphere;
+		friend class						RigidTerrain;
+		friend class						SoftObject;
+
+	};
 
 } 

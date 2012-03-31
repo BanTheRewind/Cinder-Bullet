@@ -202,6 +202,11 @@ namespace bullet
 
 	/****** CONSTRUCTORS ******/
 
+	SoftObject::SoftObject( btDynamicsWorld* world, const Vec3f &position, const Quatf &rotation )
+		: CollisionObjectBase( world, position, rotation )
+	{
+	}
+
 	// Soft box
 	/*SoftBox::SoftBox( DynamicsWorldRef world, const Vec3f &dimensions, const Vec3f &position, const Quatf &rotation ) 
 		: SoftObject( world, position, rotation )

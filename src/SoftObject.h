@@ -45,10 +45,12 @@
 namespace bullet
 {
 
-	class SoftObject
+	class SoftObject : public CollisionObjectBase
 	{
 
-	private:
+	protected:
+
+		SoftObject( btDynamicsWorld* world, const ci::Vec3f &position = ci::Vec3f::zero(), const ci::Quatf &rotation = ci::Quatf() );
 
 		/*! Create soft body from arbitrary collision shape */
 		//btSoftBody* create( btDynamicsWorld* world, btSoftBodyWorldInfo &info, btCollisionShape* shape, const Vec3f &position = Vec3f::zero(), const Quatf &rotation = Quatf() );

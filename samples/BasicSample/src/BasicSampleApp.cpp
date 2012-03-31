@@ -167,8 +167,8 @@ void BasicSampleApp::loadTerrain()
 	bullet::createRigidBox( Vec3f( size, size, size ), position );
 
 	// Add terrain
-	/*CollisionObjectRef terrain = bullet::createRigidTerrain( heightField, heightField.getWidth(), heightField.getHeight(), -200, 200, 1, Vec3f( 6.0f, 210.0f, 6.0f ) );*/
-	//( (btRigidBody*)( terrain.getBulletBody() ) )->setMassProps( 0, btVector3( 0.0f, 0.0f, 0.0f ) );
+	CollisionObject terrain = bullet::createRigidTerrain( heightField, heightField.getWidth(), heightField.getHeight(), -200, 200, 1, Vec3f( 6.0f, 210.0f, 6.0f ) );
+	bullet::toBulletRigidBody( terrain )->setMassProps( 0, btVector3( 0.0f, 0.0f, 0.0f ) );
 
 }
 

@@ -278,6 +278,15 @@ namespace bullet {
 		DynamicsWorld::getInstance()->setInfo( info );
 	}
 
+	btRigidBody* toBulletRigidBody( const CollisionObject &object )
+	{
+		return (btRigidBody*)( object.getBulletBody() );
+	}
+	btSoftBody* toBulletSoftBody( const CollisionObject &object )
+	{
+		return (btSoftBody*)( object.getBulletBody() );
+	}
+
 	void update() 
 	{
 		DynamicsWorld::getInstance()->update();
