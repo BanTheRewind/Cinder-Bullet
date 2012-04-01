@@ -40,18 +40,20 @@
 // Includes
 #include "CollisionObject.h"
 
+#include "cinder/gl/gl.h"
+
 #if defined( CINDER_MSW )
 	#include "ppl.h"
 #endif
-#include "boost/ptr_container/ptr_vector.hpp"
+#include "boost/ptr_container/ptr_container.hpp"
 
 namespace bullet {
 
-	typedef boost::ptr_vector<CollisionObjectBase> CollisionObjectList;
-	typedef boost::ptr_vector<CollisionObjectBase>::reference CollisionObject;
-	typedef boost::ptr_vector<CollisionObjectBase>::iterator Iter;
+	typedef boost::ptr_vector<CollisionObjectBase>				CollisionObjectList;
+	typedef boost::ptr_vector<CollisionObjectBase>::reference	CollisionObject;
+	typedef boost::ptr_vector<CollisionObjectBase>::iterator	Iter;
 
-	typedef std::shared_ptr<class DynamicsWorld> DynamicsWorldRef;
+	typedef std::shared_ptr<class DynamicsWorld>				DynamicsWorldRef;
 
 	// Bullet physics world manager
 	class DynamicsWorld
@@ -63,8 +65,12 @@ namespace bullet {
 
 	private:
 
+		friend DynamicsWorldRef								getInstance();
 		static DynamicsWorldRef								getInstance();
+
 		DynamicsWorld();
+		DynamicsWorld( DynamicsWorld const& );
+		const DynamicsWorld&								operator=( DynamicsWorld const& );
 
 		friend Iter											begin();
 		Iter												begin();
@@ -119,9 +125,16 @@ namespace bullet {
 
 		friend btDynamicsWorld*								getWorld();
 		btDynamicsWorld*									getWorld();
-			
+		
+		void												pushBack( CollisionObjectBase *object );
+
 		friend void											setInfo( const btSoftBodyWorldInfo &info );
 		void												setInfo( const btSoftBodyWorldInfo &info );
+
+		btRigidBody*										toBulletRigidBody( Iter pos );
+		btRigidBody*										toBulletRigidBody( CollisionObjectBase *object );
+		btSoftBody*											toBulletSoftBody( Iter pos );
+		btSoftBody*											toBulletSoftBody( CollisionObjectBase *object );
 
 		friend void											update();
 		void												update();

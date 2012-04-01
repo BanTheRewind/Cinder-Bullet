@@ -53,7 +53,7 @@ namespace bullet
 	public:
 
 		~CollisionObjectBase();
-
+		
 		void							update( double step );
 
 		double							getAge();
@@ -62,25 +62,28 @@ namespace bullet
 		btCollisionObject*				getBulletBody() const;
 		double							getLifespan();
 		double							getLifespan() const;
-		ci::Matrix44f					getMatrix();
-		ci::Matrix44f					getMatrix() const;
+		ci::Matrix44f&					getTransformMatrix();
+		const ci::Matrix44f&			getTransformMatrix() const;
 		ci::Vec3f&						getPosition();
 		const ci::Vec3f&				getPosition() const;
-		ci::Quatf&						getRotation();
-		const ci::Quatf&				getRotation() const;
 		ci::gl::VboMesh&				getVboMesh();
 		const ci::gl::VboMesh&			getVboMesh() const;
 
+		bool							isRigidBody();
+		bool							isRigidBody() const;
+		bool							isSoftBody();
+		bool							isSoftBody() const;
+
 	protected:
 
-		CollisionObjectBase( btDynamicsWorld* world, const ci::Vec3f &position = ci::Vec3f::zero(), const ci::Quatf &rotation = ci::Quatf() );
+		CollisionObjectBase( const ci::Vec3f &position = ci::Vec3f::zero(), const ci::Quatf &rotation = ci::Quatf() );
 
 		double							mAge;
+		ci::Vec3f						mPosition;
 		btRigidBody						*mRigidBody;
 		btSoftBody						*mSoftBody;
-		ci::Vec3f						mPosition;
-		ci::Quatf						mRotation;
-		btDynamicsWorld					*mWorld;
+		
+		ci::Matrix44f					mTransformMatrix;
 
 		void							clearVboData();
 		void							setVboData( GLenum primitiveType = GL_TRIANGLES );

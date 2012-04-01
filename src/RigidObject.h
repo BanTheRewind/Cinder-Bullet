@@ -45,96 +45,77 @@
 namespace bullet
 {
 
-	class RigidObject : public CollisionObjectBase
-	{
-
-	protected:
-
-		RigidObject( btDynamicsWorld* world, const ci::Vec3f &position = ci::Vec3f::zero(), const ci::Quatf &rotation = ci::Quatf() );
-
-		/*! Creates rigid body from collision shape */
-		btRigidBody* create( btDynamicsWorld* world, btCollisionShape* shape, const ci::Vec3f &position = ci::Vec3f::zero(), 
-			const ci::Quatf &rotation = ci::Quatf() );
-
-		/*! Create rigid body from triangle mesh */
-		btRigidBody* create( btDynamicsWorld* world, btBvhTriangleMeshShape* shape, const ci::Vec3f &position = ci::Vec3f::zero(), 
-			const ci::Quatf &rotation = ci::Quatf() );
-
-		/*! Creates rigid body from convex hull shape */
-		btRigidBody* create( btDynamicsWorld* world, btConvexHullShape* shape, const ci::Vec3f &position = ci::Vec3f::zero(), 
-			const ci::Quatf &rotation = ci::Quatf() );
-
-		/*! Creates a rigid box */
-		btRigidBody* create( btDynamicsWorld* world, const ci::Vec3f &size = ci::Vec3f( 10.0f, 10.0f, 10.0f ), 
-			const ci::Vec3f &position = ci::Vec3f::zero(), const ci::Quatf &rotation = ci::Quatf() );
-
-		/*! Creates a rigid cylinder */
-		btRigidBody* create( btDynamicsWorld* world, float topRadius = 10.0f, float bottomRadius = 10.0f, float height = 20.0f, 
-			int32_t segments = 16, const ci::Vec3f &position = ci::Vec3f::zero(), const ci::Quatf &rotation = ci::Quatf() );
-
-		/*! Creates a rigid sphere */
-		btRigidBody* create( btDynamicsWorld* world, float radius = 10.0f, const ci::Vec3f &position = ci::Vec3f::zero(), 
-			const ci::Quatf &rotation = ci::Quatf() );
-
-		/*! Creates a rigid torus */
-		//btRigidBody* create( btDynamicsWorld* world, float innerRadius = 5.0f, float outerRadius = 10.0f, int32_t segments = 16, const ci::Vec3f &position = ci::Vec3f::zero(), const ci::Quatf &rotation = ci::Quatf() );
-
-	};
-
-	class RigidBox : public RigidObject 
+	class RigidBox : public CollisionObjectBase 
 	{
 	private:
-		RigidBox( btDynamicsWorld* world, const ci::Vec3f &dimensions, const ci::Vec3f &position, const ci::Quatf &rotation );
+		RigidBox( const ci::Vec3f &dimensions, const ci::Vec3f &position, const ci::Quatf &rotation );
 		friend class	DynamicsWorld;
 	};
 
-	class RigidCylinder : public RigidObject 
+	class RigidCylinder : public CollisionObjectBase 
 	{
 
 	private:
-		RigidCylinder( btDynamicsWorld* world, float topRadius, float bottomRadius, float height, int32_t segments, 
+		RigidCylinder( float topRadius, float bottomRadius, float height, int32_t segments, const ci::Vec3f &position, const ci::Quatf &rotation );
+		friend class	DynamicsWorld;
+	};
+
+	class RigidHull : public CollisionObjectBase 
+	{
+	private:
+		RigidHull( const ci::TriMesh &mesh, const ci::Vec3f &scale, 
 			const ci::Vec3f &position, const ci::Quatf &rotation );
 		friend class	DynamicsWorld;
 	};
 
-	class RigidHull : public RigidObject 
+	class RigidMesh : public CollisionObjectBase 
 	{
 	private:
-		RigidHull( btDynamicsWorld* world, const ci::TriMesh &mesh, const ci::Vec3f &scale, 
-			const ci::Vec3f &position, const ci::Quatf &rotation );
+		RigidMesh( const ci::TriMesh &mesh, const ci::Vec3f &scale, float margin, const ci::Vec3f &position, const ci::Quatf &rotation );
 		friend class	DynamicsWorld;
 	};
 
-	class RigidMesh : public RigidObject 
+	class RigidSphere : public CollisionObjectBase 
 	{
 	private:
-		RigidMesh( btDynamicsWorld* world, const ci::TriMesh &mesh, const ci::Vec3f &scale, float margin, 
-			const ci::Vec3f &position, const ci::Quatf &rotation );
+		RigidSphere( float radius, int32_t segments, const ci::Vec3f &position, const ci::Quatf &rotation );
 		friend class	DynamicsWorld;
 	};
 
-	class RigidSphere : public RigidObject 
+	class RigidTerrain : public CollisionObjectBase 
 	{
 	private:
-		RigidSphere( btDynamicsWorld* world, float radius, int32_t segments, const ci::Vec3f &position, const ci::Quatf &rotation );
-		friend class	DynamicsWorld;
-	};
-
-	class RigidTerrain : public RigidObject 
-	{
-	private:
-		RigidTerrain( btDynamicsWorld* world, const ci::Surface32f &heightField, int32_t stickWidth, int32_t stickLength, float minHeight, 
+		RigidTerrain( const ci::Surface32f &heightField, int32_t stickWidth, int32_t stickLength, float minHeight, 
 			float maxHeight, int32_t upAxis, const ci::Vec3f &scale, const ci::Vec3f &position, const ci::Quatf &rotation );
 		friend class	DynamicsWorld;
 	};
 
-	/*! Rigid torus */
-	/*class RigidTorus : public RigidObject 
+	class RigidTorus : public CollisionObjectBase 
 	{
-	public:
-		static CollisionObjectBase create(btDynamicsWorld* world, float innerRadius = 5.0f, float outerRadius = 10.0f, int32_t segments = 16, const ci::Vec3f & position = ci::Vec3f::zero(), const ci::Quatf & rotation = ci::Quatf());
 	private:
-		RigidTorus(btDynamicsWorld* world, float innerRadius = 5.0f, float outerRadius = 10.0f, int32_t segments = 16, const ci::Vec3f & position = ci::Vec3f::zero(), const ci::Quatf & rotation = ci::Quatf());
-	};*/
+		RigidTorus( float innerRadius, float outerRadius, int32_t segments, const ci::Vec3f &position, const ci::Quatf &rotation );
+		friend class	DynamicsWorld;
+	};
+
+	class RigidObject
+	{
+	private:
+		static btRigidBody*	create( btCollisionShape* shape, float mass, const ci::Vec3f &position, const ci::Quatf &rotation );
+		static btRigidBody*	createBox( const ci::Vec3f &size, const ci::Vec3f &position, const ci::Quatf &rotation );
+		static btRigidBody*	createCylinder( float topRadius, float bottomRadius, float height, int32_t segments, 
+			const ci::Vec3f &position, const ci::Quatf &rotation );
+		static btRigidBody*	createHull( btConvexHullShape* shape, const ci::Vec3f &position, const ci::Quatf &rotation );
+		static btRigidBody*	createMesh( btBvhTriangleMeshShape* shape, const ci::Vec3f &position, const ci::Quatf &rotation );
+		static btRigidBody*	createSphere( float radius, const ci::Vec3f &position, const ci::Quatf &rotation );
+		static btRigidBody*	createTerrain( btHeightfieldTerrainShape* shape, const ci::Vec3f &position, const ci::Quatf &rotation );
+		
+		friend class		RigidBox;
+		friend class		RigidCylinder;
+		friend class		RigidHull;
+		friend class		RigidMesh;
+		friend class		RigidSphere;
+		friend class		RigidTerrain;
+		friend class		RigidTorus;
+	};
 
 }

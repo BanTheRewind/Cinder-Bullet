@@ -43,7 +43,7 @@ namespace bullet
 	using namespace ci;
 	using namespace std;
 
-	CollisionObjectBase::CollisionObjectBase( btDynamicsWorld* world, const Vec3f &position, const Quatf &rotation ) 
+	CollisionObjectBase::CollisionObjectBase( const Vec3f &position, const Quatf &rotation ) 
 	{
 
 		// Initialize VBO layout
@@ -54,19 +54,18 @@ namespace bullet
 		// Define properties
 		mAge = 0.0;
 		mPosition = position;
-		mRotation = rotation;
-		mWorld = world;
+		mRigidBody = 0;
+		mSoftBody = 0;
+		mTransformMatrix.setToIdentity();
 
 	}
 
 	CollisionObjectBase::~CollisionObjectBase() 
 	{
 		if (mSoftBody != 0 ) {
-			( (btSoftRigidDynamicsWorld*)mWorld )->removeSoftBody( mSoftBody );
 			delete mSoftBody;
 		}
 		if ( mRigidBody != 0 ) {
-			mWorld->removeRigidBody( mRigidBody );
 			if ( mRigidBody->getMotionState() ) {
 				delete mRigidBody->getMotionState();
 			}
@@ -79,7 +78,6 @@ namespace bullet
 		mVboIndices.clear();
 		mVboNormals.clear();
 		mVboPositions.clear();
-
 	}
 
 	double CollisionObjectBase::getAge() 
@@ -95,30 +93,19 @@ namespace bullet
 	{ 
 		if ( mSoftBody != 0 ) {
 			return (btCollisionObject*)mSoftBody;
+		} else if ( mRigidBody != 0 ) {
+			return (btCollisionObject*)mRigidBody;
 		}
-		return (btCollisionObject*)mRigidBody;
+		return 0;
 	}
 	btCollisionObject* CollisionObjectBase::getBulletBody() const
 	{ 
 		if ( mSoftBody != 0 ) {
 			return (btCollisionObject*)mSoftBody;
+		} else if ( mRigidBody != 0 ) {
+			return (btCollisionObject*)mRigidBody;
 		}
-		return (btCollisionObject*)mRigidBody;
-	}
-	
-	ci::Matrix44f CollisionObjectBase::getMatrix() 
-	{ 
-		if ( mSoftBody != 0 ) {
-			return Utilities::getWorldTransform( mSoftBody ).m; 
-		}
-		return Utilities::getWorldTransform( mRigidBody ).m; 
-	}
-	ci::Matrix44f CollisionObjectBase::getMatrix() const 
-	{ 
-		if ( mSoftBody != 0 ) {
-			return Utilities::getWorldTransform( mSoftBody ).m; 
-		}
-		return Utilities::getWorldTransform( mRigidBody ).m; 
+		return 0;
 	}
 
 	ci::Vec3f& CollisionObjectBase::getPosition() 
@@ -129,14 +116,14 @@ namespace bullet
 	{ 
 		return mPosition; 
 	}
-	
-	ci::Quatf& CollisionObjectBase::getRotation() 
+
+	ci::Matrix44f& CollisionObjectBase::getTransformMatrix() 
 	{ 
-		return mRotation; 
+		return mTransformMatrix;
 	}
-	const ci::Quatf& CollisionObjectBase::getRotation() const 
+	const ci::Matrix44f& CollisionObjectBase::getTransformMatrix() const 
 	{ 
-		return mRotation; 
+		return mTransformMatrix;
 	}
 
 	ci::gl::VboMesh& CollisionObjectBase::getVboMesh() 
@@ -146,6 +133,23 @@ namespace bullet
 	const ci::gl::VboMesh& CollisionObjectBase::getVboMesh() const 
 	{ 
 		return mVboMesh; 
+	}
+
+	bool CollisionObjectBase::isRigidBody()
+	{
+		return mRigidBody != 0;
+	}
+	bool CollisionObjectBase::isRigidBody() const
+	{
+		return mRigidBody != 0;
+	}
+	bool CollisionObjectBase::isSoftBody()
+	{
+		return mSoftBody != 0;
+	}
+	bool CollisionObjectBase::isSoftBody() const
+	{
+		return mSoftBody != 0;
 	}
 
 	void CollisionObjectBase::setVboData( GLenum primitiveType )
@@ -161,10 +165,10 @@ namespace bullet
 		mAge += step;
 		if ( mSoftBody != 0 ) {
 			mPosition = Utilities::fromBulletVector3( mSoftBody->m_bounds[ 0 ].lerp( mSoftBody->m_bounds[ 1 ], 0.5f ) );
-			mRotation = ci::Quatf( Utilities::getWorldTransform( mSoftBody ) );
+			mTransformMatrix = Utilities::getWorldTransform( mSoftBody ); 
 		} else {
 			mPosition = Utilities::fromBulletVector3( mRigidBody->getCenterOfMassPosition() );
-			mRotation = ci::Quatf( Utilities::getWorldTransform( mRigidBody ) );
+			mTransformMatrix = Utilities::getWorldTransform( mRigidBody );
 		}
 	}
 

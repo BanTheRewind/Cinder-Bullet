@@ -132,9 +132,9 @@ namespace bullet
 		vector<size_t> indices = mesh.getIndices();
 		for ( uint32_t i = 0; i < mesh.getNumTriangles(); i += 3 )
 			triMesh->addTriangle( 
-			toBulletVector3( *( vertices.begin() +  indices[ i + 0 ] ) ), 
-			toBulletVector3( *( vertices.begin() +  indices[ i + 1 ] ) ), 
-			toBulletVector3( *( vertices.begin() +  indices[ i + 2 ] ) ), 
+			toBulletVector3( vertices.at( indices.at( i + 0 ) ) ), 
+			toBulletVector3( vertices.at( indices.at( i + 1 ) ) ), 
+			toBulletVector3( vertices.at( indices.at( i + 2 ) ) ), 
 			true
 			 );
 
@@ -159,9 +159,9 @@ namespace bullet
 		uint32_t numTriangles = indices.size() / 3;
 		for ( uint32_t i = 0; i < numTriangles; i += 3 )
 			triMesh->addTriangle( 
-			toBulletVector3( *( vertices.begin() +  indices[ i + 0 ] ) ), 
-			toBulletVector3( *( vertices.begin() +  indices[ i + 1 ] ) ), 
-			toBulletVector3( *( vertices.begin() +  indices[ i + 2 ] ) ), 
+			toBulletVector3( vertices.at( indices.at( i + 0 ) ) ), 
+			toBulletVector3( vertices.at( indices.at( i + 1 ) ) ), 
+			toBulletVector3( vertices.at( indices.at( i + 2 ) ) ), 
 			true
 			 );
 
@@ -185,7 +185,7 @@ namespace bullet
 		// Add points
 		vector<Vec3f> vertices = mesh.getVertices();
 		for ( uint32_t i = 0; i < mesh.getNumVertices(); i++ ) {
-			shape->addPoint( toBulletVector3( *( vertices.begin() + i ) ) );
+			shape->addPoint( toBulletVector3( vertices.at( i ) ) );
 		}
 
 		// Scale and return shape
@@ -203,7 +203,7 @@ namespace bullet
 
 		// Add points
 		for ( uint32_t i = 0; i < vertices.size(); i++ ) {
-			shape->addPoint( toBulletVector3( *( vertices.begin() + i ) ) );
+			shape->addPoint( toBulletVector3( vertices.at( i ) ) );
 		}
 
 		// Scale and return shape

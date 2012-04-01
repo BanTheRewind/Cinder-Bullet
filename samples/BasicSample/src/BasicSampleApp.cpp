@@ -107,13 +107,12 @@ void BasicSampleApp::draw()
 	gl::pushMatrices();
 	gl::rotate( Vec3f( -45.0f, math<float>::sin( ( float )getElapsedSeconds() * 0.3333f ) * 20.0f, 0.0f ) );
 
-	for ( bullet::Iter objectIt = bullet::begin(); objectIt != bullet::end(); ++objectIt ) {
+	for ( bullet::Iter object = bullet::begin(); object != bullet::end(); ++object ) {
 		gl::pushMatrices();
-		//glMultMatrixf( objectIt->getMatrix() );
-		//gl::draw( objectIt->getVboMesh() );
+		glMultMatrixf( object->getTransformMatrix() );
+		gl::draw( object->getVboMesh() );
 		gl::popMatrices();
 	}
-
 
 	// End rotation
 	gl::popMatrices();
@@ -164,8 +163,6 @@ void BasicSampleApp::loadTerrain()
 		( float )( ( rand() % 400 ) - 200 )
 		 );
 
-	bullet::createRigidBox( Vec3f( size, size, size ), position );
-
 	// Add terrain
 	CollisionObject terrain = bullet::createRigidTerrain( heightField, heightField.getWidth(), heightField.getHeight(), -200, 200, 1, Vec3f( 6.0f, 210.0f, 6.0f ) );
 	bullet::toBulletRigidBody( terrain )->setMassProps( 0, btVector3( 0.0f, 0.0f, 0.0f ) );
@@ -184,25 +181,28 @@ void BasicSampleApp::mouseDown( MouseEvent event )
 		( float )( ( rand() % 400 ) - 200 )
 		 );
 
+	bullet::createRigidSphere( size, 16, position );
+	return;
+
 	// Drop primitive into terrain
-	/*switch ( Rand::randInt( 0, 5 ) )
+	switch ( Rand::randInt( 0, 5 ) )
 	{
 	case 0:
-		mDynamicsWorld->insert( RigidSphere( mDynamicsWorld, size, 16, position, Quatf() ) ).setLifespan( ( double )mLifespan );
+		bullet::createRigidSphere( size, 16, position );
 		break;
 	case 1:
-		mDynamicsWorld->insert( RigidBox( mDynamicsWorld, Vec3f( size, size, size ), position, Quatf() ) ).setLifespan( ( double )mLifespan );
+		bullet::createRigidBox( Vec3f::one() * size, position );
 		break;
 	case 2:
-		mDynamicsWorld->insert( RigidHull( mDynamicsWorld, mConvex, Vec3f( size, size, size ) * 0.5f, position, Quatf() ) ).setLifespan( ( double )mLifespan );
+		bullet::createRigidHull( mConvex, Vec3f::one() * size * 0.5f, position );
 		break;
 	case 3:
-		mDynamicsWorld->insert( RigidMesh( mDynamicsWorld, mConcave, Vec3f( size, size, size ) * 0.12f, 0.0f, position, Quatf() ) ).setLifespan( ( double )mLifespan );
+		bullet::createRigidMesh( mConcave, Vec3f::one() * size * 0.12f, 0.0f, position );
 		break;
 	case 4:
-		mDynamicsWorld->insert( RigidCylinder( mDynamicsWorld, size * 0.5f, size, size * 2.0f, 12, position, Quatf() ) ).setLifespan( ( double )mLifespan );
+		bullet::createRigidCylinder( size * 0.5f, size, size * 2.0f, 12, position );
 		break;
-	}*/
+	}
 
 }
 
@@ -291,6 +291,14 @@ void BasicSampleApp::update()
 
 	// Update dynamics world
 	bullet::update();
+
+	for ( bullet::Iter object = bullet::begin(); object != bullet::end(); ) {
+		if ( object->getAge() > 5.0 ) {
+			object = bullet::erase( object );
+		} else {
+			++object;
+		}
+	}
 
 }
 

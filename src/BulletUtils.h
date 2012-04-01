@@ -65,6 +65,7 @@ namespace bullet
 	class RigidObject;
 	class RigidSphere;
 	class RigidTerrain;
+	class RigidTorus;
 	class SoftObject;
 
 	class Utilities
@@ -119,6 +120,7 @@ namespace bullet
 		friend class						RigidObject;
 		friend class						RigidSphere;
 		friend class						RigidTerrain;
+		friend class						RigidTorus;
 		friend class						SoftObject;
 
 	};

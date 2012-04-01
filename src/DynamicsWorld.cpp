@@ -11,6 +11,8 @@ namespace bullet {
 	using namespace ci::app;
 	using namespace std;
 
+	/////////////////////////////////////////////////////////////////////////////////////////////////
+
 	DynamicsWorldRef DynamicsWorld::getInstance()
 	{
 		static DynamicsWorldRef world;
@@ -71,52 +73,75 @@ namespace bullet {
 		}
 	}
 
+	/////////////////////////////////////////////////////////////////////////////////////////////////
+
 	Iter DynamicsWorld::begin()
 	{
 		return mObjects.begin();
 	}
+	
 	Iter DynamicsWorld::end()
 	{
 		return mObjects.end();
 	}
+	
 	Iter DynamicsWorld::erase( Iter pos )
 	{
+		if ( pos->isRigidBody() ) {
+			mWorld->removeRigidBody( toBulletRigidBody( pos ) );
+		} else if ( pos->isSoftBody() ) {
+			( (btSoftRigidDynamicsWorld*)mWorld )->removeSoftBody( toBulletSoftBody( pos ) );
+		}
 		return mObjects.erase( pos );
 	}
 
+	void DynamicsWorld::pushBack( CollisionObjectBase *object )
+	{
+		mObjects.push_back( object );
+		if ( object->isRigidBody() ) {
+			mWorld->addRigidBody( toBulletRigidBody( object ) );
+		} else if ( object->isSoftBody() ) {
+			( (btSoftRigidDynamicsWorld*)mWorld )->addSoftBody( toBulletSoftBody( object ) );
+		}
+	}
+
+	/////////////////////////////////////////////////////////////////////////////////////////////////
+
 	CollisionObject DynamicsWorld::createRigidBox( const ci::Vec3f &dimensions, const ci::Vec3f &position, const ci::Quatf &rotation )
 	{
-		mObjects.push_back( new RigidBox( mWorld, dimensions, position, rotation ) );
+		pushBack( new RigidBox( dimensions, position, rotation ) );
 		return mObjects.back();
 	}
 	CollisionObject DynamicsWorld::createRigidCylinder( float topRadius, float bottomRadius, float height, int32_t segments, 
 		const ci::Vec3f &position, const ci::Quatf &rotation )
 	{
-		mObjects.push_back( new RigidCylinder( mWorld, topRadius, bottomRadius, height, segments, position, rotation ) );
+		pushBack( new RigidCylinder( topRadius, bottomRadius, height, segments, position, rotation ) );
 		return mObjects.back();
 	}
 	CollisionObject DynamicsWorld::createRigidHull( const ci::TriMesh &mesh, const ci::Vec3f &scale, const ci::Vec3f &position, const ci::Quatf &rotation )
 	{
-		mObjects.push_back( new RigidHull( mWorld, mesh, scale, position, rotation ) );
+		pushBack( new RigidHull( mesh, scale, position, rotation ) );
 		return mObjects.back();
 	}
 	CollisionObject DynamicsWorld::createRigidMesh( const ci::TriMesh &mesh, const ci::Vec3f &scale, float margin, 
 		const ci::Vec3f &position, const ci::Quatf &rotation )
 	{
-		mObjects.push_back( new RigidMesh( mWorld, mesh, scale, margin, position, rotation ) );
+		pushBack( new RigidMesh( mesh, scale, margin, position, rotation ) );
 		return mObjects.back();
 	}
 	CollisionObject DynamicsWorld::createRigidSphere( float radius, int32_t segments, const ci::Vec3f &position, const ci::Quatf &rotation )
 	{
-		mObjects.push_back( new RigidSphere( mWorld, radius, segments, position, rotation ) );
+		pushBack( new RigidSphere( radius, segments, position, rotation ) );
 		return mObjects.back();
 	}
 	CollisionObject DynamicsWorld::createRigidTerrain( const ci::Surface32f &heightField, int32_t stickWidth, int32_t stickLength, float minHeight, 
 		float maxHeight, int32_t upAxis, const ci::Vec3f &scale, const ci::Vec3f &position, const ci::Quatf &rotation )
 	{
-		mObjects.push_back( new RigidTerrain( mWorld, heightField, stickWidth, stickLength, minHeight, maxHeight, upAxis, scale, position, rotation ) );
+		pushBack( new RigidTerrain( heightField, stickWidth, stickLength, minHeight, maxHeight, upAxis, scale, position, rotation ) );
 		return mObjects.back();
 	}
+
+	/////////////////////////////////////////////////////////////////////////////////////////////////
 
 	btBroadphaseInterface* DynamicsWorld::getBroadphase() 
 	{ 
@@ -151,26 +176,30 @@ namespace bullet {
 		return mWorld; 
 	}
 
-	// Set soft body info
 	void DynamicsWorld::setInfo( const btSoftBodyWorldInfo &info )
 	{
 		mSoftBodyWorldInfo = info;
 	}
 
+	/////////////////////////////////////////////////////////////////////////////////////////////////
+
 	// Runs update logic
 	void DynamicsWorld::update()
 	{
 
-		// Get time since last frame, update
-		double elapsedSeconds = getElapsedSeconds();
-		double step = elapsedSeconds - mElapsedSeconds;
-		mElapsedSeconds = elapsedSeconds;
-
 		// Update Bullet world
 		mWorld->stepSimulation( 1.0f, 10, 1.0f / math<float>::max( 1.0f, getFrameRate() ) );
 
+		// Update objects
+		double elapsedSeconds = getElapsedSeconds();
+		double step = elapsedSeconds - mElapsedSeconds;
+		mElapsedSeconds = elapsedSeconds;
+		for ( Iter objectIt = begin(); objectIt != end(); ++objectIt ) {
+			objectIt->update( step );
+		}
+
 		// Check if object count has changed
-		uint32_t numObjects = mWorld->getNumCollisionObjects();
+		uint32_t numObjects = mWorld->getCollisionObjectArray().size();
 		if ( mNumObjects != numObjects ) {
 
 			// Nothing to do, bail
@@ -180,7 +209,7 @@ namespace bullet {
 
 			// Activate all bodies
 			for ( uint32_t i = 0; i < numObjects; i++ ) {
-				btCollisionObject * collisionObject = mWorld->getCollisionObjectArray().at( i );
+				btCollisionObject * collisionObject = mWorld->getCollisionObjectArray()[ i ];
 				btRigidBody* rigidBody = btRigidBody::upcast( collisionObject );
 				if ( rigidBody ) {
 					rigidBody->activate(true);
@@ -198,6 +227,27 @@ namespace bullet {
 		mNumObjects = numObjects;
 
 	}
+
+	/////////////////////////////////////////////////////////////////////////////////////////////////
+
+	btRigidBody* DynamicsWorld::toBulletRigidBody( CollisionObjectBase *object )
+	{
+		return (btRigidBody*)( object->getBulletBody() );
+	}
+	btRigidBody* DynamicsWorld::toBulletRigidBody( Iter pos )
+	{
+		return (btRigidBody*)( pos->getBulletBody() );
+	}
+	btSoftBody* DynamicsWorld::toBulletSoftBody( CollisionObjectBase *object )
+	{
+		return (btSoftBody*)( object->getBulletBody() );
+	}
+	btSoftBody* DynamicsWorld::toBulletSoftBody( Iter pos )
+	{
+		return (btSoftBody*)( pos->getBulletBody() );
+	}
+
+	/////////////////////////////////////////////////////////////////////////////////////////////////
 
 	Iter begin() 
 	{
