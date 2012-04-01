@@ -1,14 +1,17 @@
-This is a work in progress. It wraps the Bullet
-3D physics engine for Cinder. It has a lot of features 
-but there is a lot to go.
+DO NOT DOWNLOAD.  This repo is being used as a backup for
+a work in progress.
+
+This block wraps the Bullet 3D physics engine for Cinder. 
+It has a lot of features but there is a lot to go.
 
 Some notable features include...
 
+- Create and update bodies with a simple API
+- Provides access to Bullet, rather than try to wrap it
 - VBO representations of all bodies
 - Convenience methods for most rigid primitives
 - Converts TriMesh into a convex or concave physics body
 - Creates interactive terrain from heightfield (bitmap)
-- Easy to use body manager
 - Soft body dynamics ready
 - Creates VBOs for all bodies for fast rendering
 
