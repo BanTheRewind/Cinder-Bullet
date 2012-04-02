@@ -53,8 +53,6 @@ namespace bullet
 	public:
 
 		~CollisionObjectBase();
-		
-		void							update( double step );
 
 		btCollisionObject*				getBulletBody();
 		btCollisionObject*				getBulletBody() const;
