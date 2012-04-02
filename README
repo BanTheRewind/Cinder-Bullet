@@ -11,13 +11,42 @@ you just use Bullet directly.
 
 TO DO LIST
 
-- Change nomenclature from "Object" to "Body"
-- Change "CollisionObject" typedef to "BodyRef"
+- Change names:
+  - "CollisionObjectBase" to "CollisionObjectRef"
+  - "CollisionObject" to "CollisionObjectRef"
+  - "SoftObject" to "SoftBody"
+  - "RigidObject" to "RigidBody"
+  - "BulletUtils.h" to "Utils.h"
+- Move public utility methods into Bullet namespace 
+  (Utilities class should be internal only)
+- Use shared_ptr<T> create(...) instead of Singleton model
+- Pass world into create methods. This...
+
+  CollisionObjectRef bullet::create*( ... ) {
+    DynamicsWorld::getInstance->create*( ... );
+  }
+
+  ...should be...
+
+  CollisionObjectRef bullet::create*( const DynamicsWorldRef &world, ... ) {
+    world->create*( ... );
+  }
+
+- Remove member vectors from CollisionObject. Pass vectors into setVboData method instead
+- Remove clearVboData method from CollisionObject (not needed with above change)
+- Add Iter methods which take *Ref...
+  Iter bullet::erase( const CollisionObjectRef &object ) { ... }
+  Iter bullet::find( const CollisionObjectRef &object ) { ... }
 - Fix cylinder VBO normals
 - Bug check terrain
 - Screen -> dynamics world interaction
 - Texture coordinates for VBOs
 - Soft body convenience methods
+- Vehicle convenience method
+- Add "vehicle" pointer to collision object
+- Add bullet::toBulletVehicle();
+- Add CollisionObject::isVehicle();
+- Investigate if separate object is needed for bullets.
 - Static lib
 - XCode static lib + samples 
 
