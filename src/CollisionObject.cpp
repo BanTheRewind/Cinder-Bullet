@@ -51,12 +51,9 @@ namespace bullet
 		mVboLayout.setStaticNormals();
 		mVboLayout.setStaticPositions();
 
-		// Define properties
-		mAge = 0.0;
-		mPosition = position;
+		// Initialize pointers
 		mRigidBody = 0;
 		mSoftBody = 0;
-		mTransformMatrix.setToIdentity();
 
 	}
 
@@ -79,15 +76,6 @@ namespace bullet
 		mVboNormals.clear();
 		mVboPositions.clear();
 	}
-
-	double CollisionObjectBase::getAge() 
-	{ 
-		return mAge; 
-	}
-	double CollisionObjectBase::getAge() const 
-	{ 
-		return mAge; 
-	}
 	
 	btCollisionObject* CollisionObjectBase::getBulletBody() 
 	{ 
@@ -108,22 +96,46 @@ namespace bullet
 		return 0;
 	}
 
-	ci::Vec3f& CollisionObjectBase::getPosition() 
+	ci::Vec3f CollisionObjectBase::getPosition() 
 	{ 
-		return mPosition; 
+		Vec3f position;
+		if ( mSoftBody != 0 ) {
+			position = Utilities::fromBulletVector3( mSoftBody->m_bounds[ 0 ].lerp( mSoftBody->m_bounds[ 1 ], 0.5f ) );
+		} else if ( mRigidBody != 0 ) {
+			position = Utilities::fromBulletVector3( mRigidBody->getCenterOfMassPosition() );
+		}
+		return position;
 	}
-	const ci::Vec3f& CollisionObjectBase::getPosition() const 
+	ci::Vec3f CollisionObjectBase::getPosition() const 
 	{ 
-		return mPosition; 
+		Vec3f position;
+		if ( mSoftBody != 0 ) {
+			position = Utilities::fromBulletVector3( mSoftBody->m_bounds[ 0 ].lerp( mSoftBody->m_bounds[ 1 ], 0.5f ) );
+		} else if ( mRigidBody != 0 ) {
+			position = Utilities::fromBulletVector3( mRigidBody->getCenterOfMassPosition() );
+		}
+		return position;
 	}
 
 	ci::Matrix44f& CollisionObjectBase::getTransformMatrix() 
 	{ 
-		return mTransformMatrix;
+		Matrix44f worldTransform;
+		if ( mSoftBody != 0 ) {
+			worldTransform = Utilities::getWorldTransform( mSoftBody ); 
+		} else if ( mRigidBody != 0 ) {
+			worldTransform = Utilities::getWorldTransform( mRigidBody );
+		}
+		return worldTransform;
 	}
-	const ci::Matrix44f& CollisionObjectBase::getTransformMatrix() const 
+	ci::Matrix44f CollisionObjectBase::getTransformMatrix() const 
 	{ 
-		return mTransformMatrix;
+		Matrix44f worldTransform;
+		if ( mSoftBody != 0 ) {
+			worldTransform = Utilities::getWorldTransform( mSoftBody ); 
+		} else if ( mRigidBody != 0 ) {
+			worldTransform = Utilities::getWorldTransform( mRigidBody );
+		}
+		return worldTransform;
 	}
 
 	ci::gl::VboMesh& CollisionObjectBase::getVboMesh() 
@@ -158,18 +170,6 @@ namespace bullet
 		mVboMesh.bufferIndices( mVboIndices );
 		mVboMesh.bufferNormals( mVboNormals );
 		mVboMesh.bufferPositions( mVboPositions );
-	}
-
-	void CollisionObjectBase::update( double step ) 
-	{
-		mAge += step;
-		if ( mSoftBody != 0 ) {
-			mPosition = Utilities::fromBulletVector3( mSoftBody->m_bounds[ 0 ].lerp( mSoftBody->m_bounds[ 1 ], 0.5f ) );
-			mTransformMatrix = Utilities::getWorldTransform( mSoftBody ); 
-		} else {
-			mPosition = Utilities::fromBulletVector3( mRigidBody->getCenterOfMassPosition() );
-			mTransformMatrix = Utilities::getWorldTransform( mRigidBody );
-		}
 	}
 
 }
