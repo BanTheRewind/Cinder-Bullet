@@ -11,6 +11,8 @@ you just use Bullet directly.
 
 TO DO LIST
 
+- Change nomenclature from "Object" to "Body"
+- Change "CollisionObject" typedef to "BodyRef"
 - Fix cylinder VBO normals
 - Bug check terrain
 - Screen -> dynamics world interaction
