@@ -56,10 +56,10 @@ namespace bullet
 
 		btCollisionObject*				getBulletBody();
 		btCollisionObject*				getBulletBody() const;
-		ci::Matrix44f					getTransformMatrix();
-		ci::Matrix44f				getTransformMatrix() const;
 		ci::Vec3f						getPosition();
 		ci::Vec3f					getPosition() const;
+		ci::Matrix44f					getTransformMatrix();
+		ci::Matrix44f				getTransformMatrix() const;
 		ci::gl::VboMesh&				getVboMesh();
 		const ci::gl::VboMesh&			getVboMesh() const;
 
