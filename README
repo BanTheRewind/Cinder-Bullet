@@ -23,13 +23,13 @@ TO DO LIST
 - Pass world into create methods. This...
 
   CollisionObjectRef bullet::create*( ... ) {
-    DynamicsWorld::getInstance->create*( ... );
+    return DynamicsWorld::getInstance->create*( ... );
   }
 
   ...should be...
 
   CollisionObjectRef bullet::create*( const DynamicsWorldRef &world, ... ) {
-    world->create*( ... );
+    return world->create*( ... );
   }
 
 - Remove member vectors from CollisionObject. Pass vectors into setVboData method instead
