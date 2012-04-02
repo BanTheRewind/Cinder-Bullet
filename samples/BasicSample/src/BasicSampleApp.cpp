@@ -71,9 +71,6 @@ public:
 	
 private:
 
-	// Lifespan of objects, in seconds
-	float						mLifespan;
-
 	// Camera
 	ci::CameraPersp				mCamera;
 
