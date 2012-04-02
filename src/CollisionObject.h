@@ -56,16 +56,12 @@ namespace bullet
 		
 		void							update( double step );
 
-		double							getAge();
-		double							getAge() const;
 		btCollisionObject*				getBulletBody();
 		btCollisionObject*				getBulletBody() const;
-		double							getLifespan();
-		double							getLifespan() const;
-		ci::Matrix44f&					getTransformMatrix();
-		const ci::Matrix44f&			getTransformMatrix() const;
-		ci::Vec3f&						getPosition();
-		const ci::Vec3f&				getPosition() const;
+		ci::Matrix44f					getTransformMatrix();
+		ci::Matrix44f				getTransformMatrix() const;
+		ci::Vec3f						getPosition();
+		ci::Vec3f					getPosition() const;
 		ci::gl::VboMesh&				getVboMesh();
 		const ci::gl::VboMesh&			getVboMesh() const;
 
@@ -78,12 +74,8 @@ namespace bullet
 
 		CollisionObjectBase( const ci::Vec3f &position = ci::Vec3f::zero(), const ci::Quatf &rotation = ci::Quatf() );
 
-		double							mAge;
-		ci::Vec3f						mPosition;
 		btRigidBody						*mRigidBody;
 		btSoftBody						*mSoftBody;
-		
-		ci::Matrix44f					mTransformMatrix;
 
 		void							clearVboData();
 		void							setVboData( GLenum primitiveType = GL_TRIANGLES );
