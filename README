@@ -1,28 +1,21 @@
-DO NOT DOWNLOAD.  This repo is being used as a backup for
+DOWNLOAD AT YOUR OWN RISK.  This repo is being used as a backup for
 a work in progress.
 
 This block wraps the Bullet 3D physics engine for Cinder. 
-It has a lot of features but there is a lot to go.
-
-Some notable features include...
-
-- Create and update bodies with a simple API
-- Provides access to Bullet, rather than try to wrap it
-- VBO representations of all bodies
-- Convenience methods for most rigid primitives
-- Converts TriMesh into a convex or concave physics body
-- Creates interactive terrain from heightfield (bitmap)
-- Soft body dynamics ready
-- Creates VBOs for all bodies for fast rendering
+It has a lot of features but there is a lot to go. The goal 
+of this block is to provide an interface to Bullet without 
+overly wrapping it.  The heavy lifting, such as world 
+initialization, creating and managing VBOs to represent bodies, 
+memory management, and interaction is done for you. From there, 
+you just use Bullet directly.
 
 TO DO LIST
 
-- Soft body dynamics to mirror rigid body convenience 
-  methods
-- Method for applying force to a collision object
-- Mouse/screen to world method for interacting with objects
-- Add params to sample project to control "brush"
-- Code cleanup
+- Fix cylinder VBO normals
+- Bug check terrain
+- Screen -> dynamics world interaction
+- Texture coordinates for VBOs
+- Soft body convenience methods
 - Static lib
 - XCode static lib + samples 
 
