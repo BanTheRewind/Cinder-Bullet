@@ -189,14 +189,6 @@ namespace bullet {
 	void DynamicsWorld::update()
 	{
 
-		// Update objects
-		double elapsedSeconds = getElapsedSeconds();
-		double step = elapsedSeconds - mElapsedSeconds;
-		mElapsedSeconds = elapsedSeconds;
-		for ( Iter objectIt = begin(); objectIt != end(); ++objectIt ) {
-			objectIt->update( step );
-		}
-
 		// Check if object count has changed
 		uint32_t numObjects = mWorld->getCollisionObjectArray().size();
 		if ( mNumObjects != numObjects ) {
@@ -211,11 +203,11 @@ namespace bullet {
 				btCollisionObject * collisionObject = mWorld->getCollisionObjectArray()[ i ];
 				btRigidBody* rigidBody = btRigidBody::upcast( collisionObject );
 				if ( rigidBody ) {
-					rigidBody->activate(true);
+					rigidBody->activate( true );
 				} else {
 					btSoftBody* softBody = btSoftBody::upcast( collisionObject );
 					if ( softBody ) {
-						softBody->activate(true);
+						softBody->activate( true );
 					}
 				}
 			}
@@ -225,7 +217,7 @@ namespace bullet {
 		// Update object count
 		mNumObjects = numObjects;
 
-		// Update Bullet world
+		// Update dynamics world
 		mWorld->stepSimulation( 1.0f, 10, 1.0f / math<float>::max( 1.0f, getFrameRate() ) );
 
 	}
