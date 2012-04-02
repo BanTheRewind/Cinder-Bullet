@@ -86,6 +86,9 @@ private:
 	ci::TriMesh					mConcave;
 	ci::TriMesh					mConvex;
 
+	bullet::CollisionObject		mBox;
+	btTransform					mBoxTransform;
+
 };
 
 // Imports
@@ -105,7 +108,7 @@ void BasicSampleApp::draw()
 
 	// Rotate
 	gl::pushMatrices();
-	gl::rotate( Vec3f( -45.0f, math<float>::sin( ( float )getElapsedSeconds() * 0.3333f ) * 20.0f, 0.0f ) );
+	gl::rotate( Vec3f( -45.0f, 0.0f, 0.0f ) );
 
 	for ( bullet::Iter object = bullet::begin(); object != bullet::end(); ++object ) {
 		gl::pushMatrices();
@@ -155,17 +158,8 @@ void BasicSampleApp::loadTerrain()
 	// Load heightfield image from resources
 	Surface32f heightField = ( Surface32f )Surface( loadImage( loadResource( RES_IMAGE_HEIGHTFIELD ) ) );
 
-	// Set random size and position
-	float size = Rand::randFloat( 5.0f, 20.0f );
-	Vec3f position = Vec3f( 
-		( float )( ( rand() % 400 ) - 200 ), 
-		( float )( ( rand() % 100 ) + 150 ), 
-		( float )( ( rand() % 400 ) - 200 )
-		 );
-
 	// Add terrain
-	CollisionObject terrain = bullet::createRigidTerrain( heightField, heightField.getWidth(), heightField.getHeight(), -200, 200, 1, Vec3f( 6.0f, 210.0f, 6.0f ) );
-	bullet::toBulletRigidBody( terrain )->setMassProps( 0, btVector3( 0.0f, 0.0f, 0.0f ) );
+	bullet::createRigidTerrain( heightField, heightField.getWidth(), heightField.getHeight(), -200, 200, 1, Vec3f( 6.0f, 210.0f, 6.0f ), 0.0f );
 
 }
 
@@ -173,35 +167,38 @@ void BasicSampleApp::loadTerrain()
 void BasicSampleApp::mouseDown( MouseEvent event )
 {
 
-	// Set random size and position
-	float size = Rand::randFloat( 5.0f, 20.0f );
-	Vec3f position = Vec3f( 
-		( float )( ( rand() % 400 ) - 200 ), 
-		( float )( ( rand() % 100 ) + 150 ), 
-		( float )( ( rand() % 400 ) - 200 )
-		 );
+	for ( uint32_t i = 0; i < 20; i++ ) {
 
-	bullet::createRigidSphere( size, 16, position );
-	return;
+		// Set random size and position
+		float size = Rand::randFloat( 1.0f, 12.0f );
+		Vec3f position = Vec3f( 
+			( float )( ( rand() % 400 ) - 200 ), 
+			( float )( ( rand() % 100 ) + 200 ), 
+			( float )( ( rand() % 400 ) - 200 )
+			 );
 
-	// Drop primitive into terrain
-	switch ( Rand::randInt( 0, 5 ) )
-	{
-	case 0:
-		bullet::createRigidSphere( size, 16, position );
-		break;
-	case 1:
-		bullet::createRigidBox( Vec3f::one() * size, position );
-		break;
-	case 2:
-		bullet::createRigidHull( mConvex, Vec3f::one() * size * 0.5f, position );
-		break;
-	case 3:
-		bullet::createRigidMesh( mConcave, Vec3f::one() * size * 0.12f, 0.0f, position );
-		break;
-	case 4:
-		bullet::createRigidCylinder( size * 0.5f, size, size * 2.0f, 12, position );
-		break;
+		bullet::createRigidBox( Vec3f::one() * size * 3.0f, 1.0f, position );
+
+		// Drop primitive into terrain
+		/*switch ( Rand::randInt( 0, 5 ) )
+		{
+		case 0:
+			bullet::createRigidSphere( size, 16, 1.0f, position );
+			break;
+		case 1:
+			bullet::createRigidBox( Vec3f::one() * size, 1.0f, position );
+			break;
+		case 2:
+			bullet::createRigidHull( mConvex, Vec3f::one() * size * 0.5f, 1.0f, position );
+			break;
+		case 3:
+			bullet::createRigidMesh( mConcave, Vec3f::one() * size * 0.12f, 0.0f, 1.0f, position );
+			break;
+		case 4:
+			bullet::createRigidCylinder( size * 0.5f, size, size * 2.0f, 12, 1.0f, position );
+			break;
+		}*/
+
 	}
 
 }
@@ -222,7 +219,7 @@ void BasicSampleApp::prepareSettings( Settings * settings )
 	// DO IT!
 	settings->setFrameRate( 60.0f );
 	settings->setFullScreen( false );
-	settings->setWindowSize( 640, 480 );
+	settings->setWindowSize( 700, 700 );
 
 }
 
@@ -263,8 +260,12 @@ void BasicSampleApp::setup()
 	mLight->enable();
 
 	// Load 3D objects
-	loadModels();
-	loadTerrain();
+	//loadModels();
+	//loadTerrain();
+
+	// Create ground
+	mBoxTransform.setIdentity();
+	mBox = bullet::createRigidBox( Vec3f( 400.0f, 50.0f, 400.0f ), 0.0f, Vec3f( 0.0f, -25.0f, 0.0f ) );
 
 	// Run first resize to initialize camera
 	resize( ResizeEvent( getWindowSize() ) );
@@ -289,11 +290,21 @@ void BasicSampleApp::update()
 	// Update light
 	mLight->update( mCamera );
 
+	// Set rotation
+	float rotation = math<float>::sin( ( float )getElapsedSeconds() * 0.3333f );
+	mBoxTransform.setRotation( btQuaternion( 0.25f, rotation, 0.0f, 0.0f ) );
+
+	// Apply rotation to ground
+	btRigidBody* body = bullet::toBulletRigidBody( mBox );
+	body->getMotionState()->setWorldTransform( mBoxTransform );
+	body->setWorldTransform( mBoxTransform );
+	
 	// Update dynamics world
 	bullet::update();
 
+	// Remove old objects
 	for ( bullet::Iter object = bullet::begin(); object != bullet::end(); ) {
-		if ( object->getAge() > 5.0 ) {
+		if ( object != bullet::begin() && object->getPosition().y < -800.0f ) {
 			object = bullet::erase( object );
 		} else {
 			++object;

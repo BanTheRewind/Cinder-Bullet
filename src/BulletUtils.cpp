@@ -66,10 +66,18 @@ namespace bullet
 		return matrix;
 	}
 
-	// Convert Cinder vector to Bullet vector
-	btVector3 Utilities::toBulletVector3( const Vec3f& v )
+	// Convert Bullet quaternion to Cinder quaternion
+	Quatf Utilities::fromBulletQuaternion( const btQuaternion& q )
 	{
-		return btVector3( v.x, v.y, v.z );
+		return ci::Quatf( q.getX(), q.getY(), q.getZ(), q.getW() );
+	}
+
+	Matrix44f Utilities::fromBulletTransform( const btTransform &m )
+	{
+		btTransform trans;
+		Matrix44f matrix;
+		m.getOpenGLMatrix( matrix.m );
+		return matrix;
 	}
 
 	// Convert Bullet vector to Cinder vector
@@ -84,25 +92,17 @@ namespace bullet
 		return btQuaternion( q.v.x, q.v.y, q.v.z, q.w );
 	}
 
-	// Convert Bullet quaternion to Cinder quaternion
-	Quatf Utilities::fromBulletQuaternion( const btQuaternion& q )
+	btTransform	Utilities::toBulletTransform( const ci::Matrix44f &m )
 	{
-		return ci::Quatf( q.getX(), q.getY(), q.getZ(), q.getW() );
+		btTransform trans;
+		trans.setFromOpenGLMatrix( m.m );
+		return trans;
 	}
 
-	// Calculate mass using shape's bounding sphere
-	float Utilities::getMass( const btCollisionShape* shape )
+	// Convert Cinder vector to Bullet vector
+	btVector3 Utilities::toBulletVector3( const Vec3f& v )
 	{
-
-		// Get sphere
-		btVector3 center;
-		btScalar radius;
-		shape->getBoundingSphere( center, radius );
-		float radiusf = (float)radius;
-
-		// Find spherical mass
-		return radiusf * radiusf * radiusf * (float)M_PI * 4.0f / 3.0f;
-
+		return btVector3( v.x, v.y, v.z );
 	}
 
 	// Create terrain from color channel

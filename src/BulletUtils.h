@@ -71,28 +71,22 @@ namespace bullet
 	class Utilities
 	{
 
-	private:
+	public:
 
-		// Get mass for a collision shape
-		static float						getMass( const btCollisionShape* shape );
+		static ci::Quatf					fromBulletQuaternion( const btQuaternion &q );
+		static ci::Matrix44f				fromBulletTransform( const btTransform &m );
+		static ci::Vec3f					fromBulletVector3( const btVector3 &v );
+		static btQuaternion					toBulletQuaternion( const ci::Quatf &q );
+		static btVector3					toBulletVector3( const ci::Vec3f &v );
+		static btTransform					toBulletTransform( const ci::Matrix44f &m );
+		
+	private:
 
 		// Convert Bullet matrix to Cinder matrix for rigid bodies
 		static ci::Matrix44f				getWorldTransform( const btRigidBody* body );
 
 		// Convert Bullet matrix to Cinder matrix for soft bodies
 		static ci::Matrix44f				getWorldTransform( const btSoftBody* body );
-
-		// Convert Cinder vector to Bullet vector
-		static btVector3					toBulletVector3( const ci::Vec3f &v );
-
-		// Convert Bullet vector to Cinder vector
-		static ci::Vec3f					fromBulletVector3( const btVector3 &v );
-
-		// Convert Cinder quaternion to Bullet quaternion
-		static btQuaternion					toBulletQuaternion( const ci::Quatf &q );
-
-		// Convert Bullet quaternion to Cinder quaternion
-		static ci::Quatf					fromBulletQuaternion( const btQuaternion &q );
 
 		// Create terrain from color channel
 		static btHeightfieldTerrainShape*	createHeightfieldTerrainShape( const ci::Surface32f &heightField, int32_t stickWidth, int32_t stickLength, 

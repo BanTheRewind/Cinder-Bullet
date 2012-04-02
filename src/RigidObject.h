@@ -48,7 +48,7 @@ namespace bullet
 	class RigidBox : public CollisionObjectBase 
 	{
 	private:
-		RigidBox( const ci::Vec3f &dimensions, const ci::Vec3f &position, const ci::Quatf &rotation );
+		RigidBox( const ci::Vec3f &dimensions, float mass, const ci::Vec3f &position, const ci::Quatf &rotation );
 		friend class	DynamicsWorld;
 	};
 
@@ -56,44 +56,43 @@ namespace bullet
 	{
 
 	private:
-		RigidCylinder( float topRadius, float bottomRadius, float height, int32_t segments, const ci::Vec3f &position, const ci::Quatf &rotation );
+		RigidCylinder( float topRadius, float bottomRadius, float height, int32_t segments, float mass, const ci::Vec3f &position, const ci::Quatf &rotation );
 		friend class	DynamicsWorld;
 	};
 
 	class RigidHull : public CollisionObjectBase 
 	{
 	private:
-		RigidHull( const ci::TriMesh &mesh, const ci::Vec3f &scale, 
-			const ci::Vec3f &position, const ci::Quatf &rotation );
+		RigidHull( const ci::TriMesh &mesh, const ci::Vec3f &scale, float mass, const ci::Vec3f &position, const ci::Quatf &rotation );
 		friend class	DynamicsWorld;
 	};
 
 	class RigidMesh : public CollisionObjectBase 
 	{
 	private:
-		RigidMesh( const ci::TriMesh &mesh, const ci::Vec3f &scale, float margin, const ci::Vec3f &position, const ci::Quatf &rotation );
+		RigidMesh( const ci::TriMesh &mesh, const ci::Vec3f &scale, float margin, float mass, const ci::Vec3f &position, const ci::Quatf &rotation );
 		friend class	DynamicsWorld;
 	};
 
 	class RigidSphere : public CollisionObjectBase 
 	{
 	private:
-		RigidSphere( float radius, int32_t segments, const ci::Vec3f &position, const ci::Quatf &rotation );
+		RigidSphere( float radius, int32_t segments, float mass, const ci::Vec3f &position, const ci::Quatf &rotation );
 		friend class	DynamicsWorld;
 	};
 
 	class RigidTerrain : public CollisionObjectBase 
 	{
 	private:
-		RigidTerrain( const ci::Surface32f &heightField, int32_t stickWidth, int32_t stickLength, float minHeight, 
-			float maxHeight, int32_t upAxis, const ci::Vec3f &scale, const ci::Vec3f &position, const ci::Quatf &rotation );
+		RigidTerrain( const ci::Surface32f &heightField, int32_t stickWidth, int32_t stickLength, float minHeight, float maxHeight, 
+			int32_t upAxis, const ci::Vec3f &scale, float mass, const ci::Vec3f &position, const ci::Quatf &rotation );
 		friend class	DynamicsWorld;
 	};
 
 	class RigidTorus : public CollisionObjectBase 
 	{
 	private:
-		RigidTorus( float innerRadius, float outerRadius, int32_t segments, const ci::Vec3f &position, const ci::Quatf &rotation );
+		RigidTorus( float innerRadius, float outerRadius, int32_t segments, float mass, const ci::Vec3f &position, const ci::Quatf &rotation );
 		friend class	DynamicsWorld;
 	};
 
@@ -101,13 +100,13 @@ namespace bullet
 	{
 	private:
 		static btRigidBody*	create( btCollisionShape* shape, float mass, const ci::Vec3f &position, const ci::Quatf &rotation );
-		static btRigidBody*	createBox( const ci::Vec3f &size, const ci::Vec3f &position, const ci::Quatf &rotation );
+		static btRigidBody*	createBox( const ci::Vec3f &size, float mass, const ci::Vec3f &position, const ci::Quatf &rotation );
 		static btRigidBody*	createCylinder( float topRadius, float bottomRadius, float height, int32_t segments, 
-			const ci::Vec3f &position, const ci::Quatf &rotation );
-		static btRigidBody*	createHull( btConvexHullShape* shape, const ci::Vec3f &position, const ci::Quatf &rotation );
-		static btRigidBody*	createMesh( btBvhTriangleMeshShape* shape, const ci::Vec3f &position, const ci::Quatf &rotation );
-		static btRigidBody*	createSphere( float radius, const ci::Vec3f &position, const ci::Quatf &rotation );
-		static btRigidBody*	createTerrain( btHeightfieldTerrainShape* shape, const ci::Vec3f &position, const ci::Quatf &rotation );
+			float mass, const ci::Vec3f &position, const ci::Quatf &rotation );
+		static btRigidBody*	createHull( btConvexHullShape* shape, float mass, const ci::Vec3f &position, const ci::Quatf &rotation );
+		static btRigidBody*	createMesh( btBvhTriangleMeshShape* shape, float mass, const ci::Vec3f &position, const ci::Quatf &rotation );
+		static btRigidBody*	createSphere( float radius, float mass, const ci::Vec3f &position, const ci::Quatf &rotation );
+		static btRigidBody*	createTerrain( btHeightfieldTerrainShape* shape, float mass, const ci::Vec3f &position, const ci::Quatf &rotation );
 		
 		friend class		RigidBox;
 		friend class		RigidCylinder;
