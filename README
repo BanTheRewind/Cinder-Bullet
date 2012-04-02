@@ -46,9 +46,10 @@ TO DO LIST
 - Add "vehicle" pointer to collision object
 - Add bullet::toBulletVehicle();
 - Add CollisionObject::isVehicle();
-- Investigate if separate object is needed for bullets.
+- Investigate if separate object is needed for bullets
+- VboMesh manager (weak_ptr based)
 - Static lib
-- XCode static lib + samples 
+- XCode static lib + samples
 
 More about Bullet here:
 http://bulletphysics.org/wordpress/
