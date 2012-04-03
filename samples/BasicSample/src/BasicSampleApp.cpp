@@ -83,8 +83,9 @@ private:
 	ci::TriMesh					mConcave;
 	ci::TriMesh					mConvex;
 
-	bullet::CollisionObject		mBox;
+	bullet::CollisionObjectRef	mBox;
 	btTransform					mBoxTransform;
+	bullet::DynamicsWorldRef	mWorld;
 
 };
 
@@ -107,7 +108,7 @@ void BasicSampleApp::draw()
 	gl::pushMatrices();
 	gl::rotate( Vec3f( -45.0f, 0.0f, 0.0f ) );
 
-	for ( bullet::Iter object = bullet::begin(); object != bullet::end(); ++object ) {
+	for ( bullet::Iter object = mWorld->begin(); object != mWorld->end(); ++object ) {
 		gl::pushMatrices();
 		glMultMatrixf( object->getTransformMatrix() );
 		gl::draw( object->getVboMesh() );
@@ -156,7 +157,7 @@ void BasicSampleApp::loadTerrain()
 	Surface32f heightField = ( Surface32f )Surface( loadImage( loadResource( RES_IMAGE_HEIGHTFIELD ) ) );
 
 	// Add terrain
-	bullet::createRigidTerrain( heightField, heightField.getWidth(), heightField.getHeight(), -200, 200, 1, Vec3f( 6.0f, 210.0f, 6.0f ), 0.0f );
+	bullet::createRigidTerrain( mWorld, heightField, heightField.getWidth(), heightField.getHeight(), -200, 200, 1, Vec3f( 6.0f, 210.0f, 6.0f ), 0.0f );
 
 }
 
@@ -174,7 +175,7 @@ void BasicSampleApp::mouseDown( MouseEvent event )
 			( float )( ( rand() % 400 ) - 200 )
 			 );
 
-		CollisionObject box = bullet::createRigidBox( Vec3f::one() * size * 3.0f, size * 0.5f, position );
+		CollisionObjectRef box = bullet::createRigidBox( mWorld, Vec3f::one() * size * 3.0f, size * 0.5f, position );
 		btRigidBody* body = bullet::toBulletRigidBody( box );
 		body->setFriction( 100.0f );
 
@@ -259,12 +260,14 @@ void BasicSampleApp::setup()
 	loadModels();
 	//loadTerrain();
 
+	mWorld = bullet::createWorld();
+
 	// Create ground
 	mBoxTransform.setIdentity();
 	//mBox = /*bullet::createRigidBox( Vec3f( 400.0f, 50.0f, 400.0f ), 0.0f, Vec3f( 0.0f, -25.0f, 0.0f ) );*/
 
 	//mBox = bullet::createRigidHull( mConvex, Vec3f::one(), 0.0f, Vec3f::zero() );
-	mBox = bullet::createRigidSphere( 200.0f, 64, 0.0f, Vec3f( 0.0f, -100.0f, 0.0f ) );
+	mBox = bullet::createRigidSphere( mWorld, 200.0f, 64, 0.0f, Vec3f( 0.0f, -100.0f, 0.0f ) );
 
 	// Run first resize to initialize camera
 	resize( ResizeEvent( getWindowSize() ) );
@@ -300,12 +303,12 @@ void BasicSampleApp::update()
 	body->setWorldTransform( mBoxTransform );
 	
 	// Update dynamics world
-	bullet::update();
+	mWorld->update();
 
 	// Remove old objects
-	for ( bullet::Iter object = bullet::begin(); object != bullet::end(); ) {
-		if ( object != bullet::begin() && object->getPosition().y < -800.0f ) {
-			object = bullet::erase( object );
+	for ( bullet::Iter object = mWorld->begin(); object != mWorld->end(); ) {
+		if ( object != mWorld->begin() && object->getPosition().y < -800.0f ) {
+			object = mWorld->erase( object );
 		} else {
 			++object;
 		}

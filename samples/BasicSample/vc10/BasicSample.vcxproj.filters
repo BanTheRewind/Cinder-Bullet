@@ -23,9 +23,6 @@
     <ClInclude Include="..\include\Resources.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\BulletUtils.h">
-      <Filter>blocks\bullet</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\CinderBullet.h">
       <Filter>blocks\bullet</Filter>
     </ClInclude>
@@ -35,13 +32,13 @@
     <ClInclude Include="..\..\..\src\DynamicsWorld.h">
       <Filter>blocks\bullet</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\RigidObject.h">
+    <ClInclude Include="..\..\..\src\Utilities.h">
       <Filter>blocks\bullet</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\SoftObject.h">
+    <ClInclude Include="..\..\..\src\RigidBody.h">
       <Filter>blocks\bullet</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\TetraCube.h">
+    <ClInclude Include="..\..\..\src\SoftBody.h">
       <Filter>blocks\bullet</Filter>
     </ClInclude>
   </ItemGroup>
@@ -49,19 +46,19 @@
     <ClCompile Include="..\src\BasicSampleApp.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\BulletUtils.cpp">
-      <Filter>blocks\bullet</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\DynamicsWorld.cpp">
       <Filter>blocks\bullet</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\RigidObject.cpp">
-      <Filter>blocks\bullet</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\SoftObject.cpp">
-      <Filter>blocks\bullet</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\CollisionObject.cpp">
+      <Filter>blocks\bullet</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Utilities.cpp">
+      <Filter>blocks\bullet</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\RigidBody.cpp">
+      <Filter>blocks\bullet</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\SoftBody.cpp">
       <Filter>blocks\bullet</Filter>
     </ClCompile>
   </ItemGroup>

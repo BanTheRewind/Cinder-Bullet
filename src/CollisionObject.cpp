@@ -43,21 +43,13 @@ namespace bullet
 	using namespace ci;
 	using namespace std;
 
-	CollisionObjectBase::CollisionObjectBase( const Vec3f &position, const Quatf &rotation ) 
+	CollisionObject::CollisionObject( const Vec3f &position, const Quatf &rotation ) 
 	{
-
-		// Initialize VBO layout
-		mVboLayout.setStaticIndices();
-		mVboLayout.setStaticNormals();
-		mVboLayout.setStaticPositions();
-
-		// Initialize pointers
 		mRigidBody = 0;
 		mSoftBody = 0;
-
 	}
 
-	CollisionObjectBase::~CollisionObjectBase() 
+	CollisionObject::~CollisionObject() 
 	{
 		if (mSoftBody != 0 ) {
 			delete mSoftBody;
@@ -69,15 +61,8 @@ namespace bullet
 			delete mRigidBody;
 		}
 	}
-
-	void CollisionObjectBase::clearVboData()
-	{
-		mVboIndices.clear();
-		mVboNormals.clear();
-		mVboPositions.clear();
-	}
 	
-	btCollisionObject* CollisionObjectBase::getBulletBody() 
+	btCollisionObject* CollisionObject::getBulletBody() 
 	{ 
 		if ( mSoftBody != 0 ) {
 			return (btCollisionObject*)mSoftBody;
@@ -86,7 +71,7 @@ namespace bullet
 		}
 		return 0;
 	}
-	btCollisionObject* CollisionObjectBase::getBulletBody() const
+	btCollisionObject* CollisionObject::getBulletBody() const
 	{ 
 		if ( mSoftBody != 0 ) {
 			return (btCollisionObject*)mSoftBody;
@@ -96,28 +81,28 @@ namespace bullet
 		return 0;
 	}
 
-	ci::Vec3f CollisionObjectBase::getPosition() 
+	ci::Vec3f CollisionObject::getPosition() 
 	{ 
 		Vec3f position;
 		if ( mSoftBody != 0 ) {
-			position = Utilities::fromBulletVector3( mSoftBody->m_bounds[ 0 ].lerp( mSoftBody->m_bounds[ 1 ], 0.5f ) );
+			position = fromBulletVector3( mSoftBody->m_bounds[ 0 ].lerp( mSoftBody->m_bounds[ 1 ], 0.5f ) );
 		} else if ( mRigidBody != 0 ) {
-			position = Utilities::fromBulletVector3( mRigidBody->getCenterOfMassPosition() );
+			position = fromBulletVector3( mRigidBody->getCenterOfMassPosition() );
 		}
 		return position;
 	}
-	ci::Vec3f CollisionObjectBase::getPosition() const 
+	ci::Vec3f CollisionObject::getPosition() const 
 	{ 
 		Vec3f position;
 		if ( mSoftBody != 0 ) {
-			position = Utilities::fromBulletVector3( mSoftBody->m_bounds[ 0 ].lerp( mSoftBody->m_bounds[ 1 ], 0.5f ) );
+			position = fromBulletVector3( mSoftBody->m_bounds[ 0 ].lerp( mSoftBody->m_bounds[ 1 ], 0.5f ) );
 		} else if ( mRigidBody != 0 ) {
-			position = Utilities::fromBulletVector3( mRigidBody->getCenterOfMassPosition() );
+			position = fromBulletVector3( mRigidBody->getCenterOfMassPosition() );
 		}
 		return position;
 	}
 
-	ci::Matrix44f CollisionObjectBase::getTransformMatrix() 
+	ci::Matrix44f CollisionObject::getTransformMatrix() 
 	{ 
 		Matrix44f worldTransform;
 		if ( mSoftBody != 0 ) {
@@ -127,7 +112,7 @@ namespace bullet
 		}
 		return worldTransform;
 	}
-	ci::Matrix44f CollisionObjectBase::getTransformMatrix() const 
+	ci::Matrix44f CollisionObject::getTransformMatrix() const 
 	{ 
 		Matrix44f worldTransform;
 		if ( mSoftBody != 0 ) {
@@ -138,38 +123,64 @@ namespace bullet
 		return worldTransform;
 	}
 
-	ci::gl::VboMesh& CollisionObjectBase::getVboMesh() 
+	ci::gl::VboMesh& CollisionObject::getVboMesh() 
 	{ 
 		return mVboMesh; 
 	}
-	const ci::gl::VboMesh& CollisionObjectBase::getVboMesh() const 
+	const ci::gl::VboMesh& CollisionObject::getVboMesh() const 
 	{ 
 		return mVboMesh; 
 	}
 
-	bool CollisionObjectBase::isRigidBody()
+	bool CollisionObject::isRigidBody()
 	{
 		return mRigidBody != 0;
 	}
-	bool CollisionObjectBase::isRigidBody() const
+	bool CollisionObject::isRigidBody() const
 	{
 		return mRigidBody != 0;
 	}
-	bool CollisionObjectBase::isSoftBody()
+	bool CollisionObject::isSoftBody()
 	{
 		return mSoftBody != 0;
 	}
-	bool CollisionObjectBase::isSoftBody() const
+	bool CollisionObject::isSoftBody() const
 	{
 		return mSoftBody != 0;
 	}
 
-	void CollisionObjectBase::setVboData( GLenum primitiveType )
+	void CollisionObject::setVboData( const vector<uint32_t> &indices, const vector<Vec3f> &positions, 
+		const vector<Vec3f> &normals, const vector<Vec2f> &texCoords, GLenum primitiveType )
 	{
-		mVboMesh = gl::VboMesh( mVboPositions.size(), mVboIndices.size(), mVboLayout, primitiveType );
-		mVboMesh.bufferIndices( mVboIndices );
-		mVboMesh.bufferNormals( mVboNormals );
-		mVboMesh.bufferPositions( mVboPositions );
+
+		ci::gl::VboMesh::Layout layout;
+		if ( indices.size() > 0 ) {
+			layout.setStaticIndices();
+		}
+		if ( normals.size() > 0 ) {
+			layout.setStaticNormals();
+		}
+		if ( positions.size() > 0 ) {
+			layout.setStaticPositions();
+		}
+		if ( texCoords.size() > 0 ) {
+			layout.setStaticTexCoords2d();
+		}
+
+		mVboMesh = gl::VboMesh( positions.size(), indices.size(), layout, primitiveType );
+		if ( indices.size() > 0 ) {
+			mVboMesh.bufferIndices( indices );
+		}
+		if ( normals.size() > 0 ) {
+			mVboMesh.bufferNormals( normals );
+		}
+		if ( positions.size() > 0 ) {
+			mVboMesh.bufferPositions( positions );
+		}
+		if ( texCoords.size() > 0 ) {
+			mVboMesh.bufferTexCoords2d( 0, texCoords );
+		}
+
 	}
 
 }

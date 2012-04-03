@@ -107,21 +107,20 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\src\BulletUtils.cpp" />
+    <ClCompile Include="..\..\..\src\Utilities.cpp" />
     <ClCompile Include="..\..\..\src\CollisionObject.cpp" />
     <ClCompile Include="..\..\..\src\DynamicsWorld.cpp" />
-    <ClCompile Include="..\..\..\src\RigidObject.cpp" />
-    <ClCompile Include="..\..\..\src\SoftObject.cpp" />
+    <ClCompile Include="..\..\..\src\RigidBody.cpp" />
+    <ClCompile Include="..\..\..\src\SoftBody.cpp" />
     <ClCompile Include="..\src\BasicSampleApp.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\src\BulletUtils.h" />
+    <ClInclude Include="..\..\..\src\Utilities.h" />
     <ClInclude Include="..\..\..\src\CinderBullet.h" />
     <ClInclude Include="..\..\..\src\CollisionObject.h" />
     <ClInclude Include="..\..\..\src\DynamicsWorld.h" />
-    <ClInclude Include="..\..\..\src\RigidObject.h" />
-    <ClInclude Include="..\..\..\src\SoftObject.h" />
-    <ClInclude Include="..\..\..\src\TetraCube.h" />
+    <ClInclude Include="..\..\..\src\RigidBody.h" />
+    <ClInclude Include="..\..\..\src\SoftBody.h" />
     <ClInclude Include="..\include\Resources.h" />
   </ItemGroup>
   <ItemGroup>

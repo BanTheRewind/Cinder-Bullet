@@ -38,9 +38,8 @@
 #pragma once
 
 // Include block
-#include "BulletUtils.h"
+#include "Utilities.h"
 #include "CollisionObject.h"
-#include "RigidObject.h"
-#include "SoftObject.h"
-#include "TetraCube.h"
+#include "RigidBody.h"
+#include "SoftBody.h"
 #include "DynamicsWorld.h"

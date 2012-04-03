@@ -1,8 +1,8 @@
 // Include header
 #include "DynamicsWorld.h"
 
-#include "RigidObject.h"
-#include "SoftObject.h"
+#include "RigidBody.h"
+#include "SoftBody.h"
 
 namespace bullet {
 
@@ -13,13 +13,9 @@ namespace bullet {
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////
 
-	DynamicsWorldRef DynamicsWorld::getInstance()
+	DynamicsWorldRef DynamicsWorld::create()
 	{
-		static DynamicsWorldRef world;
-		if ( !world ) {
-			world = DynamicsWorldRef( new DynamicsWorld() );
-		}
-		return world;
+		return DynamicsWorldRef( new DynamicsWorld() );
 	}
 
 	// Constructor
@@ -95,7 +91,7 @@ namespace bullet {
 		return mObjects.erase( pos );
 	}
 
-	void DynamicsWorld::pushBack( CollisionObjectBase *object )
+	void DynamicsWorld::pushBack( CollisionObject *object )
 	{
 		mObjects.push_back( object );
 		if ( object->isRigidBody() ) {
@@ -103,44 +99,6 @@ namespace bullet {
 		} else if ( object->isSoftBody() ) {
 			( (btSoftRigidDynamicsWorld*)mWorld )->addSoftBody( toBulletSoftBody( object ) );
 		}
-	}
-
-	/////////////////////////////////////////////////////////////////////////////////////////////////
-
-	CollisionObject DynamicsWorld::createRigidBox( const ci::Vec3f &dimensions, float mass, const ci::Vec3f &position, 
-		const ci::Quatf &rotation )
-	{
-		pushBack( new RigidBox( dimensions, mass, position, rotation ) );
-		return &mObjects[ mObjects.size() - 1 ];
-	}
-	CollisionObject DynamicsWorld::createRigidCylinder( float topRadius, float bottomRadius, float height, int32_t segments, 
-		float mass, const ci::Vec3f &position, const ci::Quatf &rotation )
-	{
-		pushBack( new RigidCylinder( topRadius, bottomRadius, height, segments, mass, position, rotation ) );
-		return &mObjects[ mObjects.size() - 1 ];
-	}
-	CollisionObject DynamicsWorld::createRigidHull( const ci::TriMesh &mesh, const ci::Vec3f &scale, float mass, const ci::Vec3f &position, 
-		const ci::Quatf &rotation )
-	{
-		pushBack( new RigidHull( mesh, scale, mass, position, rotation ) );
-		return &mObjects[ mObjects.size() - 1 ];
-	}
-	CollisionObject DynamicsWorld::createRigidMesh( const ci::TriMesh &mesh, const ci::Vec3f &scale, float margin, 
-		float mass, const ci::Vec3f &position, const ci::Quatf &rotation )
-	{
-		pushBack( new RigidMesh( mesh, scale, margin, mass, position, rotation ) );
-		return &mObjects[ mObjects.size() - 1 ];
-	}
-	CollisionObject DynamicsWorld::createRigidSphere( float radius, int32_t segments, float mass, const ci::Vec3f &position, const ci::Quatf &rotation )
-	{
-		pushBack( new RigidSphere( radius, segments, mass, position, rotation ) );
-		return &mObjects[ mObjects.size() - 1 ];
-	}
-	CollisionObject DynamicsWorld::createRigidTerrain( const ci::Surface32f &heightField, int32_t stickWidth, int32_t stickLength, float minHeight, 
-		float maxHeight, int32_t upAxis, const ci::Vec3f &scale, float mass, const ci::Vec3f &position, const ci::Quatf &rotation )
-	{
-		pushBack( new RigidTerrain( heightField, stickWidth, stickLength, minHeight, maxHeight, upAxis, scale, mass, position, rotation ) );
-		return &mObjects[ mObjects.size() - 1 ];
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////
@@ -224,7 +182,7 @@ namespace bullet {
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////
 
-	btRigidBody* DynamicsWorld::toBulletRigidBody( CollisionObjectBase *object )
+	btRigidBody* DynamicsWorld::toBulletRigidBody( CollisionObject *object )
 	{
 		return (btRigidBody*)( object->getBulletBody() );
 	}
@@ -232,7 +190,7 @@ namespace bullet {
 	{
 		return (btRigidBody*)( pos->getBulletBody() );
 	}
-	btSoftBody* DynamicsWorld::toBulletSoftBody( CollisionObjectBase *object )
+	btSoftBody* DynamicsWorld::toBulletSoftBody( CollisionObject *object )
 	{
 		return (btSoftBody*)( object->getBulletBody() );
 	}
@@ -243,97 +201,54 @@ namespace bullet {
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////
 
-	Iter begin() 
+	DynamicsWorldRef createWorld()
 	{
-		return DynamicsWorld::getInstance()->begin();
-	}
-	Iter end()
-	{
-		return DynamicsWorld::getInstance()->end();
-	}
-	Iter erase( Iter pos )
-	{
-		return DynamicsWorld::getInstance()->erase( pos );
+		return DynamicsWorld::create();
 	}
 
-	CollisionObject createRigidBox( const ci::Vec3f &dimensions, float mass, const ci::Vec3f &position, const ci::Quatf &rotation )
+	CollisionObjectRef createRigidBox( const DynamicsWorldRef &world, const ci::Vec3f &dimensions, float mass, const ci::Vec3f &position, const ci::Quatf &rotation )
 	{
-		return DynamicsWorld::getInstance()->createRigidBox( dimensions, mass, position, rotation );
+		world->pushBack( new RigidBox( dimensions, mass, position, rotation ) );
+		return &world->mObjects[ world->mObjects.size() - 1 ];
 	}
-	CollisionObject createRigidCylinder( float topRadius, float bottomRadius, float height, int32_t segments, float mass, 
+	CollisionObjectRef createRigidCylinder( const DynamicsWorldRef &world, float topRadius, float bottomRadius, float height, int32_t segments, float mass, 
 		const ci::Vec3f &position, const ci::Quatf &rotation )
 	{
-		return DynamicsWorld::getInstance()->createRigidCylinder( topRadius, bottomRadius, height, segments, mass, position, rotation );
+		world->pushBack( new RigidCylinder( topRadius, bottomRadius, height, segments, mass, position, rotation ) );
+		return &world->mObjects[ world->mObjects.size() - 1 ];
 	}
-	CollisionObject createRigidHull( const ci::TriMesh &mesh, const ci::Vec3f &scale, float mass, const ci::Vec3f &position, const ci::Quatf &rotation )
+	CollisionObjectRef createRigidHull( const DynamicsWorldRef &world, const ci::TriMesh &mesh, const ci::Vec3f &scale, float mass, const ci::Vec3f &position, const ci::Quatf &rotation )
 	{
-		return DynamicsWorld::getInstance()->createRigidHull( mesh, scale, mass, position, rotation );
+		world->pushBack( new RigidHull( mesh, scale, mass, position, rotation ) );
+		return &world->mObjects[ world->mObjects.size() - 1 ];
 	}
-	CollisionObject createRigidMesh( const ci::TriMesh &mesh, const ci::Vec3f &scale, float margin, float mass, 
+	CollisionObjectRef createRigidMesh( const DynamicsWorldRef &world, const ci::TriMesh &mesh, const ci::Vec3f &scale, float margin, float mass, 
 		const ci::Vec3f &position, const ci::Quatf &rotation )
 	{
-		return DynamicsWorld::getInstance()->createRigidMesh( mesh, scale, margin, mass, position, rotation );
+		world->pushBack( new RigidMesh( mesh, scale, margin, mass, position, rotation ) );
+		return &world->mObjects[ world->mObjects.size() - 1 ];
 	}
-	CollisionObject createRigidSphere( float radius, int32_t segments, float mass, const ci::Vec3f &position, const ci::Quatf &rotation )
+	CollisionObjectRef createRigidSphere( const DynamicsWorldRef &world, float radius, int32_t segments, float mass, const ci::Vec3f &position, const ci::Quatf &rotation )
 	{
-		return DynamicsWorld::getInstance()->createRigidSphere( radius, segments, mass, position, rotation );
+		world->pushBack( new RigidSphere( radius, segments, mass, position, rotation ) );
+		return &world->mObjects[ world->mObjects.size() - 1 ];
 	}
-	CollisionObject createRigidTerrain( const ci::Surface32f &heightField, int32_t stickWidth, int32_t stickLength, float minHeight, 
+	CollisionObjectRef createRigidTerrain( const DynamicsWorldRef &world, const ci::Surface32f &heightField, int32_t stickWidth, int32_t stickLength, float minHeight, 
 		float maxHeight, int32_t upAxis, const ci::Vec3f &scale, float mass, const ci::Vec3f &position, const ci::Quatf &rotation )
 	{
-		return DynamicsWorld::getInstance()->createRigidTerrain( heightField, stickWidth, stickLength, minHeight, maxHeight, upAxis, scale, mass, position, rotation );
+		world->pushBack( new RigidTerrain( heightField, stickWidth, stickLength, minHeight, maxHeight, upAxis, scale, mass, position, rotation ) );
+		return &world->mObjects[ world->mObjects.size() - 1 ];
 	}
 
-	btBroadphaseInterface* getBroadphase()
-	{
-		return DynamicsWorld::getInstance()->getBroadphase();
-	}
-	btDefaultCollisionConfiguration* getCollisionConfiguration()
-	{
-		return DynamicsWorld::getInstance()->getCollisionConfiguration();
-	}
-	btCollisionDispatcher* getDispatcher()
-	{
-		return DynamicsWorld::getInstance()->getDispatcher();
-	}
-	btSoftBodyWorldInfo& getInfo()
-	{
-		return DynamicsWorld::getInstance()->getInfo();
-	}
-	uint32_t getNumObjects()
-	{
-		return DynamicsWorld::getInstance()->getNumObjects();
-	}
-	CollisionObjectList& getObjects()
-	{
-		return DynamicsWorld::getInstance()->getObjects();
-	}
-	btConstraintSolver* getSolver()
-	{
-		return DynamicsWorld::getInstance()->getSolver();
-	}
-	btDiscreteDynamicsWorld* getWorld()
-	{
-		return DynamicsWorld::getInstance()->getWorld();
-	}
+	/////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void setInfo( const btSoftBodyWorldInfo &info )
-	{
-		DynamicsWorld::getInstance()->setInfo( info );
-	}
-
-	btRigidBody* toBulletRigidBody( const CollisionObject &object )
+	btRigidBody* toBulletRigidBody( const CollisionObjectRef &object )
 	{
 		return (btRigidBody*)( object->getBulletBody() );
 	}
-	btSoftBody* toBulletSoftBody( const CollisionObject &object )
+	btSoftBody* toBulletSoftBody( const CollisionObjectRef &object )
 	{
 		return (btSoftBody*)( object->getBulletBody() );
-	}
-
-	void update() 
-	{
-		DynamicsWorld::getInstance()->update();
 	}
 
 }

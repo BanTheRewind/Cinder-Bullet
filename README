@@ -11,29 +11,6 @@ you just use Bullet directly.
 
 TO DO LIST
 
-- Change names:
-  - "CollisionObjectBase" to "CollisionObjectRef"
-  - "CollisionObject" to "CollisionObjectRef"
-  - "SoftObject" to "SoftBody"
-  - "RigidObject" to "RigidBody"
-  - "BulletUtils.h" to "Utils.h"
-- Move public utility methods into Bullet namespace 
-  (Utilities class should be internal only)
-- Use shared_ptr<T> create(...) instead of Singleton model
-- Pass world into create methods. This...
-
-  CollisionObjectRef bullet::create*( ... ) {
-    return DynamicsWorld::getInstance->create*( ... );
-  }
-
-  ...should be...
-
-  CollisionObjectRef bullet::create*( const DynamicsWorldRef &world, ... ) {
-    return world->create*( ... );
-  }
-
-- Remove member vectors from CollisionObject. Pass vectors into setVboData method instead
-- Remove clearVboData method from CollisionObject (not needed with above change)
 - Add Iter methods which take *Ref...
   Iter bullet::erase( const CollisionObjectRef &object ) { ... }
   Iter bullet::find( const CollisionObjectRef &object ) { ... }
@@ -44,10 +21,6 @@ TO DO LIST
 - Implement btConeShape
 - Implement btStaticPlaneShape
 - Soft body convenience methods
-- Vehicle convenience method
-- Add "vehicle" pointer to collision object
-- Add bullet::toBulletVehicle();
-- Add CollisionObject::isVehicle();
 - Investigate if separate object is needed for bullets
 - VboMesh manager (weak_ptr based)
 - Static lib

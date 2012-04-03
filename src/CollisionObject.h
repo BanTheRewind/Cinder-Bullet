@@ -38,28 +38,28 @@
 #pragma once
 
 // Includes
-#include "BulletUtils.h"
+#include "Utilities.h"
 
 namespace bullet
 {
 
 	class DynamicsWorld;
-	class RigidObject;
-	class SoftObject;
+	class RigidBody;
+	class SoftBody;
 	
-	class CollisionObjectBase
+	class CollisionObject
 	{
 
 	public:
 
-		~CollisionObjectBase();
+		~CollisionObject();
 
 		btCollisionObject*				getBulletBody();
 		btCollisionObject*				getBulletBody() const;
 		ci::Vec3f						getPosition();
-		ci::Vec3f					getPosition() const;
+		ci::Vec3f						getPosition() const;
 		ci::Matrix44f					getTransformMatrix();
-		ci::Matrix44f				getTransformMatrix() const;
+		ci::Matrix44f					getTransformMatrix() const;
 		ci::gl::VboMesh&				getVboMesh();
 		const ci::gl::VboMesh&			getVboMesh() const;
 
@@ -70,18 +70,15 @@ namespace bullet
 
 	protected:
 
-		CollisionObjectBase( const ci::Vec3f &position = ci::Vec3f::zero(), const ci::Quatf &rotation = ci::Quatf() );
+		CollisionObject( const ci::Vec3f &position = ci::Vec3f::zero(), const ci::Quatf &rotation = ci::Quatf() );
 
 		btRigidBody						*mRigidBody;
 		btSoftBody						*mSoftBody;
 
-		void							clearVboData();
-		void							setVboData( GLenum primitiveType = GL_TRIANGLES );
-		std::vector<uint32_t>			mVboIndices;
-		ci::gl::VboMesh::Layout			mVboLayout;
+		void							setVboData( const std::vector<uint32_t> &indices, const std::vector<ci::Vec3f> &positions, 
+													const std::vector<ci::Vec3f> &normals, const std::vector<ci::Vec2f> &texCoords, 
+													GLenum primitiveType = GL_TRIANGLES );
 		ci::gl::VboMesh					mVboMesh;
-		std::vector<ci::Vec3f>			mVboNormals;
-		std::vector<ci::Vec3f>			mVboPositions;
 
 		friend class					DynamicsWorld;
 

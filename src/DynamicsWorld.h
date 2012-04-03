@@ -49,8 +49,8 @@
 
 namespace bullet {
 
-	typedef boost::ptr_vector<CollisionObjectBase>			CollisionObjectList;
-	typedef CollisionObjectList::pointer					CollisionObject;
+	typedef boost::ptr_vector<CollisionObject>				CollisionObjectList;
+	typedef CollisionObjectList::pointer					CollisionObjectRef;
 	typedef CollisionObjectList::iterator					Iter;
 
 	typedef std::shared_ptr<class DynamicsWorld>			DynamicsWorldRef;
@@ -63,85 +63,54 @@ namespace bullet {
 
 		~DynamicsWorld();
 
+		Iter												begin();
+		Iter												end();
+		Iter												erase( Iter pos );
+
+		btBroadphaseInterface*								getBroadphase();
+		btDefaultCollisionConfiguration*					getCollisionConfiguration();
+		btCollisionDispatcher*								getDispatcher();
+		btSoftBodyWorldInfo&								getInfo();
+		CollisionObjectList&								getObjects();
+		uint32_t											getNumObjects();
+		btConstraintSolver*									getSolver();
+		btDiscreteDynamicsWorld*							getWorld();
+
+		void												setInfo( const btSoftBodyWorldInfo &info );
+
+		void												update();
+
 	private:
 
-		friend DynamicsWorldRef								getInstance();
-		static DynamicsWorldRef								getInstance();
+		friend DynamicsWorldRef								createWorld();
+		static DynamicsWorldRef								create();
 
 		DynamicsWorld();
 		DynamicsWorld( DynamicsWorld const& );
 		const DynamicsWorld&								operator=( DynamicsWorld const& );
 
-		friend Iter											begin();
-		Iter												begin();
-		friend Iter											end();
-		Iter												end();
-		friend Iter											erase( Iter pos );
-		Iter												erase( Iter pos );
-
-		friend CollisionObject								createRigidBox( const ci::Vec3f &dimensions, float mass, const ci::Vec3f &position, 
-																			const ci::Quatf &rotation );
-		CollisionObject										createRigidBox( const ci::Vec3f &dimensions,float mass,  const ci::Vec3f &position, 
-																			const ci::Quatf &rotation );
-		friend CollisionObject								createRigidCylinder( float topRadius, float bottomRadius, float height, int32_t segments, 
-																				float mass, const ci::Vec3f &position, const ci::Quatf &rotation );
-		CollisionObject										createRigidCylinder( float topRadius, float bottomRadius, float height, int32_t segments, 
-																				float mass, const ci::Vec3f &position, const ci::Quatf &rotation );
-		friend CollisionObject								createRigidHull( const ci::TriMesh &mesh, const ci::Vec3f &scale, float mass, 
+		friend CollisionObjectRef							createRigidBox( const DynamicsWorldRef &world, const ci::Vec3f &dimensions, float mass, 
 																			const ci::Vec3f &position, const ci::Quatf &rotation );
-		CollisionObject										createRigidHull( const ci::TriMesh &mesh, const ci::Vec3f &scale, float mass, 
-																			const ci::Vec3f &position, const ci::Quatf &rotation );
-		friend CollisionObject								createRigidMesh( const ci::TriMesh &mesh, const ci::Vec3f &scale, float margin, 
-																			float mass, const ci::Vec3f &position, const ci::Quatf &rotation );
-		CollisionObject										createRigidMesh( const ci::TriMesh &mesh, const ci::Vec3f &scale, float margin, 
-																			float mass, const ci::Vec3f &position, const ci::Quatf &rotation );
-		friend CollisionObject								createRigidSphere( float radius, int32_t segments, float mass, const ci::Vec3f &position, 
+		friend CollisionObjectRef							createRigidCylinder( const DynamicsWorldRef &world, float topRadius, float bottomRadius, 
+																				float height, int32_t segments, float mass, const ci::Vec3f &position, 
 																				const ci::Quatf &rotation );
-		CollisionObject										createRigidSphere( float radius, int32_t segments, float mass, const ci::Vec3f &position, 
+		friend CollisionObjectRef							createRigidHull( const DynamicsWorldRef &world, const ci::TriMesh &mesh, const ci::Vec3f &scale, 
+																			float mass, const ci::Vec3f &position, const ci::Quatf &rotation );
+		friend CollisionObjectRef							createRigidMesh( const DynamicsWorldRef &world, const ci::TriMesh &mesh, const ci::Vec3f &scale, 
+																			float margin, float mass, const ci::Vec3f &position, const ci::Quatf &rotation );
+		friend CollisionObjectRef							createRigidSphere( const DynamicsWorldRef &world, float radius, int32_t segments, float mass, 
+																				const ci::Vec3f &position, const ci::Quatf &rotation );
+		friend CollisionObjectRef							createRigidTerrain( const DynamicsWorldRef &world, const ci::Surface32f &heightField, 
+																				int32_t stickWidth, int32_t stickLength, float minHeight, float maxHeight, 
+																				int32_t upAxis, const ci::Vec3f &scale, float mass, const ci::Vec3f &position, 
 																				const ci::Quatf &rotation );
-		friend CollisionObject								createRigidTerrain( const ci::Surface32f &heightField, int32_t stickWidth, int32_t stickLength, 
-																				float minHeight, float maxHeight, int32_t upAxis, const ci::Vec3f &scale, 
-																				float mass, const ci::Vec3f &position, const ci::Quatf &rotation );
-		CollisionObject										createRigidTerrain( const ci::Surface32f &heightField, int32_t stickWidth, int32_t stickLength, 
-																				float minHeight, float maxHeight, int32_t upAxis, const ci::Vec3f &scale, 
-																				float mass, const ci::Vec3f &position, const ci::Quatf &rotation );
 
-		friend btBroadphaseInterface*						getBroadphase();
-		btBroadphaseInterface*								getBroadphase();
-			
-		friend btDefaultCollisionConfiguration*				getCollisionConfiguration();
-		btDefaultCollisionConfiguration*					getCollisionConfiguration();
-			
-		friend btCollisionDispatcher*						getDispatcher();
-		btCollisionDispatcher*								getDispatcher();
-			
-		friend btSoftBodyWorldInfo&							getInfo();
-		btSoftBodyWorldInfo&								getInfo();
-
-		friend CollisionObjectList&							getObjects();
-		CollisionObjectList&								getObjects();
-			
-		friend uint32_t										getNumObjects();
-		uint32_t											getNumObjects();
-
-		friend btConstraintSolver*							getSolver();
-		btConstraintSolver*									getSolver();
-
-		friend btDiscreteDynamicsWorld*						getWorld();
-		btDiscreteDynamicsWorld*							getWorld();
-		
-		void												pushBack( CollisionObjectBase *object );
-
-		friend void											setInfo( const btSoftBodyWorldInfo &info );
-		void												setInfo( const btSoftBodyWorldInfo &info );
+		void												pushBack( CollisionObject *object );
 
 		btRigidBody*										toBulletRigidBody( Iter pos );
-		btRigidBody*										toBulletRigidBody( CollisionObjectBase *object );
+		btRigidBody*										toBulletRigidBody( CollisionObject *object );
 		btSoftBody*											toBulletSoftBody( Iter pos );
-		btSoftBody*											toBulletSoftBody( CollisionObjectBase *object );
-
-		friend void											update();
-		void												update();
+		btSoftBody*											toBulletSoftBody( CollisionObject *object );
 
 		double												mElapsedSeconds;
 
@@ -157,47 +126,32 @@ namespace bullet {
 
 	};
 
-	Iter													begin();
-	Iter													end();
-	Iter													erase( Iter pos );
+	DynamicsWorldRef										createWorld();
 
-	CollisionObject											createRigidBox( const ci::Vec3f &dimensions = ci::Vec3f::one() * 10.0f, float mass = 1.0f, 
-																			const ci::Vec3f &position = ci::Vec3f::zero(), 
+	CollisionObjectRef										createRigidBox( const DynamicsWorldRef &world, const ci::Vec3f &dimensions = ci::Vec3f::one() * 10.0f, 
+																			float mass = 1.0f, const ci::Vec3f &position = ci::Vec3f::zero(), 
 																			const ci::Quatf &rotation = ci::Quatf() );
-	CollisionObject											createRigidCylinder( float topRadius = 10.0f, float bottomRadius = 10.0f, 
+	CollisionObjectRef										createRigidCylinder( const DynamicsWorldRef &world, float topRadius = 10.0f, float bottomRadius = 10.0f, 
 																				float height = 20.0f, int32_t segments = 16, float mass = 1.0f, 
 																				const ci::Vec3f &position = ci::Vec3f::zero(), 
 																				const ci::Quatf &rotation = ci::Quatf() );
-	CollisionObject											createRigidHull( const ci::TriMesh &mesh, const ci::Vec3f &scale = ci::Vec3f::one(), 
+	CollisionObjectRef										createRigidHull( const DynamicsWorldRef &world, const ci::TriMesh &mesh, const ci::Vec3f &scale = ci::Vec3f::one(), 
 																			float mass = 1.0f, const ci::Vec3f &position = ci::Vec3f::zero(), 
 																			const ci::Quatf &rotation = ci::Quatf() );
-	CollisionObject											createRigidMesh( const ci::TriMesh &mesh, const ci::Vec3f &scale = ci::Vec3f::one(), 
+	CollisionObjectRef										createRigidMesh( const DynamicsWorldRef &world, const ci::TriMesh &mesh, const ci::Vec3f &scale = ci::Vec3f::one(), 
 																			float margin = 0.05f, float mass = 1.0f, 
 																			const ci::Vec3f &position = ci::Vec3f::zero(), 
 																			const ci::Quatf &rotation = ci::Quatf() );
-	CollisionObject											createRigidSphere( float radius = 10.0f, int32_t segments = 16, float mass = 1.0f, 
-																				const ci::Vec3f &position = ci::Vec3f::zero(), 
+	CollisionObjectRef										createRigidSphere( const DynamicsWorldRef &world, float radius = 10.0f, int32_t segments = 16, 
+																				float mass = 1.0f, const ci::Vec3f &position = ci::Vec3f::zero(), 
 																				const ci::Quatf &rotation = ci::Quatf() );
-	CollisionObject											createRigidTerrain( const ci::Surface32f &heightField, int32_t stickWidth, 
+	CollisionObjectRef										createRigidTerrain( const DynamicsWorldRef &world, const ci::Surface32f &heightField, int32_t stickWidth, 
 																				int32_t stickLength, float minHeight = -200.0f, float maxHeight = 200.0f, 
 																				int32_t upAxis = 1, const ci::Vec3f &scale = ci::Vec3f( 1.0f, 100.0f, 1.0f ), 
 																				float mass = 1.0f, const ci::Vec3f &position = ci::Vec3f::zero(), 
 																				const ci::Quatf &rotation = ci::Quatf() );
 
-	btBroadphaseInterface*									getBroadphase();
-	btDefaultCollisionConfiguration*						getCollisionConfiguration();
-	btCollisionDispatcher*									getDispatcher();
-	btSoftBodyWorldInfo&									getInfo();
-	CollisionObjectList&									getObjects();
-	uint32_t												getNumObjects();
-	btConstraintSolver*										getSolver();
-	btDiscreteDynamicsWorld*								getWorld();
-
-	void													setInfo( const btSoftBodyWorldInfo &info );
-
-	btRigidBody*											toBulletRigidBody( const CollisionObject &object );
-	btSoftBody*												toBulletSoftBody( const CollisionObject &object );
-
-	void													update();
+	btRigidBody*											toBulletRigidBody( const CollisionObjectRef &object );
+	btSoftBody*												toBulletSoftBody( const CollisionObjectRef &object );
 
 }
