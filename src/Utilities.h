@@ -48,63 +48,10 @@
 
 namespace bullet 
 {
-
-	// Forward declarations
-	class CollisionObject;
-	class RigidBox;
-	class RigidCylinder;
-	class RigidHull;
-	class RigidMesh;
-	class RigidBody;
-	class RigidSphere;
-	class RigidTerrain;
-	class SoftBody;
-
-	/////////////////////////////////////////////////////////////////////////////////////////////////
-
-	// Conversion methods
 	ci::Quatf								fromBulletQuaternion( const btQuaternion &q );
 	ci::Matrix44f							fromBulletTransform( const btTransform &m );
 	ci::Vec3f								fromBulletVector3( const btVector3 &v );
 	btQuaternion							toBulletQuaternion( const ci::Quatf &q );
 	btVector3								toBulletVector3( const ci::Vec3f &v );
 	btTransform								toBulletTransform( const ci::Matrix44f &m );
-
-	/////////////////////////////////////////////////////////////////////////////////////////////////
-
-	class Utilities
-	{
-		
-	private:
-
-		// Convert Bullet matrix to Cinder matrix for rigid bodies
-		static ci::Matrix44f				getWorldTransform( const btRigidBody* body );
-
-		// Convert Bullet matrix to Cinder matrix for soft bodies
-		static ci::Matrix44f				getWorldTransform( const btSoftBody* body );
-
-		// Create terrain from color channel
-		static btHeightfieldTerrainShape*	createHeightfieldTerrainShape( const ci::Surface32f &heightField, int32_t stickWidth, int32_t stickLength, 
-			float heightScale, float minHeight, float maxHeight, int32_t upAxis, const ci::Vec3f &scale );
-
-		// Creates a concave Bullet mesh from a list of vertices and indices
-		static btBvhTriangleMeshShape*		createConcaveMeshShape( const std::vector<ci::Vec3f> &vertices, const std::vector<uint32_t> &indices, 
-			const ci::Vec3f &scale, float margin );
-
-		// Creates a convex Bullet hull from a list of vertices
-		static btConvexHullShape*			createConvexHullShape( const std::vector<ci::Vec3f> &vertices, const ci::Vec3f &scale );
-
-		// Grant classes permission to private methods
-		friend class						CollisionObject;
-		friend class						RigidBox;
-		friend class						RigidCylinder;
-		friend class						RigidHull;
-		friend class						RigidMesh;
-		friend class						RigidBody;
-		friend class						RigidSphere;
-		friend class						RigidTerrain;
-		friend class						SoftBody;
-
-	};
-
 } 

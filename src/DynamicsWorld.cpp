@@ -95,7 +95,7 @@ namespace bullet {
 		return mObjects.erase( pos );
 	}
 
-	void DynamicsWorld::pushBack( CollisionObject *object )
+	CollisionObjectRef DynamicsWorld::pushBack( CollisionObject *object )
 	{
 		mObjects.push_back( object );
 		if ( object->isRigidBody() ) {
@@ -103,6 +103,7 @@ namespace bullet {
 		} else if ( object->isSoftBody() ) {
 			( (btSoftRigidDynamicsWorld*)mWorld )->addSoftBody( toBulletSoftBody( object ) );
 		}
+		return &mObjects[ mObjects.size() - 1 ];
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////
@@ -212,36 +213,30 @@ namespace bullet {
 
 	CollisionObjectRef createRigidBox( const DynamicsWorldRef &world, const ci::Vec3f &dimensions, float mass, const ci::Vec3f &position, const ci::Quatf &rotation )
 	{
-		world->pushBack( new RigidBox( dimensions, mass, position, rotation ) );
-		return &world->mObjects[ world->mObjects.size() - 1 ];
+		return world->pushBack( new RigidBox( dimensions, mass, position, rotation ) );
 	}
 	CollisionObjectRef createRigidCylinder( const DynamicsWorldRef &world, float topRadius, float bottomRadius, float height, int32_t segments, float mass, 
 		const ci::Vec3f &position, const ci::Quatf &rotation )
 	{
-		world->pushBack( new RigidCylinder( topRadius, bottomRadius, height, segments, mass, position, rotation ) );
-		return &world->mObjects[ world->mObjects.size() - 1 ];
+		return world->pushBack( new RigidCylinder( topRadius, bottomRadius, height, segments, mass, position, rotation ) );
 	}
 	CollisionObjectRef createRigidHull( const DynamicsWorldRef &world, const ci::TriMesh &mesh, const ci::Vec3f &scale, float mass, const ci::Vec3f &position, const ci::Quatf &rotation )
 	{
-		world->pushBack( new RigidHull( mesh, scale, mass, position, rotation ) );
-		return &world->mObjects[ world->mObjects.size() - 1 ];
+		return world->pushBack( new RigidHull( mesh, scale, mass, position, rotation ) );
 	}
 	CollisionObjectRef createRigidMesh( const DynamicsWorldRef &world, const ci::TriMesh &mesh, const ci::Vec3f &scale, float margin, float mass, 
 		const ci::Vec3f &position, const ci::Quatf &rotation )
 	{
-		world->pushBack( new RigidMesh( mesh, scale, margin, mass, position, rotation ) );
-		return &world->mObjects[ world->mObjects.size() - 1 ];
+		return world->pushBack( new RigidMesh( mesh, scale, margin, mass, position, rotation ) );
 	}
 	CollisionObjectRef createRigidSphere( const DynamicsWorldRef &world, float radius, int32_t segments, float mass, const ci::Vec3f &position, const ci::Quatf &rotation )
 	{
-		world->pushBack( new RigidSphere( radius, segments, mass, position, rotation ) );
-		return &world->mObjects[ world->mObjects.size() - 1 ];
+		return world->pushBack( new RigidSphere( radius, segments, mass, position, rotation ) );
 	}
 	CollisionObjectRef createRigidTerrain( const DynamicsWorldRef &world, const ci::Surface32f &heightField, int32_t stickWidth, int32_t stickLength, float minHeight, 
 		float maxHeight, int32_t upAxis, const ci::Vec3f &scale, float mass, const ci::Vec3f &position, const ci::Quatf &rotation )
 	{
-		world->pushBack( new RigidTerrain( heightField, stickWidth, stickLength, minHeight, maxHeight, upAxis, scale, mass, position, rotation ) );
-		return &world->mObjects[ world->mObjects.size() - 1 ];
+		return world->pushBack( new RigidTerrain( heightField, stickWidth, stickLength, minHeight, maxHeight, upAxis, scale, mass, position, rotation ) );
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////

@@ -106,9 +106,9 @@ namespace bullet
 	{ 
 		Matrix44f worldTransform;
 		if ( mSoftBody != 0 ) {
-			worldTransform = Utilities::getWorldTransform( mSoftBody ); 
+			worldTransform = getTransformMatrix( mSoftBody ); 
 		} else if ( mRigidBody != 0 ) {
-			worldTransform = Utilities::getWorldTransform( mRigidBody );
+			worldTransform = getTransformMatrix( mRigidBody );
 		}
 		return worldTransform;
 	}
@@ -116,9 +116,9 @@ namespace bullet
 	{ 
 		Matrix44f worldTransform;
 		if ( mSoftBody != 0 ) {
-			worldTransform = Utilities::getWorldTransform( mSoftBody ); 
+			worldTransform = getTransformMatrix( mSoftBody ); 
 		} else if ( mRigidBody != 0 ) {
-			worldTransform = Utilities::getWorldTransform( mRigidBody );
+			worldTransform = getTransformMatrix( mRigidBody );
 		}
 		return worldTransform;
 	}
@@ -180,6 +180,92 @@ namespace bullet
 		if ( texCoords.size() > 0 ) {
 			mVboMesh.bufferTexCoords2d( 0, texCoords );
 		}
+
+	}
+
+	/////////////////////////////////////////////////////////////////////////////////////////////////
+
+	// Convert Bullet matrix to Cinder matrix for rigid bodies
+	Matrix44f CollisionObject::getTransformMatrix( const btRigidBody* body )
+	{
+		btTransform trans;
+		body->getMotionState()->getWorldTransform( trans );
+		Matrix44f matrix;
+		trans.getOpenGLMatrix( matrix.m );
+		return matrix;
+	}
+
+	// Convert Bullet matrix to Cinder matrix for soft bodies
+	Matrix44f CollisionObject::getTransformMatrix( const btSoftBody* body )
+	{
+		btTransform trans = body->getWorldTransform();
+		Matrix44f matrix;
+		trans.getOpenGLMatrix( matrix.m );
+		return matrix;
+	}
+
+	/////////////////////////////////////////////////////////////////////////////////////////////////
+
+	// Create terrain from color channel
+	btHeightfieldTerrainShape* CollisionObject::createHeightfieldTerrainShape( const Surface32f& heightField, int32_t stickWidth, int32_t stickLength, 
+		float heightScale, float minHeight, float maxHeight, int32_t upAxis, const Vec3f& scale )
+	{
+
+		// Create height field shape from channel data
+		Channel32f channel( heightField );
+		btHeightfieldTerrainShape* shape = new btHeightfieldTerrainShape( stickWidth, stickLength, channel.getData(), heightScale, minHeight, maxHeight, upAxis, PHY_FLOAT, false );
+		
+		// Scale and return shape
+		shape->setLocalScaling( toBulletVector3( scale ) );
+		return shape;
+
+	}
+
+	// Creates a concave Bullet mesh from a list of vertices and indices
+	btBvhTriangleMeshShape* CollisionObject::createConcaveMeshShape( const vector<Vec3f>& vertices, const vector<uint32_t>& indices, const Vec3f& scale, float margin )
+	{
+
+		// Create Bullet mesh
+		btTriangleMesh* triMesh = new btTriangleMesh( true, false );
+
+		// Add triangles
+		uint32_t numTriangles = indices.size() / 3;
+		for ( uint32_t i = 0; i < numTriangles; i += 3 )
+			triMesh->addTriangle( 
+			toBulletVector3( vertices.at( indices.at( i + 0 ) ) ), 
+			toBulletVector3( vertices.at( indices.at( i + 1 ) ) ), 
+			toBulletVector3( vertices.at( indices.at( i + 2 ) ) ), 
+			true
+			 );
+
+		// Create mesh shape
+		btBvhTriangleMeshShape* shape = new btBvhTriangleMeshShape( triMesh, true );
+		shape->buildOptimizedBvh();
+
+		// Scale and return shape
+		btVector3 localScaling = toBulletVector3( scale );
+		shape->setLocalScaling( localScaling );
+		shape->setMargin( margin );
+		return shape;
+
+	}
+
+	// Creates a convex Bullet hull from a list of vertices
+	btConvexHullShape* CollisionObject::createConvexHullShape( const vector<Vec3f>& vertices, const Vec3f& scale )
+	{
+
+		// Create hull
+		btConvexHullShape* shape = new btConvexHullShape();
+
+		// Add points
+		for ( uint32_t i = 0; i < vertices.size(); i++ ) {
+			shape->addPoint( toBulletVector3( vertices.at( i ) ) );
+		}
+
+		// Scale and return shape
+		btVector3 localScaling = toBulletVector3( scale );
+		shape->setLocalScaling( localScaling );
+		return shape;
 
 	}
 

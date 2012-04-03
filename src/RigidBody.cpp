@@ -415,7 +415,7 @@ namespace bullet
 		}
 
 		// Define body
-		btConvexHullShape* shape = Utilities::createConvexHullShape( mesh.getVertices(), scale );
+		btConvexHullShape* shape = createConvexHullShape( mesh.getVertices(), scale );
 		mRigidBody = RigidBody::createHull( shape, mass, position, rotation );
 
 		// Set VBO data
@@ -436,7 +436,7 @@ namespace bullet
 		
 		// Define body
 		Vec3f halfScale = scale * 0.5f;
-		btBvhTriangleMeshShape* shape = Utilities::createConcaveMeshShape( mesh.getVertices(), mesh.getIndices(), scale, margin );
+		btBvhTriangleMeshShape* shape = createConcaveMeshShape( mesh.getVertices(), mesh.getIndices(), scale, margin );
 		mRigidBody = RigidBody::createMesh( shape, mass, position, rotation );
 		
 		// Scale mesh to size of body
@@ -522,7 +522,7 @@ namespace bullet
 	{
 
 		// Create body
-		btHeightfieldTerrainShape* shape = Utilities::createHeightfieldTerrainShape( heightField, stickWidth, stickLength, 1.0f, minHeight, maxHeight, 1, scale );
+		btHeightfieldTerrainShape* shape = createHeightfieldTerrainShape( heightField, stickWidth, stickLength, 1.0f, minHeight, maxHeight, 1, scale );
 		mRigidBody = RigidBody::createTerrain( shape, mass, position, rotation );
 
 		// Declare vectors

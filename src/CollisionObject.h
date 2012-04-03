@@ -74,6 +74,17 @@ namespace bullet
 
 	protected:
 
+		
+		static ci::Matrix44f			getTransformMatrix( const btRigidBody* body );
+		static ci::Matrix44f			getTransformMatrix( const btSoftBody* body );
+
+		static btHeightfieldTerrainShape*	createHeightfieldTerrainShape( const ci::Surface32f &heightField, int32_t stickWidth, int32_t stickLength, 
+			float heightScale, float minHeight, float maxHeight, int32_t upAxis, const ci::Vec3f &scale );
+		static btBvhTriangleMeshShape*		createConcaveMeshShape( const std::vector<ci::Vec3f> &vertices, const std::vector<uint32_t> &indices, 
+			const ci::Vec3f &scale, float margin );
+		static btConvexHullShape*			createConvexHullShape( const std::vector<ci::Vec3f> &vertices, const ci::Vec3f &scale );
+
+
 		CollisionObject( const ci::Vec3f &position = ci::Vec3f::zero(), const ci::Quatf &rotation = ci::Quatf() );
 
 		btRigidBody						*mRigidBody;
@@ -84,6 +95,7 @@ namespace bullet
 		//VboMeshRef					mVboMesh;
 		ci::gl::VboMesh					mVboMesh;
 
+		// Move to VBO manager
 		void							setVboData( const std::vector<uint32_t> &indices, const std::vector<ci::Vec3f> &positions, 
 											const std::vector<ci::Vec3f> &normals, const std::vector<ci::Vec2f> &texCoords, 
 											GLenum primitiveType = GL_TRIANGLES );
