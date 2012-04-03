@@ -168,32 +168,32 @@ void BasicSampleApp::mouseDown( MouseEvent event )
 	for ( uint32_t i = 0; i < 10; i++ ) {
 
 		// Set random size and position
-		float size = Rand::randFloat( 1.0f, 12.0f );
+		float size = Rand::randFloat( 3.0f, 36.0f );
 		Vec3f position = Vec3f( 
 			( float )( ( rand() % 400 ) - 200 ), 
 			( float )( ( rand() % 100 ) + 200 ), 
 			( float )( ( rand() % 400 ) - 200 )
 			 );
 
-		CollisionObjectRef box = bullet::createRigidBox( mWorld, Vec3f::one() * size * 3.0f, size * 0.5f, position );
-
+		bullet::createRigidBox( mWorld, Vec3f::one() * size, size * size, position );
+		
 		// Drop primitive into terrain
 		/*switch ( Rand::randInt( 0, 5 ) )
 		{
 		case 0:
-			bullet::createRigidSphere( size, 16, 1.0f, position );
+			bullet::createRigidSphere( mWorld, size, 16, 1.0f, position );
 			break;
 		case 1:
-			bullet::createRigidBox( Vec3f::one() * size, 1.0f, position );
+			bullet::createRigidBox( mWorld, Vec3f::one() * size, 1.0f, position );
 			break;
 		case 2:
-			bullet::createRigidHull( mConvex, Vec3f::one() * size * 0.5f, 1.0f, position );
+			bullet::createRigidHull( mWorld, mConvex, Vec3f::one() * size * 0.5f, 1.0f, position );
 			break;
 		case 3:
-			bullet::createRigidMesh( mConcave, Vec3f::one() * size * 0.12f, 0.0f, 1.0f, position );
+			bullet::createRigidMesh( mWorld, mConcave, Vec3f::one() * size * 0.12f, 0.0f, 1.0f, position );
 			break;
 		case 4:
-			bullet::createRigidCylinder( size * 0.5f, size, size * 2.0f, 12, 1.0f, position );
+			bullet::createRigidCylinder( mWorld, size * 0.5f, size, size * 2.0f, 12, 1.0f, position );
 			break;
 		}*/
 
@@ -217,7 +217,7 @@ void BasicSampleApp::prepareSettings( Settings * settings )
 	// DO IT!
 	settings->setFrameRate( 60.0f );
 	settings->setFullScreen( false );
-	settings->setWindowSize( 700, 700 );
+	settings->setWindowSize( 1280, 720 );
 
 }
 
@@ -261,12 +261,15 @@ void BasicSampleApp::setup()
 	loadModels();
 	//loadTerrain();
 
-	// Create ground
+	// Create sphere and box
 	mBoxTransform.setIdentity();
-	//mBox = bullet::createRigidBox( mWorld,  Vec3f( 400.0f, 50.0f, 400.0f ), 0.0f, Vec3f( 0.0f, -25.0f, 0.0f ) );
-	//mBox = bullet::createRigidMesh( mWorld, mConcave, Vec3f( 20.0f, 40.0f, 20.0f ), 0.01f, 0.0f );
-	//mBox = bullet::createRigidSphere( mWorld, 200.0f, 64, 0.0f, Vec3f( 0.0f, -100.0f, 0.0f ) );
-	mBox = bullet::createRigidCylinder( mWorld, 100.0f, 300.0f, 100.0f, 64, 0.0f, Vec3f( 0.0f, -150.0f, 0.0f ) );
+	bullet::createRigidSphere( mWorld, 200.0f, 64, 0.0f, Vec3f( 0.0f, -100.0f, 0.0f ) );
+	mBox = bullet::createRigidBox( mWorld,  Vec3f( 600.0f, 50.0f, 600.0f ), 0.0f );
+	btRigidBody* boxBody = bullet::toBulletRigidBody( mBox );
+	boxBody->setFriction( 1.0f );
+
+	//mBox = bullet::createRigidHull( mWorld, mConvex, Vec3f( 100.0f, 100.0f, 100.0f ), 0.0f );
+	//mBox = bullet::createRigidCylinder( mWorld, 100.0f, 300.0f, 100.0f, 64, 0.0f, Vec3f( 0.0f, -150.0f, 0.0f ) );
 
 	// Run first resize to initialize camera
 	resize( ResizeEvent( getWindowSize() ) );
@@ -292,8 +295,9 @@ void BasicSampleApp::update()
 	mLight->update( mCamera );
 
 	// Set rotation
-	float rotation = math<float>::sin( ( float )getElapsedSeconds() * 0.3333f ) * 0.25f	;
+	float rotation = math<float>::sin( ( float )getElapsedSeconds() * 0.3333f ) * 0.35f	;
 	mBoxTransform.setRotation( btQuaternion( 0.25f, 0.0f, 1.0f + rotation * 0.1f, rotation ) );
+	mBoxTransform.setOrigin( btVector3( 0.0f, -100.0f, 0.0f ) );
 
 	// Apply rotation to ground
 	btRigidBody* body = bullet::toBulletRigidBody( mBox );
