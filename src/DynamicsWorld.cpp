@@ -1,6 +1,10 @@
 // Include header
 #include "DynamicsWorld.h"
 
+#include "cinder/app/App.h"
+
+#include "bullet/BulletSoftBody/btSoftRigidDynamicsWorld.h"
+
 #include "RigidBody.h"
 #include "SoftBody.h"
 

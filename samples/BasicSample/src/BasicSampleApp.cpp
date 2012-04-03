@@ -165,7 +165,7 @@ void BasicSampleApp::loadTerrain()
 void BasicSampleApp::mouseDown( MouseEvent event )
 {
 
-	for ( uint32_t i = 0; i < 500; i++ ) {
+	for ( uint32_t i = 0; i < 10; i++ ) {
 
 		// Set random size and position
 		float size = Rand::randFloat( 1.0f, 12.0f );
@@ -176,8 +176,6 @@ void BasicSampleApp::mouseDown( MouseEvent event )
 			 );
 
 		CollisionObjectRef box = bullet::createRigidBox( mWorld, Vec3f::one() * size * 3.0f, size * 0.5f, position );
-		btRigidBody* body = bullet::toBulletRigidBody( box );
-		body->setFriction( 100.0f );
 
 		// Drop primitive into terrain
 		/*switch ( Rand::randInt( 0, 5 ) )
@@ -256,18 +254,19 @@ void BasicSampleApp::setup()
 	mLight->setDiffuse( ColorAf( 1.0f, 1.0f, 1.0f, 1.0f ) );
 	mLight->enable();
 
+	// Create a dynamics world
+	mWorld = bullet::createWorld();
+
 	// Load 3D objects
 	loadModels();
 	//loadTerrain();
 
-	mWorld = bullet::createWorld();
-
 	// Create ground
 	mBoxTransform.setIdentity();
-	//mBox = /*bullet::createRigidBox( Vec3f( 400.0f, 50.0f, 400.0f ), 0.0f, Vec3f( 0.0f, -25.0f, 0.0f ) );*/
-
-	//mBox = bullet::createRigidHull( mConvex, Vec3f::one(), 0.0f, Vec3f::zero() );
-	mBox = bullet::createRigidSphere( mWorld, 200.0f, 64, 0.0f, Vec3f( 0.0f, -100.0f, 0.0f ) );
+	//mBox = bullet::createRigidBox( mWorld,  Vec3f( 400.0f, 50.0f, 400.0f ), 0.0f, Vec3f( 0.0f, -25.0f, 0.0f ) );
+	//mBox = bullet::createRigidMesh( mWorld, mConcave, Vec3f( 20.0f, 40.0f, 20.0f ), 0.01f, 0.0f );
+	//mBox = bullet::createRigidSphere( mWorld, 200.0f, 64, 0.0f, Vec3f( 0.0f, -100.0f, 0.0f ) );
+	mBox = bullet::createRigidCylinder( mWorld, 100.0f, 300.0f, 100.0f, 64, 0.0f, Vec3f( 0.0f, -150.0f, 0.0f ) );
 
 	// Run first resize to initialize camera
 	resize( ResizeEvent( getWindowSize() ) );
@@ -293,12 +292,11 @@ void BasicSampleApp::update()
 	mLight->update( mCamera );
 
 	// Set rotation
-	float rotation = math<float>::sin( ( float )getElapsedSeconds() * 0.3333f );
-	mBoxTransform.setRotation( btQuaternion( 0.25f, rotation, rotation, rotation ) );
+	float rotation = math<float>::sin( ( float )getElapsedSeconds() * 0.3333f ) * 0.25f	;
+	mBoxTransform.setRotation( btQuaternion( 0.25f, 0.0f, 1.0f + rotation * 0.1f, rotation ) );
 
 	// Apply rotation to ground
 	btRigidBody* body = bullet::toBulletRigidBody( mBox );
-	body->setFriction( 1000.0f );
 	body->getMotionState()->setWorldTransform( mBoxTransform );
 	body->setWorldTransform( mBoxTransform );
 	

@@ -9,13 +9,18 @@ initialization, creating and managing VBOs to represent bodies,
 memory management, and interaction is done for you. From there, 
 you just use Bullet directly.
 
+BUGS
+
+- Concave mesh body isn't scaling on Y axis
+- Cylinder VBO normals are wrong
+- Terrain collision
+- Crash in exit
+
 TO DO LIST
 
 - Add Iter methods which take *Ref...
   Iter bullet::erase( const CollisionObjectRef &object ) { ... }
   Iter bullet::find( const CollisionObjectRef &object ) { ... }
-- Fix cylinder VBO normals
-- Bug check terrain
 - Screen -> dynamics world interaction
 - Texture coordinates for VBOs
 - Implement btConeShape

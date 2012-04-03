@@ -38,6 +38,8 @@
 #pragma once
 
 // Includes
+#include "cinder/TriMesh.h"
+#include "cinder/gl/Vbo.h"
 #include "Utilities.h"
 
 namespace bullet
@@ -46,6 +48,8 @@ namespace bullet
 	class DynamicsWorld;
 	class RigidBody;
 	class SoftBody;
+
+	typedef std::shared_ptr<ci::gl::VboMesh> VboMeshRef;
 	
 	class CollisionObject
 	{
@@ -75,10 +79,14 @@ namespace bullet
 		btRigidBody						*mRigidBody;
 		btSoftBody						*mSoftBody;
 
-		void							setVboData( const std::vector<uint32_t> &indices, const std::vector<ci::Vec3f> &positions, 
-													const std::vector<ci::Vec3f> &normals, const std::vector<ci::Vec2f> &texCoords, 
-													GLenum primitiveType = GL_TRIANGLES );
+		// For future use with VBO manager
+		//ci::Vec3f						mScale;
+		//VboMeshRef					mVboMesh;
 		ci::gl::VboMesh					mVboMesh;
+
+		void							setVboData( const std::vector<uint32_t> &indices, const std::vector<ci::Vec3f> &positions, 
+											const std::vector<ci::Vec3f> &normals, const std::vector<ci::Vec2f> &texCoords, 
+											GLenum primitiveType = GL_TRIANGLES );
 
 		friend class					DynamicsWorld;
 
