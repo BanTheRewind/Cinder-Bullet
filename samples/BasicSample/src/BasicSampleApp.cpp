@@ -164,7 +164,7 @@ void BasicSampleApp::loadTerrain()
 void BasicSampleApp::mouseDown( MouseEvent event )
 {
 
-	for ( uint32_t i = 0; i < 20; i++ ) {
+	for ( uint32_t i = 0; i < 500; i++ ) {
 
 		// Set random size and position
 		float size = Rand::randFloat( 1.0f, 12.0f );
@@ -174,7 +174,9 @@ void BasicSampleApp::mouseDown( MouseEvent event )
 			( float )( ( rand() % 400 ) - 200 )
 			 );
 
-		bullet::createRigidBox( Vec3f::one() * size * 3.0f, 1.0f, position );
+		CollisionObject box = bullet::createRigidBox( Vec3f::one() * size * 3.0f, size * 0.5f, position );
+		btRigidBody* body = bullet::toBulletRigidBody( box );
+		body->setFriction( 100.0f );
 
 		// Drop primitive into terrain
 		/*switch ( Rand::randInt( 0, 5 ) )
@@ -246,9 +248,6 @@ void BasicSampleApp::resize( ResizeEvent event )
 void BasicSampleApp::setup()
 {
 
-	// Set default properties
-	mLifespan = 5.0f;
-
 	// Set up OpenGL lighting
 	mLight = new gl::Light( gl::Light::DIRECTIONAL, 0 );
 	mLight->setDirection( Vec3f( 0.0f, 0.1f, 0.3f ).normalized() );
@@ -257,12 +256,15 @@ void BasicSampleApp::setup()
 	mLight->enable();
 
 	// Load 3D objects
-	//loadModels();
+	loadModels();
 	//loadTerrain();
 
 	// Create ground
 	mBoxTransform.setIdentity();
-	mBox = bullet::createRigidBox( Vec3f( 400.0f, 50.0f, 400.0f ), 0.0f, Vec3f( 0.0f, -25.0f, 0.0f ) );
+	//mBox = /*bullet::createRigidBox( Vec3f( 400.0f, 50.0f, 400.0f ), 0.0f, Vec3f( 0.0f, -25.0f, 0.0f ) );*/
+
+	//mBox = bullet::createRigidHull( mConvex, Vec3f::one(), 0.0f, Vec3f::zero() );
+	mBox = bullet::createRigidSphere( 200.0f, 64, 0.0f, Vec3f( 0.0f, -100.0f, 0.0f ) );
 
 	// Run first resize to initialize camera
 	resize( ResizeEvent( getWindowSize() ) );
@@ -289,10 +291,11 @@ void BasicSampleApp::update()
 
 	// Set rotation
 	float rotation = math<float>::sin( ( float )getElapsedSeconds() * 0.3333f );
-	mBoxTransform.setRotation( btQuaternion( 0.25f, rotation, 0.0f, 0.0f ) );
+	mBoxTransform.setRotation( btQuaternion( 0.25f, rotation, rotation, rotation ) );
 
 	// Apply rotation to ground
 	btRigidBody* body = bullet::toBulletRigidBody( mBox );
+	body->setFriction( 1000.0f );
 	body->getMotionState()->setWorldTransform( mBoxTransform );
 	body->setWorldTransform( mBoxTransform );
 	

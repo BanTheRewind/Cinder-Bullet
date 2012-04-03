@@ -41,6 +41,8 @@ TO DO LIST
 - Bug check terrain
 - Screen -> dynamics world interaction
 - Texture coordinates for VBOs
+- Implement btConeShape
+- Implement btStaticPlaneShape
 - Soft body convenience methods
 - Vehicle convenience method
 - Add "vehicle" pointer to collision object

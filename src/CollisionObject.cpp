@@ -117,7 +117,7 @@ namespace bullet
 		return position;
 	}
 
-	ci::Matrix44f& CollisionObjectBase::getTransformMatrix() 
+	ci::Matrix44f CollisionObjectBase::getTransformMatrix() 
 	{ 
 		Matrix44f worldTransform;
 		if ( mSoftBody != 0 ) {
