@@ -146,172 +146,13 @@ namespace bullet
 	{
 
 		// Create body
-		mRigidBody = RigidBody::createBox( dimensions, mass, position, rotation );
+		mRigidBody = createBox( dimensions, mass, position, rotation );
 
-		// Declare vectors
-		vector<uint32_t> indices;
-		vector<Vec3f> normals;
-		vector<Vec3f> positions;
-		vector<Vec2f> texCoords;
+		// Set scale
+		mScale = dimensions;
 
-		// Define VBO positions
-		Vec3f size = dimensions * 0.5f;
-		Vec3f pos0 = Vec3f( 1.0f, 1.0f, 1.0f ) * size;
-		Vec3f pos1 = Vec3f( 1.0f, -1.0f, 1.0f ) * size;
-		Vec3f pos2 = Vec3f( 1.0f, -1.0f, -1.0f ) * size;
-		Vec3f pos3 = Vec3f( 1.0f, 1.0f, -1.0f ) * size;
-		Vec3f pos4 = Vec3f( -1.0f, 1.0f, -1.0f ) * size;
-		Vec3f pos5 = Vec3f( -1.0f, 1.0f, 1.0f ) * size;
-		Vec3f pos6 = Vec3f( -1.0f, -1.0f, -1.0f ) * size;
-		Vec3f pos7 = Vec3f( -1.0f, -1.0f, 1.0f ) * size;
-
-		// Define nromals
-		Vec3f norm0( 1.0f, 0.0f, 0.0f );
-		Vec3f norm1( 0.0f, 1.0f, 0.0f );
-		Vec3f norm2( 0.0f, 0.0f, 1.0f );
-		Vec3f norm3( -1.0f, 0.0f, 0.0f ); 
-		Vec3f norm4( 0.0f, -1.0f, 0.0f ); 
-		Vec3f norm5( 0.0f, 0.0f, -1.0f ); 
-
-		// Add positions
-		positions.push_back( pos0 ); 
-		positions.push_back( pos1 ); 	
-		positions.push_back( pos2 ); 	
-		positions.push_back( pos3 );
-
-		positions.push_back( pos0 ); 
-		positions.push_back( pos3 ); 	
-		positions.push_back( pos4 ); 	
-		positions.push_back( pos5 );
-
-		positions.push_back( pos0 ); 	
-		positions.push_back( pos5 ); 	
-		positions.push_back( pos7 ); 	
-		positions.push_back( pos1 );
-
-		positions.push_back( pos5 ); 	
-		positions.push_back( pos4 ); 	
-		positions.push_back( pos6 ); 	
-		positions.push_back( pos7 );
-
-		positions.push_back( pos6 ); 	
-		positions.push_back( pos2 ); 	
-		positions.push_back( pos1 ); 	
-		positions.push_back( pos7 );
-
-		positions.push_back( pos2 ); 	
-		positions.push_back( pos6 ); 	
-		positions.push_back( pos4 ); 	
-		positions.push_back( pos3 );
-
-		// Add normals
-		for ( uint8_t i = 0; i < 4; i++ ) {
-			normals.push_back( norm0 );
-		}
-		for ( uint8_t i = 0; i < 4; i++ ) {
-			normals.push_back( norm1 );
-		}
-		for ( uint8_t i = 0; i < 4; i++ ) {
-			normals.push_back( norm2 );
-		}
-		for ( uint8_t i = 0; i < 4; i++ ) {
-			normals.push_back( norm3 );
-		}
-		for ( uint8_t i = 0; i < 4; i++ ) {
-			normals.push_back( norm4 );
-		}
-		for ( uint8_t i = 0; i < 4; i++ ) {
-			normals.push_back( norm5 );
-		}
-
-		// Define texture coordinates
-		Vec2f texCoord0( 0.0f, 0.0f );
-		Vec2f texCoord1( 1.0f, 0.0f );
-		Vec2f texCoord2( 1.0f, 1.0f );
-		Vec2f texCoord3( 0.0f, 1.0f );
-
-		// Add texture coordinates
-		texCoords.push_back( texCoord3 );
-		texCoords.push_back( texCoord2 );
-		texCoords.push_back( texCoord1 );
-		texCoords.push_back( texCoord0 );
-
-		texCoords.push_back( texCoord2 );
-		texCoords.push_back( texCoord1 );
-		texCoords.push_back( texCoord0 );
-		texCoords.push_back( texCoord3 );
-
-		texCoords.push_back( texCoord3 );
-		texCoords.push_back( texCoord2 );
-		texCoords.push_back( texCoord1 );
-		texCoords.push_back( texCoord0 );
-
-		texCoords.push_back( texCoord2 );
-		texCoords.push_back( texCoord1 );
-		texCoords.push_back( texCoord0 );
-		texCoords.push_back( texCoord3 );
-
-		texCoords.push_back( texCoord1 );
-		texCoords.push_back( texCoord0 );
-		texCoords.push_back( texCoord3 );
-		texCoords.push_back( texCoord2 );
-		
-		texCoords.push_back( texCoord1 );
-		texCoords.push_back( texCoord0 );			
-		texCoords.push_back( texCoord3 );
-		texCoords.push_back( texCoord2 );
-
-		// Add indices
-		indices.push_back( 0 );
-		indices.push_back( 1 );
-		indices.push_back( 2 );
-		indices.push_back( 0 );
-		indices.push_back( 2 );
-		indices.push_back( 3 );
-		
-		indices.push_back( 4 );
-		indices.push_back( 5 );
-		indices.push_back( 6 );
-		indices.push_back( 4 );
-		indices.push_back( 6 );
-		indices.push_back( 7 );
-		
-		indices.push_back( 8 );
-		indices.push_back( 9 );
-		indices.push_back( 10 );
-		indices.push_back( 8 );
-		indices.push_back( 10 );
-		indices.push_back( 11 );
-		
-		indices.push_back( 12 );
-		indices.push_back( 13 );
-		indices.push_back( 14 );
-		indices.push_back( 12 );
-		indices.push_back( 14 );
-		indices.push_back( 15 );
-		
-		indices.push_back( 16 );
-		indices.push_back( 17 );
-		indices.push_back( 18 );
-		indices.push_back( 16 );
-		indices.push_back( 18 );
-		indices.push_back( 19 );
-		
-		indices.push_back( 20 );
-		indices.push_back( 21 );
-		indices.push_back( 22 );
-		indices.push_back( 20 );
-		indices.push_back( 22 );
-		indices.push_back( 23 );
-
-		// Set VBO data
-		setVboData( indices, positions, normals, texCoords );
-
-		// Clean up
-		indices.clear();
-		normals.clear();
-		positions.clear();
-		texCoords.clear();
+		// Create VBO
+		mVboMesh = VboMeshManager::create( VboMeshManager::PRIMITIVE_BOX, Vec3f::zero(), 0 );
 
 	}
 
@@ -321,85 +162,14 @@ namespace bullet
 	{
 
 		// Create body
-		mRigidBody = RigidBody::createCylinder( topRadius, bottomRadius, height, segments, mass, position, rotation );
+		mRigidBody = createCylinder( topRadius, bottomRadius, height, segments, mass, position, rotation );
 
-		// Declare vectors
-		vector<uint32_t> indices;
-		vector<Vec3f> normals;
-		vector<Vec3f> positions;
-		vector<Vec2f> texCoords;
+		// Set scale
+		mScale = Vec3f( height, topRadius, bottomRadius );
+		Vec3f scale( 1.0f, topRadius / height, bottomRadius / height );
 
-		// Set delta size
-		float delta = 1.0f / (float)segments;
-
-		// Iterate layers
-		for ( int32_t p = 0; p < 2; p++ ) {
-
-			// Choose radius
-			float radius = p == 0 ? bottomRadius : topRadius;
-
-			// Iterate segments
-			int32_t t = 0;
-			for ( float theta = delta; t < segments; t++, theta += delta ) {
-
-				// Set normal
-				Vec3f normal( math<float>::cos( theta ), 0.0f, math<float>::sin( theta ) );
-				normals.push_back( normal );
-
-				// Set vertex
-				float t = 2.0f * (float)M_PI * theta;
-				Vec3f position( 
-					math<float>::cos( t ) * radius, 
-					(float)p * height, 
-					math<float>::sin( t ) * radius 
-					);
-				positions.push_back( position );
-
-			}
-
-		}
-
-		// Top and bottom center
-		positions.push_back( Vec3f::zero() );
-		positions.push_back( Vec3f( 0.0f, height, 0.0f ) );
-		int32_t bottomCenter = (int32_t)positions.size() - 1;
-		int32_t topCenter = bottomCenter - 1;
-
-		// Build top face
-		for ( int32_t t = 0; t < segments; t++ ) {
-			int32_t n = t + 1 >= segments ? 0 : t + 1;
-			indices.push_back( t );
-			indices.push_back( topCenter );
-			indices.push_back( n );
-		}
-
-		// Build body
-		for ( int32_t t = 0; t < segments; t++ ) {
-			int32_t n = t + 1 >= segments ? 0 : t + 1;
-			indices.push_back( t );
-			indices.push_back( segments + t );
-			indices.push_back( n );
-			indices.push_back( n );
-			indices.push_back( segments + t );
-			indices.push_back( segments + n );
-		}
-			
-		// Build bottom face
-		for ( int32_t t = 0; t < segments; t++ ) {
-			int32_t n = t + 1 >= segments ? 0 : t + 1;
-			indices.push_back( segments + t );
-			indices.push_back( bottomCenter );
-			indices.push_back( segments + n );
-		}
-		
-		// Set VBO data
-		setVboData( indices, positions, normals, texCoords, GL_TRIANGLE_STRIP );
-
-		// Clean up
-		indices.clear();
-		normals.clear();
-		positions.clear();
-		texCoords.clear();
+		// Create VBO
+		mVboMesh = VboMeshManager::create( VboMeshManager::PRIMITIVE_CYLINDER, scale, segments );
 
 	}
 
@@ -408,21 +178,15 @@ namespace bullet
 		: CollisionObject( position, rotation )
 	{
 
-		// Scale mesh to size of body
-		vector<Vec3f> positions;
-		for ( vector<Vec3f>::const_iterator posIt = mesh.getVertices().begin(); posIt != mesh.getVertices().end(); ++posIt ) {
-			positions.push_back( *posIt * scale );
-		}
+		// Set scale
+		mScale = scale;
 
 		// Define body
 		btConvexHullShape* shape = createConvexHullShape( mesh.getVertices(), scale );
-		mRigidBody = RigidBody::createHull( shape, mass, position, rotation );
+		mRigidBody = createHull( shape, mass, position, rotation );
 
 		// Set VBO data
-		setVboData( mesh.getIndices(), positions, mesh.getNormals(), mesh.getTexCoords() );
-
-		// Clean up
-		positions.clear();
+		mVboMesh = VboMeshManager::create( mesh.getIndices(), mesh.getVertices(), mesh.getNormals(), mesh.getTexCoords() );
 
 	}
 
@@ -431,24 +195,16 @@ namespace bullet
 		: CollisionObject( position, rotation )
 	{
 
-		// Declare vectors
-		vector<Vec3f> positions;
-		
+		// Set scale
+		mScale = scale;
+
 		// Define body
 		Vec3f halfScale = scale * 0.5f;
 		btBvhTriangleMeshShape* shape = createConcaveMeshShape( mesh.getVertices(), mesh.getIndices(), scale, margin );
-		mRigidBody = RigidBody::createMesh( shape, mass, position, rotation );
-		
-		// Scale mesh to size of body
-		for ( vector<Vec3f>::const_iterator posIt = mesh.getVertices().begin(); posIt != mesh.getVertices().end(); ++posIt ) {
-			positions.push_back( *posIt * scale );
-		}
+		mRigidBody = createMesh( shape, mass, position, rotation );
 
 		// Set VBO data
-		setVboData( mesh.getIndices(), positions, mesh.getNormals(), mesh.getTexCoords() );
-
-		// Clean up
-		positions.clear();
+		mVboMesh = VboMeshManager::create( mesh.getIndices(), mesh.getVertices(), mesh.getNormals(), mesh.getTexCoords() );
 		
 	}
 
@@ -458,60 +214,13 @@ namespace bullet
 	{
 
 		// Create body
-		mRigidBody = RigidBody::createSphere( radius, mass, position, rotation );
+		mRigidBody = createSphere( radius, mass, position, rotation );
 
-		// Declare vectors
-		vector<uint32_t> indices;
-		vector<Vec3f> normals;
-		vector<Vec3f> positions;
-		vector<Vec2f> texCoords;
+		// Set scale
+		mScale = Vec3f::one() * radius;
 
-		// Define steps
-		int32_t layers = segments / 2;
-		float step = (float)M_PI / (float)layers;
-		float delta = ((float)M_PI * 2.0f) / (float)segments;
-
-		// Phi
-		int32_t p = 0;
-		for ( float phi = 0.0f; p <= layers; p++, phi += step ) {
-
-			// Theta
-			int32_t t = 0;
-			for ( float theta = delta; t < segments; t++, theta += delta )
-			{
-
-				// Set position
-				Vec3f position(
-					radius * math<float>::sin( phi ) * math<float>::cos( theta ),
-					radius * math<float>::sin( phi ) * math<float>::sin( theta ),
-					-radius * math<float>::cos( phi ) );
-				positions.push_back(position);
-
-				// Set normal
-				Vec3f normal = position.normalized();
-				normals.push_back( normal );
-
-				// Add indices
-				int32_t n = t + 1 >= segments ? 0 : t + 1;
-				indices.push_back( p * segments + t );
-				indices.push_back( ( p + 1 ) * segments + t );
-				indices.push_back( p * segments + n );
-				indices.push_back( p * segments + n );
-				indices.push_back( ( p + 1 ) * segments + t );
-				indices.push_back( ( p + 1 ) * segments + n );
-
-			}
-
-		}
-
-		// Set VBO data
-		setVboData( indices, positions, normals, texCoords );
-
-		// Clean up
-		indices.clear();
-		normals.clear();
-		positions.clear();
-		texCoords.clear();
+		// Create VBO
+		mVboMesh = VboMeshManager::create( VboMeshManager::PRIMITIVE_SPHERE, Vec3f::one(), segments );
 
 	}
 
@@ -521,9 +230,12 @@ namespace bullet
 		: CollisionObject( position, rotation )
 	{
 
+		// Set scale
+		mScale = scale;
+
 		// Create body
 		btHeightfieldTerrainShape* shape = createHeightfieldTerrainShape( heightField, stickWidth, stickLength, 1.0f, minHeight, maxHeight, 1, scale );
-		mRigidBody = RigidBody::createTerrain( shape, mass, position, rotation );
+		mRigidBody = createTerrain( shape, mass, position, rotation );
 
 		// Declare vectors
 		vector<uint32_t> indices;
@@ -549,9 +261,9 @@ namespace bullet
 				
 				// Add position
 				positions.push_back( Vec3f(
-					( (float)x - halfWidth ) * scale.x, 
-					Vec3f( color.r, color.g, color.b ).dot(grey) * scale.y, 
-					( ( float)y - halfHeight ) * scale.z )
+					(float)x - halfWidth, 
+					Vec3f( color.r, color.g, color.b ).dot( grey ), 
+					( float)y - halfHeight )
 					);
 
 				// Add default normal
@@ -586,8 +298,8 @@ namespace bullet
 			}
 		}
 
-		// Set VBO data
-		setVboData( indices, positions, normals, texCoords );
+		// Set VBO
+		mVboMesh = VboMeshManager::create( indices, positions, normals, texCoords );
 
 		// Clean up
 		indices.clear();

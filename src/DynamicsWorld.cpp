@@ -79,8 +79,18 @@ namespace bullet {
 	{
 		return mObjects.begin();
 	}
+
+	ConstIter DynamicsWorld::begin() const
+	{
+		return mObjects.begin();
+	}
 	
 	Iter DynamicsWorld::end()
+	{
+		return mObjects.end();
+	}
+	
+	ConstIter DynamicsWorld::end() const
 	{
 		return mObjects.end();
 	}
@@ -93,6 +103,30 @@ namespace bullet {
 			( (btSoftRigidDynamicsWorld*)mWorld )->removeSoftBody( toBulletSoftBody( pos ) );
 		}
 		return mObjects.erase( pos );
+	}
+
+	Iter DynamicsWorld::find( CollisionObjectRef &object )
+	{
+		Iter iter;
+		for ( Iter objectIt = mObjects.begin(); objectIt != mObjects.end(); ++objectIt ) {
+			if ( *iter.base() == object ) {
+				iter = objectIt;
+				break;
+			}
+		}
+		return iter;
+	}
+
+	ConstIter DynamicsWorld::find( const CollisionObjectRef &object ) const
+	{
+		ConstIter iter;
+		for ( ConstIter objectIt = mObjects.begin(); objectIt != mObjects.end(); ++objectIt ) {
+			if ( *iter.base() == object ) {
+				iter = objectIt;
+				break;
+			}
+		}
+		return iter;
 	}
 
 	CollisionObjectRef DynamicsWorld::pushBack( CollisionObject *object )
@@ -124,11 +158,23 @@ namespace bullet {
 	{ 
 		return mSoftBodyWorldInfo; 
 	}
+	const btSoftBodyWorldInfo& DynamicsWorld::getInfo() const
+	{ 
+		return mSoftBodyWorldInfo; 
+	}
 	uint32_t DynamicsWorld::getNumObjects()
 	{
 		return mNumObjects;
 	}
+	const uint32_t DynamicsWorld::getNumObjects() const
+	{
+		return mNumObjects;
+	}
 	CollisionObjectList& DynamicsWorld::getObjects()
+	{
+		return mObjects;
+	}
+	const CollisionObjectList& DynamicsWorld::getObjects() const
 	{
 		return mObjects;
 	}

@@ -41,6 +41,9 @@
     <ClInclude Include="..\..\..\src\SoftBody.h">
       <Filter>blocks\bullet</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\VboMeshManager.h">
+      <Filter>blocks\bullet</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\BasicSampleApp.cpp">
@@ -59,6 +62,9 @@
       <Filter>blocks\bullet</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\SoftBody.cpp">
+      <Filter>blocks\bullet</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\VboMeshManager.cpp">
       <Filter>blocks\bullet</Filter>
     </ClCompile>
   </ItemGroup>

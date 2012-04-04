@@ -165,13 +165,13 @@ void BasicSampleApp::loadTerrain()
 void BasicSampleApp::mouseDown( MouseEvent event )
 {
 
-	for ( uint32_t i = 0; i < 10; i++ ) {
+	for ( uint32_t i = 0; i < 100; i++ ) {
 
 		// Set random size and position
 		float size = Rand::randFloat( 3.0f, 36.0f );
 		Vec3f position = Vec3f( 
 			( float )( ( rand() % 400 ) - 200 ), 
-			( float )( ( rand() % 100 ) + 200 ), 
+			( float )( ( rand() % 100 ) + 400 ), 
 			( float )( ( rand() % 400 ) - 200 )
 			 );
 
@@ -217,6 +217,7 @@ void BasicSampleApp::prepareSettings( Settings * settings )
 	// DO IT!
 	settings->setFrameRate( 60.0f );
 	settings->setFullScreen( false );
+	settings->setResizable( false );
 	settings->setWindowSize( 1280, 720 );
 
 }
@@ -285,6 +286,9 @@ void BasicSampleApp::shutdown()
 		delete mLight;
 	}
 
+	// TO DO remove
+	exit( 1 );
+
 }
 
 // Runs update logic
@@ -306,6 +310,10 @@ void BasicSampleApp::update()
 	
 	// Update dynamics world
 	mWorld->update();
+
+	/*Iter iter = mWorld->find( mBox );
+	OutputDebugStringA( toString( iter->getPosition().x ).c_str() );
+	OutputDebugStringA( "\n" );*/
 
 	// Remove old objects
 	for ( bullet::Iter object = mWorld->begin(); object != mWorld->end(); ) {

@@ -51,6 +51,7 @@ namespace bullet {
 
 	typedef boost::ptr_vector<CollisionObject>				CollisionObjectList;
 	typedef CollisionObjectList::pointer					CollisionObjectRef;
+	typedef CollisionObjectList::const_iterator				ConstIter;
 	typedef CollisionObjectList::iterator					Iter;
 
 	typedef std::shared_ptr<class DynamicsWorld>			DynamicsWorldRef;
@@ -64,7 +65,11 @@ namespace bullet {
 		~DynamicsWorld();
 
 		Iter												begin();
+		ConstIter											begin() const;
 		Iter												end();
+		ConstIter											end() const;
+		Iter												find( CollisionObjectRef &object );
+		ConstIter											find( const CollisionObjectRef &object ) const;
 		Iter												erase( Iter pos );
 		CollisionObjectRef									pushBack( CollisionObject *object );
 
@@ -72,8 +77,11 @@ namespace bullet {
 		btDefaultCollisionConfiguration*					getCollisionConfiguration();
 		btCollisionDispatcher*								getDispatcher();
 		btSoftBodyWorldInfo&								getInfo();
+		const btSoftBodyWorldInfo&							getInfo() const;
 		CollisionObjectList&								getObjects();
+		const CollisionObjectList&							getObjects() const;
 		uint32_t											getNumObjects();
+		const uint32_t										getNumObjects() const;
 		btConstraintSolver*									getSolver();
 		btDiscreteDynamicsWorld*							getWorld();
 

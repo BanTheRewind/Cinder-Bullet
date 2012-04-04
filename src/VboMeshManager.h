@@ -37,60 +37,60 @@
 
 #pragma once
 
-// Includes
-#include "cinder/TriMesh.h"
-#include "Utilities.h"
-#include "VboMeshManager.h"
+#include "cinder/gl/Vbo.h"
+#include "cinder/Vector.h"
+#include <map>
 
 namespace bullet
 {
 
-	class DynamicsWorld;
-	class RigidBody;
-	class SoftBody;
+	// Texture pointer alias
+	typedef std::shared_ptr<ci::gl::VboMesh> VboMeshRef;
+	typedef std::weak_ptr<ci::gl::VboMesh> VboMeshWeakRef;
 
-	class CollisionObject
+	// Manages VBO meshes
+	class VboMeshManager 
 	{
 
 	public:
 
-		~CollisionObject();
+		typedef enum 
+		{
+			PRIMITIVE_NONE, PRIMITIVE_BOX, PRIMITIVE_CONE, PRIMITIVE_CYLINDER, PRIMITIVE_SPHERE
+		} PrimitiveType;
 
-		btCollisionObject*					getBulletBody();
-		btCollisionObject*					getBulletBody() const;
-		ci::Vec3f							getPosition();
-		ci::Vec3f							getPosition() const;
-		ci::Matrix44f						getTransformMatrix();
-		ci::Matrix44f						getTransformMatrix() const;
-		ci::gl::VboMesh&					getVboMesh();
-		const ci::gl::VboMesh&				getVboMesh() const;
+		static VboMeshRef create( PrimitiveType type, const ci::Vec3f &scale = ci::Vec3f::one(), uint32_t segments = 0 );
+		static VboMeshRef create( const std::vector<uint32_t> &indices, const std::vector<ci::Vec3f> &positions, 
+								  const std::vector<ci::Vec3f> &normals, const std::vector<ci::Vec2f> &texCoords, 
+								  GLenum primitiveType = GL_TRIANGLES );
 
-		bool								isRigidBody();
-		bool								isRigidBody() const;
-		bool								isSoftBody();
-		bool								isSoftBody() const;
+	private:
+		
+		static VboMeshRef createBox();
+		//static VboMeshRef createCone( const ci::Vec3f &scale, uint32_t segments );
+		static VboMeshRef createCylinder( const ci::Vec3f &scale, uint32_t segments );
+		static VboMeshRef createSphere( uint32_t segments );
 
-	protected:
+		class PrimitiveInfo
+		{
+		public:
+			PrimitiveInfo( PrimitiveType type, const ci::Vec3f &scale, uint32_t segments );
+			bool			operator==( const PrimitiveInfo &rhs ) const;
+			bool			operator!=( const PrimitiveInfo &rhs ) const;
+		private:
+			uint32_t		mSegments;
+			ci::Vec3f		mScale;
+			PrimitiveType	mType;
+		};
 
-		static ci::Matrix44f				getTransformMatrix( const btRigidBody* body );
-		static ci::Matrix44f				getTransformMatrix( const btSoftBody* body );
+		struct PrimitiveInfoSort
+		{
+			bool operator()( const PrimitiveInfo &lhs, const PrimitiveInfo &rhs) const;
+		};
 
-		static btHeightfieldTerrainShape*	createHeightfieldTerrainShape( const ci::Surface32f &heightField, int32_t stickWidth, int32_t stickLength, 
-			float heightScale, float minHeight, float maxHeight, int32_t upAxis, const ci::Vec3f &scale );
-		static btBvhTriangleMeshShape*		createConcaveMeshShape( const std::vector<ci::Vec3f> &vertices, const std::vector<uint32_t> &indices, 
-			const ci::Vec3f &scale, float margin );
-		static btConvexHullShape*			createConvexHullShape( const std::vector<ci::Vec3f> &vertices, const ci::Vec3f &scale );
-
-
-		CollisionObject( const ci::Vec3f &position = ci::Vec3f::zero(), const ci::Quatf &rotation = ci::Quatf() );
-
-		btRigidBody							*mRigidBody;
-		btSoftBody							*mSoftBody;
-
-		ci::Vec3f							mScale;
-		VboMeshRef							mVboMesh;
-
-		friend class						DynamicsWorld;
+		// List of weak pointers to textures
+		typedef std::map<PrimitiveInfo, VboMeshWeakRef, PrimitiveInfoSort> VboMeshList;
+		static VboMeshList	sVboMeshList;
 
 	};
 
