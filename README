@@ -27,7 +27,6 @@ TO DO LIST
 - Implement btStaticPlaneShape
 - Soft body convenience methods
 - Investigate if separate object is needed for bullets
-- VboMesh manager (weak_ptr based)
 - Static lib
 - XCode static lib + samples
 
