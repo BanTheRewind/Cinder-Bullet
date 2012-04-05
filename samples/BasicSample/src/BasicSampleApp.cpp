@@ -42,7 +42,6 @@
 #include "cinder/gl/Light.h"
 #include "cinder/gl/Texture.h"
 #include "cinder/Camera.h"
-#include "cinder/Channel.h"
 #include "cinder/ImageIo.h"
 #include "cinder/ObjLoader.h"
 #include "cinder/Rand.h"
@@ -58,7 +57,6 @@ class BasicSampleApp : public ci::app::AppBasic
 
 public:
 
-	// Cinder callbacks
 	void						draw();
 	void						keyDown( ci::app::KeyEvent event );
 	void						mouseDown( ci::app::MouseEvent event );
@@ -71,13 +69,9 @@ public:
 	
 private:
 
-	// Camera
 	ci::CameraPersp				mCamera;
-
-	// Shading
 	ci::gl::Light				*mLight;
 
-	// 3D objects
 	void						loadModels();
 	void						loadTerrain();
 	ci::TriMesh					mConcave;
@@ -89,42 +83,30 @@ private:
 
 };
 
-// Imports
 using namespace bullet;
 using namespace ci;
 using namespace ci::app;
 using namespace std;
 
-// Render
 void BasicSampleApp::draw()
 {
-
-	// Set up screen	
 	gl::setViewport( getWindowBounds() );
 	gl::setMatrices( mCamera );
 	gl::clear( ColorAf::black() );
 
-	// Rotate
 	gl::pushMatrices();
 	gl::rotate( Vec3f( -45.0f, 0.0f, 0.0f ) );
-
 	for ( bullet::Iter object = mWorld->begin(); object != mWorld->end(); ++object ) {
 		gl::pushMatrices();
 		glMultMatrixf( object->getTransformMatrix() );
 		gl::draw( object->getVboMesh() );
 		gl::popMatrices();
 	}
-
-	// End rotation
 	gl::popMatrices();
-
 }
 
-// Handles key press
 void BasicSampleApp::keyDown( KeyEvent event )
 {
-
-	// Key on key...
 	switch ( event.getCode() )
 	{
 	case KeyEvent::KEY_ESCAPE:
@@ -134,22 +116,16 @@ void BasicSampleApp::keyDown( KeyEvent event )
 		writeImage( getAppPath() + "\\frame_" + toString( getElapsedFrames() ) + ".png", copyWindowSurface() );
 		break;
 	}
-
 }
 
-// Load test models
 void BasicSampleApp::loadModels()
 {
-
-	// Load OBJ files as meshes
 	ObjLoader loader( loadResource( RES_OBJ_SPHERE )->createStream() );
 	loader.load( & mConvex );
 	loader = ObjLoader( loadResource( RES_OBJ_TORUS )->createStream() );
 	loader.load( & mConcave );
-
 }
 
-// Load the ground
 void BasicSampleApp::loadTerrain()
 {
 
@@ -157,7 +133,7 @@ void BasicSampleApp::loadTerrain()
 	Surface32f heightField = ( Surface32f )Surface( loadImage( loadResource( RES_IMAGE_HEIGHTFIELD ) ) );
 
 	// Add terrain
-	bullet::createRigidTerrain( mWorld, heightField, heightField.getWidth(), heightField.getHeight(), -200, 200, 1, Vec3f( 6.0f, 210.0f, 6.0f ), 0.0f );
+	//mBox = bullet::createRigidTerrain( mWorld, heightField, heightField.getWidth(), heightField.getHeight(), -200, 200, 1, Vec3f( 6.0f, 210.0f, 6.0f ), 0.0f );
 
 }
 
@@ -175,33 +151,13 @@ void BasicSampleApp::mouseDown( MouseEvent event )
 			( float )( ( rand() % 400 ) - 200 )
 			 );
 
+		// Add a box
 		bullet::createRigidBox( mWorld, Vec3f::one() * size, size * size, position );
 		
-		// Drop primitive into terrain
-		/*switch ( Rand::randInt( 0, 5 ) )
-		{
-		case 0:
-			bullet::createRigidSphere( mWorld, size, 16, 1.0f, position );
-			break;
-		case 1:
-			bullet::createRigidBox( mWorld, Vec3f::one() * size, 1.0f, position );
-			break;
-		case 2:
-			bullet::createRigidHull( mWorld, mConvex, Vec3f::one() * size * 0.5f, 1.0f, position );
-			break;
-		case 3:
-			bullet::createRigidMesh( mWorld, mConcave, Vec3f::one() * size * 0.12f, 0.0f, 1.0f, position );
-			break;
-		case 4:
-			bullet::createRigidCylinder( mWorld, size * 0.5f, size, size * 2.0f, 12, 1.0f, position );
-			break;
-		}*/
-
 	}
 
 }
 
-// Handles mouse wheel
 void BasicSampleApp::mouseWheel( MouseEvent event )
 {
 
@@ -210,19 +166,14 @@ void BasicSampleApp::mouseWheel( MouseEvent event )
 
 }
 
-// Set up window
 void BasicSampleApp::prepareSettings( Settings * settings )
 {
-
-	// DO IT!
 	settings->setFrameRate( 60.0f );
 	settings->setFullScreen( false );
 	settings->setResizable( false );
 	settings->setWindowSize( 1280, 720 );
-
 }
 
-// Handles window resize
 void BasicSampleApp::resize( ResizeEvent event )
 {
 
@@ -244,40 +195,40 @@ void BasicSampleApp::resize( ResizeEvent event )
 
 }
 
-// Setup
 void BasicSampleApp::setup()
 {
 
-	// Set up OpenGL lighting
+	// Set up lighting
 	mLight = new gl::Light( gl::Light::DIRECTIONAL, 0 );
 	mLight->setDirection( Vec3f( 0.0f, 0.1f, 0.3f ).normalized() );
 	mLight->setAmbient( ColorAf( 0.2f, 0.2f, 0.2f, 1.0f ) );
 	mLight->setDiffuse( ColorAf( 1.0f, 1.0f, 1.0f, 1.0f ) );
 	mLight->enable();
 
-	// Create a dynamics world
+	// Load meshes
+	loadModels();
+
+	// Create a Bullet dynamics world
 	mWorld = bullet::createWorld();
 
-	// Load 3D objects
-	loadModels();
-	//loadTerrain();
+	// Create and add a sphere
+	//bullet::createRigidSphere( mWorld, 200.0f, 64, 0.0f, Vec3f( 0.0f, -100.0f, 0.0f ) );
 
-	// Create sphere and box
+	// Create and add the wobbly box
 	mBoxTransform.setIdentity();
-	bullet::createRigidSphere( mWorld, 200.0f, 64, 0.0f, Vec3f( 0.0f, -100.0f, 0.0f ) );
-	mBox = bullet::createRigidBox( mWorld,  Vec3f( 600.0f, 50.0f, 600.0f ), 0.0f );
+	//mBox = bullet::createRigidBox( mWorld,  Vec3f( 600.0f, 50.0f, 600.0f ), 0.0f );
+	mBox = bullet::createRigidHull( mWorld, mConvex, Vec3f( 100.0f, 100.0f, 100.0f ), 0.0f );
+	//mBox = bullet::createRigidMesh( mWorld, mConcave, Vec3f( 20.0f, 2.0f, 20.0f ), 0.0f, 0.0f );
+
+	// Set friction for box
 	btRigidBody* boxBody = bullet::toBulletRigidBody( mBox );
-	boxBody->setFriction( 1.0f );
+	boxBody->setFriction( 1.1667f );
 
-	//mBox = bullet::createRigidHull( mWorld, mConvex, Vec3f( 100.0f, 100.0f, 100.0f ), 0.0f );
-	//mBox = bullet::createRigidCylinder( mWorld, 100.0f, 300.0f, 100.0f, 64, 0.0f, Vec3f( 0.0f, -150.0f, 0.0f ) );
-
-	// Run first resize to initialize camera
+	// Run first resize to initialize view
 	resize( ResizeEvent( getWindowSize() ) );
 
 }
 
-// Called on exit
 void BasicSampleApp::shutdown()
 {
 
@@ -291,19 +242,18 @@ void BasicSampleApp::shutdown()
 
 }
 
-// Runs update logic
 void BasicSampleApp::update()
 {
 
 	// Update light
 	mLight->update( mCamera );
 
-	// Set rotation
+	// Set box rotation
 	float rotation = math<float>::sin( ( float )getElapsedSeconds() * 0.3333f ) * 0.35f	;
 	mBoxTransform.setRotation( btQuaternion( 0.25f, 0.0f, 1.0f + rotation * 0.1f, rotation ) );
 	mBoxTransform.setOrigin( btVector3( 0.0f, -100.0f, 0.0f ) );
 
-	// Apply rotation to ground
+	// Apply rotation to box
 	btRigidBody* body = bullet::toBulletRigidBody( mBox );
 	body->getMotionState()->setWorldTransform( mBoxTransform );
 	body->setWorldTransform( mBoxTransform );
@@ -326,5 +276,4 @@ void BasicSampleApp::update()
 
 }
 
-// Run application
 CINDER_APP_BASIC( BasicSampleApp, RendererGl )

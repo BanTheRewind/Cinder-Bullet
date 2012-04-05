@@ -431,6 +431,10 @@ namespace bullet
 	{
 		return !( *this == rhs );
 	}
+	bool VboMeshManager::PrimitiveInfo::operator<( const VboMeshManager::PrimitiveInfo &rhs ) const
+	{
+		return !( *this == rhs );
+	}
 
 	bool VboMeshManager::PrimitiveInfoSort::operator()( const PrimitiveInfo &lhs, const PrimitiveInfo &rhs) const
 	{

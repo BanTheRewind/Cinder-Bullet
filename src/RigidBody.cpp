@@ -152,7 +152,7 @@ namespace bullet
 		mScale = dimensions;
 
 		// Create VBO
-		mVboMesh = VboMeshManager::create( VboMeshManager::PRIMITIVE_BOX, Vec3f::zero(), 0 );
+		mVboMesh = VboMeshManager::create( VboMeshManager::PRIMITIVE_BOX );
 
 	}
 

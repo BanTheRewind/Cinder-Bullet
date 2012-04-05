@@ -75,6 +75,7 @@ namespace bullet
 		{
 		public:
 			PrimitiveInfo( PrimitiveType type, const ci::Vec3f &scale, uint32_t segments );
+			bool			operator<( const PrimitiveInfo &rhs ) const;
 			bool			operator==( const PrimitiveInfo &rhs ) const;
 			bool			operator!=( const PrimitiveInfo &rhs ) const;
 		private:
