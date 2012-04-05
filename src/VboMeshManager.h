@@ -84,13 +84,8 @@ namespace bullet
 			PrimitiveType	mType;
 		};
 
-		struct PrimitiveInfoSort
-		{
-			bool operator()( const PrimitiveInfo &lhs, const PrimitiveInfo &rhs) const;
-		};
-
 		// List of weak pointers to textures
-		typedef std::map<PrimitiveInfo, VboMeshWeakRef, PrimitiveInfoSort> VboMeshList;
+		typedef std::map<PrimitiveInfo, VboMeshWeakRef> VboMeshList;
 		static VboMeshList	sVboMeshList;
 
 	};

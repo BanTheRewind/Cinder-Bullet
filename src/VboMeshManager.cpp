@@ -36,7 +36,7 @@ namespace bullet
 			case PRIMITIVE_BOX:
 				meshRef = createBox();
 				break;
-			case PRIMITIVE_CONE:
+			case PRIMITIVE_CONE:	
 				//meshRef = createCone( scale, segments );
 				break;
 			case PRIMITIVE_CYLINDER:
@@ -433,12 +433,7 @@ namespace bullet
 	}
 	bool VboMeshManager::PrimitiveInfo::operator<( const VboMeshManager::PrimitiveInfo &rhs ) const
 	{
-		return !( *this == rhs );
-	}
-
-	bool VboMeshManager::PrimitiveInfoSort::operator()( const PrimitiveInfo &lhs, const PrimitiveInfo &rhs) const
-	{
-		return lhs != rhs;
+		return *this != rhs;
 	}
 
 }
