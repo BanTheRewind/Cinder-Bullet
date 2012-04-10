@@ -69,11 +69,13 @@ public:
 	
 private:
 
+	static const uint32_t		GROUND = 3;
+	static const uint32_t		MAX_SPHERES = 80;
+
 	ci::CameraPersp				mCamera;
 	ci::gl::Light				*mLight;
 
 	void						loadModels();
-	void						loadTerrain();
 	ci::TriMesh					mConcave;
 	ci::TriMesh					mConvex;
 
@@ -81,12 +83,34 @@ private:
 	btTransform					mBoxTransform;
 	bullet::DynamicsWorldRef	mWorld;
 
+	ci::gl::Texture				mTexSquare;
+	ci::gl::Texture				mTexSphere;
+	ci::gl::Texture				mTexTerrain;
+	
+	void						bindTexture( uint32_t index );
+	void						unbindTexture( uint32_t index );
+
 };
 
 using namespace bullet;
 using namespace ci;
 using namespace ci::app;
 using namespace std;
+
+void BasicSampleApp::bindTexture( uint32_t index )
+{
+	if ( GROUND == 3 ) {
+		if ( index == 0 ) {
+			mTexTerrain.bind();
+		} else {
+			mTexSphere.bind();
+		}
+	} else {
+		if ( ( GROUND == 0 && index > 1 ) || GROUND == 1 ) {
+			mTexSquare.bind();
+		}
+	}
+}
 
 void BasicSampleApp::draw()
 {
@@ -96,10 +120,13 @@ void BasicSampleApp::draw()
 
 	gl::pushMatrices();
 	gl::rotate( Vec3f( -45.0f, 0.0f, 0.0f ) );
-	for ( bullet::Iter object = mWorld->begin(); object != mWorld->end(); ++object ) {
+	uint32_t i = 0;
+	for ( bullet::Iter object = mWorld->begin(); object != mWorld->end(); ++object, i++ ) {
 		gl::pushMatrices();
 		glMultMatrixf( object->getTransformMatrix() );
+		bindTexture( i );
 		gl::draw( object->getVboMesh() );
+		unbindTexture( i );
 		gl::popMatrices();
 	}
 	gl::popMatrices();
@@ -126,33 +153,27 @@ void BasicSampleApp::loadModels()
 	loader.load( & mConcave );
 }
 
-void BasicSampleApp::loadTerrain()
-{
-
-	// Load heightfield image from resources
-	Surface32f heightField = ( Surface32f )Surface( loadImage( loadResource( RES_IMAGE_HEIGHTFIELD ) ) );
-
-	// Add terrain
-	//mBox = bullet::createRigidTerrain( mWorld, heightField, heightField.getWidth(), heightField.getHeight(), -200, 200, 1, Vec3f( 6.0f, 210.0f, 6.0f ), 0.0f );
-
-}
-
 // Handles mouse button press
 void BasicSampleApp::mouseDown( MouseEvent event )
 {
 
-	for ( uint32_t i = 0; i < 100; i++ ) {
+	for ( uint32_t i = 0; i < 10; i++ ) {
 
 		// Set random size and position
-		float size = Rand::randFloat( 3.0f, 36.0f );
+		float size = Rand::randFloat( 1.0f, 12.0f );
 		Vec3f position = Vec3f( 
-			( float )( ( rand() % 400 ) - 200 ), 
-			( float )( ( rand() % 100 ) + 400 ), 
-			( float )( ( rand() % 400 ) - 200 )
+			( float )( ( rand() % 200 ) - 100 ), 
+			( float )( ( rand() % 50 ) + 200 ), 
+			( float )( ( rand() % 200 ) - 100 )
 			 );
 
-		// Add a box
-		bullet::createRigidBox( mWorld, Vec3f::one() * size, size * size, position );
+		// Add a body
+		if ( GROUND == 3 ) {
+			bullet::createRigidSphere( mWorld, size, 16, size * size, position );
+		} else {
+			size *= 2.0f;
+			bullet::createRigidBox( mWorld, Vec3f::one() * size, size * size, position );
+		}
 		
 	}
 
@@ -178,13 +199,14 @@ void BasicSampleApp::resize( ResizeEvent event )
 {
 
 	// Reset camera
-	mCamera.setPerspective( 60.0f, getWindowAspectRatio(), 1.0f, 2000.0f );
-	mCamera.lookAt( Vec3f( 0.0f, 0.0f, -600.0f ), Vec3f::zero() );
+	mCamera.setPerspective( 60.0f, getWindowAspectRatio(), 1.0f, 5000.0f );
+	mCamera.lookAt( Vec3f( 0.0f, 0.0f, -200.0f ), Vec3f::zero() );
 	gl::setMatrices( mCamera );
 
 	// Set up OpenGL
 	glEnable( GL_BLEND );
 	glEnable( GL_DEPTH_TEST );
+	gl::enable( GL_TEXTURE_2D );
 	glShadeModel( GL_SMOOTH );
 	glEnable( GL_POLYGON_SMOOTH );
 	glHint( GL_POLYGON_SMOOTH_HINT, GL_NICEST );
@@ -211,18 +233,34 @@ void BasicSampleApp::setup()
 	// Create a Bullet dynamics world
 	mWorld = bullet::createWorld();
 
-	// Create and add a sphere
-	//bullet::createRigidSphere( mWorld, 200.0f, 64, 0.0f, Vec3f( 0.0f, -100.0f, 0.0f ) );
+	// Load texture
+	mTexSquare = gl::Texture( loadImage( loadResource( RES_TEX_SQUARE ) ) );
+	mTexSphere = gl::Texture( loadImage( loadResource( RES_TEX_SPHERE ) ) );
+	mTexTerrain = gl::Texture( loadImage( loadResource( RES_TEX_TERRAIN ) ) );
+	mTexTerrain.unbind();
 
 	// Create and add the wobbly box
 	mBoxTransform.setIdentity();
-	//mBox = bullet::createRigidBox( mWorld,  Vec3f( 600.0f, 50.0f, 600.0f ), 0.0f );
-	mBox = bullet::createRigidHull( mWorld, mConvex, Vec3f( 100.0f, 100.0f, 100.0f ), 0.0f );
-	//mBox = bullet::createRigidMesh( mWorld, mConcave, Vec3f( 20.0f, 2.0f, 20.0f ), 0.0f, 0.0f );
+	switch ( GROUND ) {
+	case 0:
+		mBox = bullet::createRigidBox( mWorld, Vec3f( 200.0f, 35.0f, 200.0f ), 0.0f );
+		bullet::createRigidSphere( mWorld, 50.0f, 64, 0.0f, Vec3f( 0.0f, -50.0f, 0.0f ) );
+		break;
+	case 1:
+		mBox = bullet::createRigidHull( mWorld, mConvex, Vec3f::one() * 50.0f, 0.0f );
+		break;
+	case 2:
+		mBox = bullet::createRigidMesh( mWorld, mConcave, Vec3f( 10.0f, 1.0f, 10.0f ), 0.0f, 0.0f );
+		break;
+	case 3:
+		Channel32f heightField( loadImage( loadResource( RES_IMAGE_HEIGHTFIELD_SM ) ) );
+		mBox = bullet::createRigidTerrain( mWorld, heightField, -1.0f, 1.0f, Vec3f( 6.0f, 80.0f, 6.0f ), 0.0f );
+		break;
+	}
 
 	// Set friction for box
 	btRigidBody* boxBody = bullet::toBulletRigidBody( mBox );
-	boxBody->setFriction( 1.1667f );
+	boxBody->setFriction( 0.95f );
 
 	// Run first resize to initialize view
 	resize( ResizeEvent( getWindowSize() ) );
@@ -242,21 +280,41 @@ void BasicSampleApp::shutdown()
 
 }
 
+void BasicSampleApp::unbindTexture( uint32_t index )
+{
+	if ( GROUND == 3 ) {
+		if ( index == 0 ) {
+			mTexTerrain.unbind();
+		} else {
+			mTexSphere.unbind();
+		}
+	} else if ( GROUND == 0 ) {
+		if ( ( GROUND == 0 && index > 1 ) || GROUND == 1 ) {
+			mTexSquare.unbind();
+		}
+	}
+}
+
 void BasicSampleApp::update()
 {
 
 	// Update light
 	mLight->update( mCamera );
 
-	// Set box rotation
-	float rotation = math<float>::sin( ( float )getElapsedSeconds() * 0.3333f ) * 0.35f	;
-	mBoxTransform.setRotation( btQuaternion( 0.25f, 0.0f, 1.0f + rotation * 0.1f, rotation ) );
-	mBoxTransform.setOrigin( btVector3( 0.0f, -100.0f, 0.0f ) );
+	// If ground is not terrain..
+	if ( GROUND < 3 ) {
 
-	// Apply rotation to box
-	btRigidBody* body = bullet::toBulletRigidBody( mBox );
-	body->getMotionState()->setWorldTransform( mBoxTransform );
-	body->setWorldTransform( mBoxTransform );
+		// Set box rotation
+		float rotation = math<float>::sin( ( float )getElapsedSeconds() * 0.3333f ) * 0.35f	;
+		mBoxTransform.setRotation( btQuaternion( 0.25f, 0.0f, 1.0f + rotation * 0.1f, rotation ) );
+		mBoxTransform.setOrigin( btVector3( 0.0f, -60.0f, 0.0f ) );
+
+		// Apply rotation to box
+		btRigidBody* body = bullet::toBulletRigidBody( mBox );
+		body->getMotionState()->setWorldTransform( mBoxTransform );
+		body->setWorldTransform( mBoxTransform );
+
+	}
 	
 	// Update dynamics world
 	mWorld->update();
@@ -265,12 +323,20 @@ void BasicSampleApp::update()
 	OutputDebugStringA( toString( iter->getPosition().x ).c_str() );
 	OutputDebugStringA( "\n" );*/
 
-	// Remove old objects
-	for ( bullet::Iter object = mWorld->begin(); object != mWorld->end(); ) {
-		if ( object != mWorld->begin() && object->getPosition().y < -800.0f ) {
-			object = mWorld->erase( object );
-		} else {
-			++object;
+	// Remove objects
+	if ( GROUND == 3 ) {
+		if ( mWorld->getNumObjects() > MAX_SPHERES + 1 ) {
+			for ( int32_t i = 1; i < mWorld->getNumObjects() - MAX_SPHERES; i++ ) {
+				mWorld->erase( mWorld->begin() + 1 );
+			}
+		}
+	} else {
+		for ( bullet::Iter object = mWorld->begin(); object != mWorld->end(); ) {
+			if ( object != mWorld->begin() && object->getPosition().y < -800.0f ) {
+				object = mWorld->erase( object );
+			} else {
+				++object;
+			}
 		}
 	}
 

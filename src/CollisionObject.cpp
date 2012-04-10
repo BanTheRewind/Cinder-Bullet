@@ -176,14 +176,17 @@ namespace bullet
 	/////////////////////////////////////////////////////////////////////////////////////////////////
 
 	// Create terrain from color channel
-	btHeightfieldTerrainShape* CollisionObject::createHeightfieldTerrainShape( const Surface32f& heightField, int32_t stickWidth, int32_t stickLength, 
-		float heightScale, float minHeight, float maxHeight, int32_t upAxis, const Vec3f& scale )
+	btHeightfieldTerrainShape* CollisionObject::createHeightfieldTerrainShape( const Channel32f &heightField, float minHeight, float maxHeight, const Vec3f &scale )
 	{
 
-		// Create height field shape from channel data
-		Channel32f channel( heightField );
-		btHeightfieldTerrainShape* shape = new btHeightfieldTerrainShape( stickWidth, stickLength, channel.getData(), heightScale, minHeight, maxHeight, upAxis, PHY_FLOAT, false );
-		
+		// Get stick size from image dimensions
+		int32_t length = heightField.getHeight(); 
+		int32_t width = heightField.getWidth();
+
+        // Create height field shape from channel data
+		float heightScale = math<float>::abs( minHeight ) + math<float>::abs( maxHeight );
+		btHeightfieldTerrainShape* shape = new btHeightfieldTerrainShape( width, length, heightField.getData(), heightScale, minHeight, maxHeight, 1, PHY_FLOAT, false );
+
 		// Scale and return shape
 		shape->setLocalScaling( toBulletVector3( scale ) );
 		return shape;

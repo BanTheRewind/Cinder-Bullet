@@ -102,12 +102,11 @@ namespace bullet
 	class RigidTerrain : public CollisionObject, public RigidBody 
 	{
 	private:
-		RigidTerrain( const ci::Surface32f &heightField, int32_t stickWidth, int32_t stickLength, float minHeight, float maxHeight, 
-			int32_t upAxis, const ci::Vec3f &scale, float mass, const ci::Vec3f &position, const ci::Quatf &rotation );
-		friend CollisionObjectRef	createRigidTerrain( const DynamicsWorldRef &world, const ci::Surface32f &heightField, 
-														int32_t stickWidth, int32_t stickLength, float minHeight, float maxHeight, 
-														int32_t upAxis, const ci::Vec3f &scale, float mass, const ci::Vec3f &position, 
-														const ci::Quatf &rotation );
+		RigidTerrain( const ci::Channel32f &heightField, float minHeight, float maxHeight, const ci::Vec3f &scale, float mass, 
+			const ci::Vec3f &position, const ci::Quatf &rotation );
+		friend CollisionObjectRef	createRigidTerrain( const DynamicsWorldRef &world, const ci::Channel32f &heightField, float minHeight, float maxHeight, 
+														const ci::Vec3f &scale, float mass, const ci::Vec3f &position, const ci::Quatf &rotation );
+		ci::Channel32f				mChannel;
 	};
 
 }

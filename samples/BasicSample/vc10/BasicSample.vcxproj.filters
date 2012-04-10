@@ -77,5 +77,17 @@
     <None Include="..\resources\heightfield.png">
       <Filter>Resources</Filter>
     </None>
+    <None Include="..\resources\heightfield_sm.jpg">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="..\resources\tex_sphere.jpg">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="..\resources\tex_square.png">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="..\resources\tex_terrain.jpg">
+      <Filter>Resources</Filter>
+    </None>
   </ItemGroup>
 </Project>

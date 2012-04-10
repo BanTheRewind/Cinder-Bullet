@@ -11,7 +11,7 @@ namespace bullet
 	VboMeshManager::VboMeshList VboMeshManager::sVboMeshList = VboMeshManager::VboMeshList();
 
 	// Find and return a texture
-	VboMeshRef VboMeshManager::create( PrimitiveType type, const Vec3f &scale, uint32_t segments )
+	VboMeshRef VboMeshManager::create( PrimitiveType type, const Vec3f &scale, int32_t segments )
 	{
 
 		// Remove unused references
@@ -271,7 +271,7 @@ namespace bullet
 	//{
 	//}
 
-	VboMeshRef VboMeshManager::createCylinder( const Vec3f &scale, uint32_t segments )
+	VboMeshRef VboMeshManager::createCylinder( const Vec3f &scale, int32_t segments )
 	{
 
 		// Declare vectors
@@ -357,7 +357,7 @@ namespace bullet
 
 	}
 
-	VboMeshRef VboMeshManager::createSphere( uint32_t segments )
+	VboMeshRef VboMeshManager::createSphere( int32_t segments )
 	{
 
 		// Declare vectors
@@ -391,6 +391,9 @@ namespace bullet
 				Vec3f normal = position.normalized();
 				normals.push_back( normal );
 
+				// Set tex coord
+				texCoords.push_back( normal.xy() * 0.5f + Vec2f( 0.5f, 0.5f ) ); 
+
 				// Add indices
 				int32_t n = t + 1 >= segments ? 0 : t + 1;
 				indices.push_back( p * segments + t );
@@ -418,7 +421,7 @@ namespace bullet
 
 	}
 
-	VboMeshManager::PrimitiveInfo::PrimitiveInfo( VboMeshManager::PrimitiveType type, const ci::Vec3f &scale, uint32_t segments )
+	VboMeshManager::PrimitiveInfo::PrimitiveInfo( VboMeshManager::PrimitiveType type, const ci::Vec3f &scale, int32_t segments )
 		: mScale( scale ), mSegments( segments ), mType( type )
 	{}
 

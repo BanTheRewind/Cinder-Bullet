@@ -130,6 +130,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\resources\heightfield.png" />
+    <None Include="..\resources\heightfield_sm.jpg" />
+    <None Include="..\resources\tex_sphere.jpg" />
+    <None Include="..\resources\tex_square.png" />
+    <None Include="..\resources\tex_terrain.jpg" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -13,7 +13,6 @@ BUGS
 
 - Concave mesh body isn't scaling on Y axis
 - Cylinder VBO normals are wrong
-- Terrain collision
 - Crash in exit
 
 TO DO LIST
@@ -22,7 +21,7 @@ TO DO LIST
   Iter bullet::erase( const CollisionObjectRef &object ) { ... }
   Iter bullet::find( const CollisionObjectRef &object ) { ... }
 - Screen -> dynamics world interaction
-- Texture coordinates for VBOs
+- Texture coordinates for VBOs (some are finished)
 - Implement btConeShape
 - Implement btStaticPlaneShape
 - Soft body convenience methods

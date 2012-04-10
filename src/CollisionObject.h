@@ -75,8 +75,7 @@ namespace bullet
 		static ci::Matrix44f				getTransformMatrix( const btRigidBody* body );
 		static ci::Matrix44f				getTransformMatrix( const btSoftBody* body );
 
-		static btHeightfieldTerrainShape*	createHeightfieldTerrainShape( const ci::Surface32f &heightField, int32_t stickWidth, int32_t stickLength, 
-			float heightScale, float minHeight, float maxHeight, int32_t upAxis, const ci::Vec3f &scale );
+		static btHeightfieldTerrainShape*	createHeightfieldTerrainShape( const ci::Channel32f &heightField, float minHeight, float maxHeight, const ci::Vec3f &scale );
 		static btBvhTriangleMeshShape*		createConcaveMeshShape( const std::vector<ci::Vec3f> &vertices, const std::vector<uint32_t> &indices, 
 			const ci::Vec3f &scale, float margin );
 		static btConvexHullShape*			createConvexHullShape( const std::vector<ci::Vec3f> &vertices, const ci::Vec3f &scale );

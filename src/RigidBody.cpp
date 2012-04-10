@@ -225,16 +225,19 @@ namespace bullet
 	}
 
 	// Terrain from Surface data
-	RigidTerrain::RigidTerrain( const Surface32f &heightField, int32_t stickWidth, int32_t stickLength, float minHeight, float maxHeight, 
-		int32_t upAxis, const Vec3f &scale, float mass, const Vec3f &position, const Quatf &rotation )
+	RigidTerrain::RigidTerrain( const Channel32f &heightField, float minHeight, float maxHeight, const Vec3f &scale, float mass, 
+		const Vec3f &position, const Quatf &rotation )
 		: CollisionObject( position, rotation )
 	{
+
+		// Copy channel
+		mChannel = heightField;
 
 		// Set scale
 		mScale = scale;
 
 		// Create body
-		btHeightfieldTerrainShape* shape = createHeightfieldTerrainShape( heightField, stickWidth, stickLength, 1.0f, minHeight, maxHeight, 1, scale );
+		btHeightfieldTerrainShape* shape = createHeightfieldTerrainShape( mChannel, minHeight, maxHeight, scale );
 		mRigidBody = createTerrain( shape, mass, position, rotation );
 
 		// Declare vectors
@@ -244,30 +247,26 @@ namespace bullet
 		vector<Vec2f> texCoords;
 
 		// Get image dimensions
-		int32_t height = heightField.getHeight();
-		int32_t width = heightField.getWidth();
+		int32_t height = mChannel.getHeight();
+		int32_t width = mChannel.getWidth();
 		float halfHeight = (float)height * 0.5f;
 		float halfWidth = (float)width * 0.5f;
 		
-		// Set grey for dot product
-		Vec3f grey( 0.3333f, 0.3333f, 0.3333f );
-
 		// Iterate through dimensions
 		for ( int32_t y = 0; y < height; y++ ) {
 			for ( int32_t x = 0; x < width; x++ ) {
 
-				// Get pixel color
-				Colorf color( heightField.getPixel( Vec2i( x, y ) ) );
+				// Get pixel shade
+				float value = mChannel.getValue( Vec2i( x, y ) );
 				
 				// Add position
-				positions.push_back( Vec3f(
-					(float)x - halfWidth, 
-					Vec3f( color.r, color.g, color.b ).dot( grey ), 
-					( float)y - halfHeight )
-					);
+				Vec3f position( (float)x - halfWidth, value, (float)y - halfHeight );
+				positions.push_back( position );
 
 				// Add default normal
 				normals.push_back( Vec3f::zero() );
+
+				texCoords.push_back( Vec2f( (float)x / float(width), (float)y / (float)height ) );
 
 				// Add indices for this quad
 				int32_t xn = x + 1 >= width ? 0 : 1;

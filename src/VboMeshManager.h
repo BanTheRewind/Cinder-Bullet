@@ -59,22 +59,22 @@ namespace bullet
 			PRIMITIVE_NONE, PRIMITIVE_BOX, PRIMITIVE_CONE, PRIMITIVE_CYLINDER, PRIMITIVE_SPHERE
 		} PrimitiveType;
 
-		static VboMeshRef create( PrimitiveType type, const ci::Vec3f &scale = ci::Vec3f::one(), uint32_t segments = 0 );
-		static VboMeshRef create( const std::vector<uint32_t> &indices, const std::vector<ci::Vec3f> &positions, 
-								  const std::vector<ci::Vec3f> &normals, const std::vector<ci::Vec2f> &texCoords, 
-								  GLenum primitiveType = GL_TRIANGLES );
+		static VboMeshRef	create( PrimitiveType type, const ci::Vec3f &scale = ci::Vec3f::one(), int32_t segments = 0 );
+		static VboMeshRef	create( const std::vector<uint32_t> &indices, const std::vector<ci::Vec3f> &positions, 
+									const std::vector<ci::Vec3f> &normals, const std::vector<ci::Vec2f> &texCoords, 
+									GLenum primitiveType = GL_TRIANGLES );
 
 	private:
 		
-		static VboMeshRef createBox();
-		//static VboMeshRef createCone( const ci::Vec3f &scale, uint32_t segments );
-		static VboMeshRef createCylinder( const ci::Vec3f &scale, uint32_t segments );
-		static VboMeshRef createSphere( uint32_t segments );
+		static VboMeshRef	createBox();
+		//static VboMeshRef createCone( const ci::Vec3f &scale, int32_t segments );
+		static VboMeshRef	createCylinder( const ci::Vec3f &scale, int32_t segments );
+		static VboMeshRef	createSphere( int32_t segments );
 
 		class PrimitiveInfo
 		{
 		public:
-			PrimitiveInfo( PrimitiveType type, const ci::Vec3f &scale, uint32_t segments );
+			PrimitiveInfo( PrimitiveType type, const ci::Vec3f &scale, int32_t segments );
 			bool			operator<( const PrimitiveInfo &rhs ) const;
 			bool			operator==( const PrimitiveInfo &rhs ) const;
 			bool			operator!=( const PrimitiveInfo &rhs ) const;

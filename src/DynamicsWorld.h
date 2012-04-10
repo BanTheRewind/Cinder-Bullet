@@ -136,11 +136,9 @@ namespace bullet {
 	CollisionObjectRef										createRigidSphere( const DynamicsWorldRef &world, float radius = 10.0f, int32_t segments = 16, 
 																				float mass = 1.0f, const ci::Vec3f &position = ci::Vec3f::zero(), 
 																				const ci::Quatf &rotation = ci::Quatf() );
-	CollisionObjectRef										createRigidTerrain( const DynamicsWorldRef &world, const ci::Surface32f &heightField, int32_t stickWidth, 
-																				int32_t stickLength, float minHeight = -200.0f, float maxHeight = 200.0f, 
-																				int32_t upAxis = 1, const ci::Vec3f &scale = ci::Vec3f( 1.0f, 100.0f, 1.0f ), 
-																				float mass = 1.0f, const ci::Vec3f &position = ci::Vec3f::zero(), 
-																				const ci::Quatf &rotation = ci::Quatf() );
+	CollisionObjectRef										createRigidTerrain( const DynamicsWorldRef &world, const ci::Channel32f &heightField, float minHeight = -1.0f, 
+																				float maxHeight = 1.0f, const ci::Vec3f &scale = ci::Vec3f::one(), float mass = 1.0f, 
+																				const ci::Vec3f &position = ci::Vec3f::zero(), const ci::Quatf &rotation = ci::Quatf() );
 
 	btRigidBody*											toBulletRigidBody( const CollisionObjectRef &object );
 	btSoftBody*												toBulletSoftBody( const CollisionObjectRef &object );
