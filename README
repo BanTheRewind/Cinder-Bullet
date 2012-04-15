@@ -11,23 +11,24 @@ you just use Bullet directly.
 
 BUGS
 
-- Concave mesh body isn't scaling on Y axis
 - Cylinder VBO normals are wrong
-- Crash in exit
+- Concave mesh body isn't scaling on Y axis
+- Crash on exit
 
 TO DO LIST
 
 - Add Iter methods which take *Ref...
   Iter bullet::erase( const CollisionObjectRef &object ) { ... }
   Iter bullet::find( const CollisionObjectRef &object ) { ... }
-- Screen -> dynamics world interaction
-- Texture coordinates for VBOs (some are finished)
 - Implement btConeShape
 - Implement btStaticPlaneShape
+- Texture coordinates for VBOs (some are finished)
 - Soft body convenience methods
+- Screen -> dynamics world interaction
 - Investigate if separate object is needed for bullets
 - Static lib
 - XCode static lib + samples
+- Create sample with shadows
 
 More about Bullet here:
 http://bulletphysics.org/wordpress/

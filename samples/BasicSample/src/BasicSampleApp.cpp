@@ -140,7 +140,7 @@ void BasicSampleApp::keyDown( KeyEvent event )
 		quit();
 		break;
 	case KeyEvent::KEY_SPACE:
-		writeImage( getAppPath() + "\\frame_" + toString( getElapsedFrames() ) + ".png", copyWindowSurface() );
+		writeImage( getAppPath() / "\\frame_" / toString( getElapsedFrames() ) / ".png", copyWindowSurface() );
 		break;
 	}
 }
@@ -170,6 +170,8 @@ void BasicSampleApp::mouseDown( MouseEvent event )
 		// Add a body
 		if ( GROUND == 3 ) {
 			bullet::createRigidSphere( mWorld, size, 16, size * size, position );
+		} else if ( GROUND == 2 ) {
+			bullet::createRigidCylinder( mWorld, size * 1.5f, size * 0.9f, size, 16, size * size, position );
 		} else {
 			size *= 2.0f;
 			bullet::createRigidBox( mWorld, Vec3f::one() * size, size * size, position );
