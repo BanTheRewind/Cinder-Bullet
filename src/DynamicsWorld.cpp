@@ -261,10 +261,10 @@ namespace bullet {
 	{
 		return world->pushBack( new RigidBox( dimensions, mass, position, rotation ) );
 	}
-	CollisionObjectRef createRigidCylinder( const DynamicsWorldRef &world, float topRadius, float bottomRadius, float height, int32_t segments, float mass, 
+	CollisionObjectRef createRigidCylinder( const DynamicsWorldRef &world, const ci::Vec3f &scale, int32_t segments, float mass, 
 		const ci::Vec3f &position, const ci::Quatf &rotation )
 	{
-		return world->pushBack( new RigidCylinder( topRadius, bottomRadius, height, segments, mass, position, rotation ) );
+		return world->pushBack( new RigidCylinder( scale, segments, mass, position, rotation ) );
 	}
 	CollisionObjectRef createRigidHull( const DynamicsWorldRef &world, const ci::TriMesh &mesh, const ci::Vec3f &scale, float mass, const ci::Vec3f &position, const ci::Quatf &rotation )
 	{

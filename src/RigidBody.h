@@ -50,8 +50,7 @@ namespace bullet
 	protected:
 		static btRigidBody*	create( btCollisionShape* shape, float mass, const ci::Vec3f &position, const ci::Quatf &rotation );
 		static btRigidBody*	createBox( const ci::Vec3f &size, float mass, const ci::Vec3f &position, const ci::Quatf &rotation );
-		static btRigidBody*	createCylinder( float topRadius, float bottomRadius, float height, int32_t segments, 
-			float mass, const ci::Vec3f &position, const ci::Quatf &rotation );
+		static btRigidBody*	createCylinder( const ci::Vec3f &scale, int32_t segments, float mass, const ci::Vec3f &position, const ci::Quatf &rotation );
 		static btRigidBody*	createHull( btConvexHullShape* shape, float mass, const ci::Vec3f &position, const ci::Quatf &rotation );
 		static btRigidBody*	createMesh( btBvhTriangleMeshShape* shape, float mass, const ci::Vec3f &position, const ci::Quatf &rotation );
 		static btRigidBody*	createSphere( float radius, float mass, const ci::Vec3f &position, const ci::Quatf &rotation );
@@ -69,10 +68,9 @@ namespace bullet
 	class RigidCylinder : public CollisionObject, public RigidBody 
 	{
 	private:
-		RigidCylinder( float topRadius, float bottomRadius, float height, int32_t segments, float mass, const ci::Vec3f &position, const ci::Quatf &rotation );
-		friend CollisionObjectRef	createRigidCylinder( const DynamicsWorldRef &world, float topRadius, float bottomRadius, 
-														float height, int32_t segments, float mass, const ci::Vec3f &position, 
-														const ci::Quatf &rotation );
+		RigidCylinder( const ci::Vec3f &scale, int32_t segments, float mass, const ci::Vec3f &position, const ci::Quatf &rotation );
+		friend CollisionObjectRef	createRigidCylinder( const DynamicsWorldRef &world, const ci::Vec3f &scale, int32_t segments, 
+														float mass, const ci::Vec3f &position, const ci::Quatf &rotation );
 	};
 
 	class RigidHull : public CollisionObject, public RigidBody 

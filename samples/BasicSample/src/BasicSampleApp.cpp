@@ -70,6 +70,7 @@ public:
 private:
 
 	static const uint32_t		GROUND = 3;
+	static const uint32_t		MAX_OBJECTS = 300;
 	static const uint32_t		MAX_SPHERES = 80;
 
 	ci::CameraPersp				mCamera;
@@ -99,14 +100,14 @@ using namespace std;
 
 void BasicSampleApp::bindTexture( uint32_t index )
 {
-	if ( GROUND == 3 ) {
+	if ( GROUND == 4 ) {
 		if ( index == 0 ) {
 			mTexTerrain.bind();
 		} else {
 			mTexSphere.bind();
 		}
 	} else {
-		if ( ( GROUND == 0 && index > 1 ) || GROUND == 1 ) {
+		if ( ( ( GROUND == 0 || GROUND == 3 ) && index > 0 ) || GROUND == 1 ) {
 			mTexSquare.bind();
 		}
 	}
@@ -168,10 +169,12 @@ void BasicSampleApp::mouseDown( MouseEvent event )
 			 );
 
 		// Add a body
-		if ( GROUND == 3 ) {
+		if ( GROUND == 4 ) {
 			bullet::createRigidSphere( mWorld, size, 16, size * size, position );
-		} else if ( GROUND == 2 ) {
-			bullet::createRigidCylinder( mWorld, size * 1.5f, size * 0.9f, size, 16, size * size, position );
+		} else if ( GROUND == 3 ) {
+			bullet::CollisionObjectRef cylinder = bullet::createRigidCylinder( mWorld, Vec3f( size, size * 3, size ), 24, size * size, position );
+			btRigidBody* shape = bullet::toBulletRigidBody( cylinder );
+			shape->setAngularFactor( 0.95f );
 		} else {
 			size *= 2.0f;
 			bullet::createRigidBox( mWorld, Vec3f::one() * size, size * size, position );
@@ -255,6 +258,9 @@ void BasicSampleApp::setup()
 		mBox = bullet::createRigidMesh( mWorld, mConcave, Vec3f( 10.0f, 1.0f, 10.0f ), 0.0f, 0.0f );
 		break;
 	case 3:
+		mBox = bullet::createRigidBox( mWorld, Vec3f( 200.0f, 35.0f, 200.0f ), 0.0f );
+		break;
+	case 4:
 		Channel32f heightField( loadImage( loadResource( RES_IMAGE_HEIGHTFIELD_SM ) ) );
 		mBox = bullet::createRigidTerrain( mWorld, heightField, -1.0f, 1.0f, Vec3f( 6.0f, 80.0f, 6.0f ), 0.0f );
 		break;
@@ -284,14 +290,14 @@ void BasicSampleApp::shutdown()
 
 void BasicSampleApp::unbindTexture( uint32_t index )
 {
-	if ( GROUND == 3 ) {
+	if ( GROUND == 4 ) {
 		if ( index == 0 ) {
 			mTexTerrain.unbind();
 		} else {
 			mTexSphere.unbind();
 		}
-	} else if ( GROUND == 0 ) {
-		if ( ( GROUND == 0 && index > 1 ) || GROUND == 1 ) {
+	} else {
+		if ( ( ( GROUND == 0 || GROUND == 3 ) && index > 0 ) || GROUND == 1 ) {
 			mTexSquare.unbind();
 		}
 	}
@@ -303,7 +309,6 @@ void BasicSampleApp::update()
 	// Update light
 	mLight->update( mCamera );
 
-	// If ground is not terrain..
 	if ( GROUND < 3 ) {
 
 		// Set box rotation
@@ -326,19 +331,18 @@ void BasicSampleApp::update()
 	OutputDebugStringA( "\n" );*/
 
 	// Remove objects
-	if ( GROUND == 3 ) {
-		if ( mWorld->getNumObjects() > MAX_SPHERES + 1 ) {
-			for ( int32_t i = 1; i < mWorld->getNumObjects() - MAX_SPHERES; i++ ) {
-				mWorld->erase( mWorld->begin() + 1 );
-			}
+	for ( bullet::Iter object = mWorld->begin(); object != mWorld->end(); ) {
+		if ( object != mWorld->begin() && object->getPosition().y < -800.0f ) {
+			object = mWorld->erase( object );
+		} else {
+			++object;
 		}
-	} else {
-		for ( bullet::Iter object = mWorld->begin(); object != mWorld->end(); ) {
-			if ( object != mWorld->begin() && object->getPosition().y < -800.0f ) {
-				object = mWorld->erase( object );
-			} else {
-				++object;
-			}
+	}
+
+	uint32_t max = GROUND == 4 ? MAX_SPHERES : MAX_OBJECTS;
+	if ( mWorld->getNumObjects() > max + 1 ) {
+		for ( uint32_t i = 1; i < mWorld->getNumObjects() - MAX_SPHERES; i++ ) {
+			mWorld->erase( mWorld->begin() + 1 );
 		}
 	}
 

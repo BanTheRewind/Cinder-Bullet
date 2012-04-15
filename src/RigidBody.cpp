@@ -85,11 +85,11 @@ namespace bullet
 	}
 
 	// Creates rigid cylinder
-	btRigidBody* RigidBody::createCylinder( float topRadius, float bottomRadius, float height, int32_t segments, float mass, const Vec3f& position, const Quatf& rotation )
+	btRigidBody* RigidBody::createCylinder( const Vec3f &scale, int32_t segments, float mass, const Vec3f& position, const Quatf& rotation )
 	{
 
 		// Create cylinder
-		btVector3 size = btVector3( height, topRadius, bottomRadius );
+		btVector3 size = toBulletVector3( scale );
 		btCollisionShape* shape = new btCylinderShape( size );
 
 		// Create and return rigid body
@@ -156,20 +156,18 @@ namespace bullet
 
 	}
 
-	RigidCylinder::RigidCylinder( float topRadius, float bottomRadius, float height, int32_t segments, 
-		float mass, const Vec3f &position, const Quatf &rotation )
+	RigidCylinder::RigidCylinder( const Vec3f &scale, int32_t segments, float mass, const Vec3f &position, const Quatf &rotation )
 		: CollisionObject( position, rotation )
 	{
 
 		// Create body
-		mRigidBody = createCylinder( topRadius, bottomRadius, height, segments, mass, position, rotation );
+		mRigidBody = createCylinder( scale, segments, mass, position, rotation );
 
 		// Set scale
-		mScale = Vec3f( height, topRadius, bottomRadius );
-		Vec3f scale( 1.0f, topRadius / height, bottomRadius / height );
+		mScale = scale;
 
 		// Create VBO
-		mVboMesh = VboMeshManager::create( VboMeshManager::PRIMITIVE_CYLINDER, scale, segments );
+		mVboMesh = VboMeshManager::create( VboMeshManager::PRIMITIVE_CYLINDER, mScale, segments );
 
 	}
 

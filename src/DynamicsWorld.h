@@ -122,9 +122,8 @@ namespace bullet {
 	CollisionObjectRef										createRigidBox( const DynamicsWorldRef &world, const ci::Vec3f &dimensions = ci::Vec3f::one() * 10.0f, 
 																			float mass = 1.0f, const ci::Vec3f &position = ci::Vec3f::zero(), 
 																			const ci::Quatf &rotation = ci::Quatf() );
-	CollisionObjectRef										createRigidCylinder( const DynamicsWorldRef &world, float topRadius = 10.0f, float bottomRadius = 10.0f, 
-																				float height = 20.0f, int32_t segments = 16, float mass = 1.0f, 
-																				const ci::Vec3f &position = ci::Vec3f::zero(), 
+	CollisionObjectRef										createRigidCylinder( const DynamicsWorldRef &world, const ci::Vec3f &scale = ci::Vec3f::one(), int32_t segments = 16, 
+																				float mass = 1.0f, const ci::Vec3f &position = ci::Vec3f::zero(), 
 																				const ci::Quatf &rotation = ci::Quatf() );
 	CollisionObjectRef										createRigidHull( const DynamicsWorldRef &world, const ci::TriMesh &mesh, const ci::Vec3f &scale = ci::Vec3f::one(), 
 																			float mass = 1.0f, const ci::Vec3f &position = ci::Vec3f::zero(), 

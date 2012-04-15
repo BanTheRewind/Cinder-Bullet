@@ -40,7 +40,7 @@ namespace bullet
 				//meshRef = createCone( scale, segments );
 				break;
 			case PRIMITIVE_CYLINDER:
-				meshRef = createCylinder( scale, segments );
+				meshRef = createCylinder( segments );
 				break;
 			case PRIMITIVE_SPHERE:
 				meshRef = createSphere( segments );
@@ -271,7 +271,7 @@ namespace bullet
 	//{
 	//}
 
-	VboMeshRef VboMeshManager::createCylinder( const Vec3f &scale, int32_t segments )
+	VboMeshRef VboMeshManager::createCylinder( int32_t segments )
 	{
 
 		// Declare vectors
@@ -289,33 +289,39 @@ namespace bullet
 		// Iterate layers
 		for ( int32_t p = 0; p < 2; p++ ) {
 
-			// Choose radius
-			float radius = p == 0 ? scale.z : scale.y;
-
 			// Iterate segments
 			int32_t t = 0;
 			for ( float theta = delta; t < segments; t++, theta += delta ) {
 
-				// Set normal
-				Vec3f normal( math<float>::cos( theta ), 0.0f, math<float>::sin( theta ) );
-				srcNormals.push_back( normal );
-
-				// Set vertex
+				// Set position
 				float t = 2.0f * (float)M_PI * theta;
 				Vec3f position( 
-					math<float>::cos( t ) * radius, 
-					(float)p * scale.x, 
-					math<float>::sin( t ) * radius 
+					math<float>::cos( t ), 
+					(float)p - 0.5f, 
+					math<float>::sin( t ) 
 					);
 				srcPositions.push_back( position );
+
+				// Set normal
+				Vec3f normal = position.normalized();
+				normal.y = 0.0f;
+				srcNormals.push_back( normal );
+
+				// Set tex coord
+				Vec2f texCoord( normal.x, position.y + 0.5f );
+				srcTexCoords.push_back( texCoord );
 
 			}
 
 		}
 
 		// Top and bottom center
-		srcPositions.push_back( Vec3f::zero() );
-		srcPositions.push_back( Vec3f( 0.0f, scale.x, 0.0f ) );
+		srcNormals.push_back( Vec3f( 0.0f, -1.0f, 0.0f ) );
+		srcNormals.push_back( Vec3f( 0.0f, 1.0f, 0.0f ) );
+		srcPositions.push_back( Vec3f( 0.0f, -0.5f, 0.0f ) );
+		srcPositions.push_back( Vec3f( 0.0f, 0.5f, 0.0f ) );
+		srcTexCoords.push_back( Vec2f( 0.0f, 0.0f ) );
+		srcTexCoords.push_back( Vec2f( 0.0f, 1.0f ) );
 		int32_t bottomCenter = (int32_t)srcPositions.size() - 1;
 		int32_t topCenter = bottomCenter - 1;
 
@@ -323,13 +329,17 @@ namespace bullet
 		for ( int32_t t = 0; t < segments; t++ ) {
 			int32_t n = t + 1 >= segments ? 0 : t + 1;
 
-			normals.push_back( srcNormals[ t ] );
 			normals.push_back( srcNormals[ topCenter ] );
-			normals.push_back( srcNormals[ n ] );
+			normals.push_back( srcNormals[ topCenter ] );
+			normals.push_back( srcNormals[ topCenter ] );
 
 			positions.push_back( srcPositions[ t ] );
 			positions.push_back( srcPositions[ topCenter ] );
 			positions.push_back( srcPositions[ n ] );
+
+			texCoords.push_back( srcTexCoords[ topCenter ] );
+			texCoords.push_back( srcTexCoords[ topCenter ] );
+			texCoords.push_back( srcTexCoords[ topCenter ] );
 		}
 
 		// Build body
@@ -349,19 +359,30 @@ namespace bullet
 			positions.push_back( srcPositions[ n ] );
 			positions.push_back( srcPositions[ segments + t ] );
 			positions.push_back( srcPositions[ segments + n ] );
+
+			texCoords.push_back( srcTexCoords[ t ] );
+			texCoords.push_back( srcTexCoords[ segments + t ] );
+			texCoords.push_back( srcTexCoords[ n ] );
+			texCoords.push_back( srcTexCoords[ n ] );
+			texCoords.push_back( srcTexCoords[ segments + t ] );
+			texCoords.push_back( srcTexCoords[ segments + n ] );
 		}
 			
 		// Build bottom face
 		for ( int32_t t = 0; t < segments; t++ ) {
 			int32_t n = t + 1 >= segments ? 0 : t + 1;
 
-			normals.push_back( srcNormals[ segments + t ] );
 			normals.push_back( srcNormals[ bottomCenter ] );
-			normals.push_back( srcNormals[ segments + n ] );
+			normals.push_back( srcNormals[ bottomCenter ] );
+			normals.push_back( srcNormals[ bottomCenter ] );
 
 			positions.push_back( srcPositions[ segments + t ] );
 			positions.push_back( srcPositions[ bottomCenter ] );
 			positions.push_back( srcPositions[ segments + n ] );
+
+			texCoords.push_back( srcTexCoords[ bottomCenter ] );
+			texCoords.push_back( srcTexCoords[ bottomCenter ] );
+			texCoords.push_back( srcTexCoords[ bottomCenter ] );
 		}
 			
 		// Set VBO data

@@ -68,7 +68,7 @@ namespace bullet
 		
 		static VboMeshRef	createBox();
 		//static VboMeshRef createCone( const ci::Vec3f &scale, int32_t segments );
-		static VboMeshRef	createCylinder( const ci::Vec3f &scale, int32_t segments );
+		static VboMeshRef	createCylinder( int32_t segments );
 		static VboMeshRef	createSphere( int32_t segments );
 
 		class PrimitiveInfo

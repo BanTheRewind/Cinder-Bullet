@@ -11,7 +11,6 @@ you just use Bullet directly.
 
 BUGS
 
-- Cylinder VBO normals are wrong
 - Concave mesh body isn't scaling on Y axis
 - Crash on exit
 
@@ -20,7 +19,7 @@ TO DO LIST
 - Add Iter methods which take *Ref...
   Iter bullet::erase( const CollisionObjectRef &object ) { ... }
   Iter bullet::find( const CollisionObjectRef &object ) { ... }
-- Implement btConeShape
+- Implement btConeShapen
 - Implement btStaticPlaneShape
 - Texture coordinates for VBOs (some are finished)
 - Soft body convenience methods
