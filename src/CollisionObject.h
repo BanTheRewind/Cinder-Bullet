@@ -89,6 +89,11 @@ namespace bullet
 		ci::Vec3f							mScale;
 		VboMeshRef							mVboMesh;
 
+		std::vector<uint32_t>				mIndices;
+		std::vector<ci::Vec3f>				mNormals;
+		std::vector<ci::Vec3f>				mPositions;
+		std::vector<ci::Vec2f>				mTexCoords;
+
 		friend class						DynamicsWorld;
 
 	};

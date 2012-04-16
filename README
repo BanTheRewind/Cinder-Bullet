@@ -16,12 +16,11 @@ BUGS
 
 TO DO LIST
 
+- Cone normals / tex coords
 - Add Iter methods which take *Ref...
   Iter bullet::erase( const CollisionObjectRef &object ) { ... }
   Iter bullet::find( const CollisionObjectRef &object ) { ... }
-- Implement btConeShapen
 - Implement btStaticPlaneShape
-- Texture coordinates for VBOs (some are finished)
 - Soft body convenience methods
 - Screen -> dynamics world interaction
 - Investigate if separate object is needed for bullets

@@ -67,7 +67,7 @@ namespace bullet
 	private:
 		
 		static VboMeshRef	createBox();
-		//static VboMeshRef	createCone( uint32_t segments );
+		static VboMeshRef	createCone( uint32_t segments );
 		static VboMeshRef	createCylinder( uint32_t segments );
 		static VboMeshRef	createSphere( uint32_t segments );
 

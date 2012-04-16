@@ -50,6 +50,7 @@ namespace bullet
 	protected:
 		static btRigidBody*	create( btCollisionShape* shape, float mass, const ci::Vec3f &position, const ci::Quatf &rotation );
 		static btRigidBody*	createBox( const ci::Vec3f &size, float mass, const ci::Vec3f &position, const ci::Quatf &rotation );
+		static btRigidBody*	createCone( float radius, float height, int32_t segments, float mass, const ci::Vec3f &position, const ci::Quatf &rotation );
 		static btRigidBody*	createCylinder( const ci::Vec3f &scale, int32_t segments, float mass, const ci::Vec3f &position, const ci::Quatf &rotation );
 		static btRigidBody*	createHull( btConvexHullShape* shape, float mass, const ci::Vec3f &position, const ci::Quatf &rotation );
 		static btRigidBody*	createMesh( btBvhTriangleMeshShape* shape, float mass, const ci::Vec3f &position, const ci::Quatf &rotation );
@@ -63,6 +64,14 @@ namespace bullet
 		RigidBox( const ci::Vec3f &dimensions, float mass, const ci::Vec3f &position, const ci::Quatf &rotation );
 		friend CollisionObjectRef	createRigidBox( const DynamicsWorldRef &world, const ci::Vec3f &dimensions, float mass, 
 													const ci::Vec3f &position, const ci::Quatf &rotation );
+	};
+
+	class RigidCone : public CollisionObject, public RigidBody 
+	{
+	protected:
+		RigidCone( float radius, float height, int32_t segments, float mass, const ci::Vec3f &position, const ci::Quatf &rotation );
+		friend CollisionObjectRef	createRigidCone( const DynamicsWorldRef &world, float radius, float height, int32_t segments, 
+													float mass, const ci::Vec3f &position, const ci::Quatf &rotation );
 	};
 
 	class RigidCylinder : public CollisionObject, public RigidBody 
@@ -105,10 +114,6 @@ namespace bullet
 		friend CollisionObjectRef	createRigidTerrain( const DynamicsWorldRef &world, const ci::Channel32f &heightField, float minHeight, float maxHeight, 
 														const ci::Vec3f &scale, float mass, const ci::Vec3f &position, const ci::Quatf &rotation );
 		ci::Channel32f				mChannel;
-		std::vector<uint32_t>		mIndices;
-		std::vector<ci::Vec3f>		mNormals;
-		std::vector<ci::Vec3f>		mPositions;
-		std::vector<ci::Vec2f>		mTexCoords;
 		void						readChannelData();
 	};
 

@@ -84,6 +84,19 @@ namespace bullet
 
 	}
 
+	// Creates rigid cone
+	btRigidBody* RigidBody::createCone( float radius, float height, int32_t segments, float mass, const Vec3f& position, const Quatf& rotation )
+	{
+
+		// Create cylinder
+		btCollisionShape* shape = new btConeShape( radius, height );
+
+		// Create and return rigid body
+		btRigidBody* body = create( shape, mass, position, rotation );
+		return body;
+
+	}
+
 	// Creates rigid cylinder
 	btRigidBody* RigidBody::createCylinder( const Vec3f &scale, int32_t segments, float mass, const Vec3f& position, const Quatf& rotation )
 	{
@@ -108,7 +121,7 @@ namespace bullet
 
 	}
 
-	/*! Create rigid body from triangle mesh */
+	// Create rigid body from triangle mesh
 	btRigidBody* RigidBody::createMesh( btBvhTriangleMeshShape* shape, float mass, const Vec3f& position, const Quatf& rotation )
 	{
 
@@ -156,6 +169,21 @@ namespace bullet
 
 	}
 
+	RigidCone::RigidCone( float radius, float height, int32_t segments, float mass, const Vec3f &position, const Quatf &rotation )
+		: CollisionObject( position, rotation )
+	{
+
+		// Create body
+		mRigidBody = createCone( radius, height, segments, mass, position, rotation );
+
+		// Set scale
+		mScale = Vec3f( radius, height, radius );
+
+		// Create VBO
+		mVboMesh = VboMeshManager::create( VboMeshManager::PRIMITIVE_CONE, segments );
+
+	}
+
 	RigidCylinder::RigidCylinder( const Vec3f &scale, int32_t segments, float mass, const Vec3f &position, const Quatf &rotation )
 		: CollisionObject( position, rotation )
 	{
@@ -183,8 +211,14 @@ namespace bullet
 		btConvexHullShape* shape = createConvexHullShape( mesh.getVertices(), scale );
 		mRigidBody = createHull( shape, mass, position, rotation );
 
+		// Set data from TriMesh
+		mIndices = mesh.getIndices();
+		mNormals = mesh.getNormals();
+		mPositions = mesh.getVertices();
+		mTexCoords = mesh.getTexCoords();
+
 		// Set VBO data
-		mVboMesh = VboMeshManager::create( mesh.getIndices(), mesh.getVertices(), mesh.getNormals(), mesh.getTexCoords() );
+		mVboMesh = VboMeshManager::create( mIndices, mPositions, mNormals, mTexCoords );
 
 	}
 
@@ -201,8 +235,14 @@ namespace bullet
 		btBvhTriangleMeshShape* shape = createConcaveMeshShape( mesh.getVertices(), mesh.getIndices(), scale, margin );
 		mRigidBody = createMesh( shape, mass, position, rotation );
 
+		// Set data from TriMesh
+		mIndices = mesh.getIndices();
+		mNormals = mesh.getNormals();
+		mPositions = mesh.getVertices();
+		mTexCoords = mesh.getTexCoords();
+
 		// Set VBO data
-		mVboMesh = VboMeshManager::create( mesh.getIndices(), mesh.getVertices(), mesh.getNormals(), mesh.getTexCoords() );
+		mVboMesh = VboMeshManager::create( mIndices, mPositions, mNormals, mTexCoords );
 		
 	}
 
@@ -268,10 +308,6 @@ namespace bullet
 
 		// Set VBO
 		mVboMesh = VboMeshManager::create( mIndices, mPositions, mNormals, mTexCoords );
-
-		// Clean up
-		mNormals.clear();
-		mPositions.clear();
 
 	}
 

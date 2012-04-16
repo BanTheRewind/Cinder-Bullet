@@ -66,11 +66,12 @@ namespace bullet {
 
 		Iter												begin();
 		ConstIter											begin() const;
+		void												clear();
 		Iter												end();
 		ConstIter											end() const;
+		Iter												erase( Iter pos );
 		Iter												find( CollisionObjectRef &object );
 		ConstIter											find( const CollisionObjectRef &object ) const;
-		Iter												erase( Iter pos );
 		CollisionObjectRef									pushBack( CollisionObject *object );
 
 		btBroadphaseInterface*								getBroadphase();
@@ -119,9 +120,11 @@ namespace bullet {
 
 	DynamicsWorldRef										createWorld();
 
-	CollisionObjectRef										createRigidBox( const DynamicsWorldRef &world, const ci::Vec3f &dimensions = ci::Vec3f::one() * 10.0f, 
+	CollisionObjectRef										createRigidBox( const DynamicsWorldRef &world, const ci::Vec3f &dimensions = ci::Vec3f::one(), 
 																			float mass = 1.0f, const ci::Vec3f &position = ci::Vec3f::zero(), 
 																			const ci::Quatf &rotation = ci::Quatf() );
+	CollisionObjectRef										createRigidCone( const DynamicsWorldRef &world, float radius = 1.0f, float height = 1.0f, int32_t segments = 16, 
+																			float mass = 1.0f, const ci::Vec3f &position = ci::Vec3f::zero(), const ci::Quatf &rotation = ci::Quatf() );
 	CollisionObjectRef										createRigidCylinder( const DynamicsWorldRef &world, const ci::Vec3f &scale = ci::Vec3f::one(), int32_t segments = 16, 
 																				float mass = 1.0f, const ci::Vec3f &position = ci::Vec3f::zero(), 
 																				const ci::Quatf &rotation = ci::Quatf() );

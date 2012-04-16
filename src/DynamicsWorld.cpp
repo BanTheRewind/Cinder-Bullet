@@ -84,6 +84,13 @@ namespace bullet {
 	{
 		return mObjects.begin();
 	}
+
+	void DynamicsWorld::clear()
+	{
+		for ( bullet::Iter object = mObjects.begin(); object != mObjects.end(); ) {
+			object = erase( object );
+		}
+	}
 	
 	Iter DynamicsWorld::end()
 	{
@@ -260,6 +267,11 @@ namespace bullet {
 	CollisionObjectRef createRigidBox( const DynamicsWorldRef &world, const ci::Vec3f &dimensions, float mass, const ci::Vec3f &position, const ci::Quatf &rotation )
 	{
 		return world->pushBack( new RigidBox( dimensions, mass, position, rotation ) );
+	}
+	CollisionObjectRef createRigidCone( const DynamicsWorldRef &world, float radius, float height, int32_t segments, float mass, 
+		const ci::Vec3f &position, const ci::Quatf &rotation )
+	{
+		return world->pushBack( new RigidCone( radius, height, segments, mass, position, rotation ) );
 	}
 	CollisionObjectRef createRigidCylinder( const DynamicsWorldRef &world, const ci::Vec3f &scale, int32_t segments, float mass, 
 		const ci::Vec3f &position, const ci::Quatf &rotation )
