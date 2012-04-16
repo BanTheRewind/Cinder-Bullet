@@ -167,7 +167,7 @@ namespace bullet
 		mScale = scale;
 
 		// Create VBO
-		mVboMesh = VboMeshManager::create( VboMeshManager::PRIMITIVE_CYLINDER, mScale, segments );
+		mVboMesh = VboMeshManager::create( VboMeshManager::PRIMITIVE_CYLINDER, segments );
 
 	}
 
@@ -218,7 +218,7 @@ namespace bullet
 		mScale = Vec3f::one() * radius;
 
 		// Create VBO
-		mVboMesh = VboMeshManager::create( VboMeshManager::PRIMITIVE_SPHERE, Vec3f::one(), segments );
+		mVboMesh = VboMeshManager::create( VboMeshManager::PRIMITIVE_SPHERE, segments );
 
 	}
 
@@ -238,11 +238,49 @@ namespace bullet
 		btHeightfieldTerrainShape* shape = createHeightfieldTerrainShape( mChannel, minHeight, maxHeight, scale );
 		mRigidBody = createTerrain( shape, mass, position, rotation );
 
-		// Declare vectors
-		vector<uint32_t> indices;
-		vector<Vec3f> normals;
-		vector<Vec3f> positions;
-		vector<Vec2f> texCoords;
+		// Get image dimensions
+		int32_t height = mChannel.getHeight();
+		int32_t width = mChannel.getWidth();
+
+		// Iterate through dimensions to set indices and texture coordinates
+		for ( int32_t y = 0; y < height; y++ ) {
+			for ( int32_t x = 0; x < width; x++ ) {
+
+				// Add texture coordinate
+				mTexCoords.push_back( Vec2f( (float)x / (float)width, (float)y / (float)height ) );
+
+				// Add indices for this quad
+				int32_t xn = x + 1 >= width ? 0 : 1;
+				int32_t yn = y + 1 >= height ? 0 : 1;
+				mIndices.push_back( x + height * y );
+				mIndices.push_back( ( x + xn ) + height * y);
+				mIndices.push_back( ( x + xn ) + height * ( y + yn ) );
+				mIndices.push_back( x + height * ( y + yn ) );
+				mIndices.push_back( ( x + xn ) + height * ( y + yn ) );
+				mIndices.push_back( x + height * y );
+
+			}
+
+		}
+
+		// Define positions, normals from channel
+		readChannelData();
+
+		// Set VBO
+		mVboMesh = VboMeshManager::create( mIndices, mPositions, mNormals, mTexCoords );
+
+		// Clean up
+		mNormals.clear();
+		mPositions.clear();
+
+	}
+
+	void RigidTerrain::readChannelData()
+	{
+
+		// Clear normal and posiiton data
+		mNormals.clear();
+		mPositions.clear();
 
 		// Get image dimensions
 		int32_t height = mChannel.getHeight();
@@ -259,22 +297,10 @@ namespace bullet
 				
 				// Add position
 				Vec3f position( (float)x - halfWidth, value, (float)y - halfHeight );
-				positions.push_back( position );
+				mPositions.push_back( position );
 
 				// Add default normal
-				normals.push_back( Vec3f::zero() );
-
-				texCoords.push_back( Vec2f( (float)x / float(width), (float)y / (float)height ) );
-
-				// Add indices for this quad
-				int32_t xn = x + 1 >= width ? 0 : 1;
-				int32_t yn = y + 1 >= height ? 0 : 1;
-				indices.push_back( x + height * y );
-				indices.push_back( ( x + xn ) + height * y);
-				indices.push_back( ( x + xn ) + height * ( y + yn ) );
-				indices.push_back( x + height * ( y + yn ) );
-				indices.push_back( ( x + xn ) + height * ( y + yn ) );
-				indices.push_back( x + height * y );
+				mNormals.push_back( Vec3f::zero() );
 
 			}
 
@@ -285,24 +311,16 @@ namespace bullet
 			for (int32_t x = 0; x < width - 1; x++) {
 
 				// Get vertices of this triangle
-				Vec3f vert0 = positions[ indices[ ( x + height * y ) * 6 ] ];
-				Vec3f vert1 = positions[ indices[ ( ( x + 1 ) + height * y ) * 6 ] ];
-				Vec3f vert2 = positions[ indices[ ( ( x + 1 ) + height * ( y + 1 ) ) * 6 ] ];
+				Vec3f vert0 = mPositions[ mIndices[ ( x + height * y ) * 6 ] ];
+				Vec3f vert1 = mPositions[ mIndices[ ( ( x + 1 ) + height * y ) * 6 ] ];
+				Vec3f vert2 = mPositions[ mIndices[ ( ( x + 1 ) + height * ( y + 1 ) ) * 6 ] ];
 
 				// Calculate normal
-				normals[ x + height * y ] = Vec3f( ( vert1 - vert0 ).cross( vert1 - vert2 ).normalized() );
+				mNormals[ x + height * y ] = Vec3f( ( vert1 - vert0 ).cross( vert1 - vert2 ).normalized() );
 
 			}
 		}
 
-		// Set VBO
-		mVboMesh = VboMeshManager::create( indices, positions, normals, texCoords );
-
-		// Clean up
-		indices.clear();
-		normals.clear();
-		positions.clear();
-		texCoords.clear();
-
 	}
+
 }

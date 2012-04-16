@@ -52,60 +52,8 @@ namespace bullet
 
 		SoftBody( const ci::Vec3f &position = ci::Vec3f::zero(), const ci::Quatf &rotation = ci::Quatf() );
 
-		/*! Create soft body from arbitrary collision shape */
-		//btSoftBody* create( btDynamicsWorld* world, btSoftBodyWorldInfo &info, btCollisionShape* shape, const Vec3f &position = Vec3f::zero(), const Quatf &rotation = Quatf() );
-
-		/*! Creates soft body from triangle mesh */
-		//btSoftBody* create( btDynamicsWorld* world, btSoftBodyWorldInfo &info, btBvhTriangleMeshShape* shape, const Vec3f &position = Vec3f::zero(), const Quatf &rotation = Quatf() );
-
-		/*! Creates soft concave mesh */
-		//btSoftBody* create( btDynamicsWorld* world, btSoftBodyWorldInfo &info, btConvexHullShape* shape, const Vec3f &position = Vec3f::zero(), const Quatf &rotation = Quatf() );
-
-		/*! Create a soft box from AxisAlignedBox3f */
-		//btSoftBody* create( btDynamicsWorld* world, btSoftBodyWorldInfo &info, const AxisAlignedBox3f &box, const Vec3f &position = Vec3f::zero(), const Quatf &rotation = Quatf() );
-
-		/*! Creates a soft box from two Rectfs */
-		//btRigidBody* create( btDynamicsWorld* world, btSoftBodyWorldInfo &info, const Rectf &top, const Rectf &bottom, float height = 10.0f, const Vec3f &position = Vec3f::zero(), const Quatf &rotation = Quatf() );
-
-		/*! Creates soft box */
-		//static btSoftBody* create( btDynamicsWorld* world, btSoftBodyWorldInfo &info, const ci::Vec3f &dimensions = ci::Vec3f( 10.0f, 10.0f, 10.0f ), 
-			//const ci::Vec3f &position = ci::Vec3f::zero(), const ci::Quatf &rotation = ci::Quatf() );
-
-		/*! Creates a soft cylinder */
-		//btRigidBody* create( btDynamicsWorld* world, float topRadius = 10.0f, float bottomRadius = 10.0f, float height = 20.0f, int32_t segments = 16, const Vec3f &position = Vec3f::zero(), const Quatf &rotation = Quatf() );
-
-		/*! Creates a soft sphere from Sphere */
-		//btSoftBody* create( btDynamicsWorld* world, btSoftBodyWorldInfo &info, const Sphere &sphere, int32_t segments = 16, const Vec3f &position = Vec3f::zero(), const Quatf &rotation = Quatf() );
-
-		/*! Creates a soft sphere */
-		//static btSoftBody* create( btDynamicsWorld* world, btSoftBodyWorldInfo &info, float radius = 10.0f, int32_t segments = 16, 
-			//const ci::Vec3f &position = ci::Vec3f::zero(), const ci::Quatf &rotation = ci::Quatf() );
-
 		friend class CollisionObject;
 
 	};
-
-	/*class SoftBox : public SoftBody 
-	{
-	public:
-		SoftBox( DynamicsWorldRef world, const ci::Vec3f &dimensions = ci::Vec3f( 10.0f, 10.0f, 10.0f ), 
-			const ci::Vec3f &position = ci::Vec3f::zero(), const ci::Quatf &rotation = ci::Quatf() );
-	};
-
-	class SoftSphere : public SoftBody 
-	{
-	public:
-		SoftSphere( DynamicsWorldRef world, float radius = 10.0f, int32_t segments = 16, 
-			const ci::Vec3f &position = ci::Vec3f::zero(), const ci::Quatf &rotation = ci::Quatf() );
-	};
-
-	class SoftTetraBox : public SoftBody 
-	{
-	public:
-		SoftTetraBox( DynamicsWorldRef world, const ci::Vec3f &dimensions = ci::Vec3f( 10.0f, 10.0f, 10.0f ), 
-			const ci::Vec3f &position = ci::Vec3f::zero(), const ci::Quatf &rotation = ci::Quatf() );
-	private:
-		TetraCube mTetraCube;
-	};*/
 
 }

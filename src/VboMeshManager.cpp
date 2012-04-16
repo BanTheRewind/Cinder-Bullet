@@ -11,7 +11,7 @@ namespace bullet
 	VboMeshManager::VboMeshList VboMeshManager::sVboMeshList = VboMeshManager::VboMeshList();
 
 	// Find and return a texture
-	VboMeshRef VboMeshManager::create( PrimitiveType type, const Vec3f &scale, int32_t segments )
+	VboMeshRef VboMeshManager::create( PrimitiveType type, uint32_t segments )
 	{
 
 		// Remove unused references
@@ -24,7 +24,7 @@ namespace bullet
 		}
 
 		// Find VBO -- this will return an expired weak reference if not found
-		PrimitiveInfo info( type, scale, segments );
+		PrimitiveInfo info( type, segments );
 		VboMeshWeakRef & meshWeakRef = sVboMeshList[ info ];
       
 		// Check if the weak texture is expired
@@ -37,7 +37,7 @@ namespace bullet
 				meshRef = createBox();
 				break;
 			case PRIMITIVE_CONE:	
-				//meshRef = createCone( scale, segments );
+//				meshRef = createCone( segments );
 				break;
 			case PRIMITIVE_CYLINDER:
 				meshRef = createCylinder( segments );
@@ -267,11 +267,11 @@ namespace bullet
 
 	}
 
-	//VboMeshRef VboMeshManager::createCone( const Vec3f &scale )
-	//{
-	//}
+	/*VboMeshRef VboMeshManager::createCone( uint32_t segments )
+	{
+	}*/
 
-	VboMeshRef VboMeshManager::createCylinder( int32_t segments )
+	VboMeshRef VboMeshManager::createCylinder( uint32_t segments )
 	{
 
 		// Declare vectors
@@ -287,10 +287,10 @@ namespace bullet
 		float delta = 1.0f / (float)segments;
 
 		// Iterate layers
-		for ( int32_t p = 0; p < 2; p++ ) {
+		for ( uint32_t p = 0; p < 2; p++ ) {
 
 			// Iterate segments
-			int32_t t = 0;
+			uint32_t t = 0;
 			for ( float theta = delta; t < segments; t++, theta += delta ) {
 
 				// Set position
@@ -326,8 +326,8 @@ namespace bullet
 		int32_t topCenter = bottomCenter - 1;
 
 		// Build top face
-		for ( int32_t t = 0; t < segments; t++ ) {
-			int32_t n = t + 1 >= segments ? 0 : t + 1;
+		for ( uint32_t t = 0; t < segments; t++ ) {
+			uint32_t n = t + 1 >= segments ? 0 : t + 1;
 
 			normals.push_back( srcNormals[ topCenter ] );
 			normals.push_back( srcNormals[ topCenter ] );
@@ -343,8 +343,8 @@ namespace bullet
 		}
 
 		// Build body
-		for ( int32_t t = 0; t < segments; t++ ) {
-			int32_t n = t + 1 >= segments ? 0 : t + 1;
+		for ( uint32_t t = 0; t < segments; t++ ) {
+			uint32_t n = t + 1 >= segments ? 0 : t + 1;
 			
 			normals.push_back( srcNormals[ t ] );
 			normals.push_back( srcNormals[ segments + t ] );
@@ -369,8 +369,8 @@ namespace bullet
 		}
 			
 		// Build bottom face
-		for ( int32_t t = 0; t < segments; t++ ) {
-			int32_t n = t + 1 >= segments ? 0 : t + 1;
+		for ( uint32_t t = 0; t < segments; t++ ) {
+			uint32_t n = t + 1 >= segments ? 0 : t + 1;
 
 			normals.push_back( srcNormals[ bottomCenter ] );
 			normals.push_back( srcNormals[ bottomCenter ] );
@@ -402,7 +402,7 @@ namespace bullet
 
 	}
 
-	VboMeshRef VboMeshManager::createSphere( int32_t segments )
+	VboMeshRef VboMeshManager::createSphere( uint32_t segments )
 	{
 
 		// Declare vectors
@@ -412,23 +412,24 @@ namespace bullet
 		vector<Vec2f> texCoords;
 
 		// Define steps
-		int32_t layers = segments / 2;
+		uint32_t layers = segments / 2;
 		float step = (float)M_PI / (float)layers;
 		float delta = ((float)M_PI * 2.0f) / (float)segments;
 
 		// Phi
-		int32_t p = 0;
+		uint32_t p = 0;
 		for ( float phi = 0.0f; p <= layers; p++, phi += step ) {
 
 			// Theta
-			int32_t t = 0;
+			uint32_t t = 0;
 			for ( float theta = delta; t < segments; t++, theta += delta )
 			{
 
 				// Set position
+				float sinP = math<float>::sin( phi );
 				Vec3f position(
-					math<float>::sin( phi ) * math<float>::cos( theta ),
-					math<float>::sin( phi ) * math<float>::sin( theta ),
+					sinP * math<float>::cos( theta ),
+					sinP * math<float>::sin( theta ),
 					-math<float>::cos( phi ) );
 				positions.push_back(position);
 
@@ -437,10 +438,10 @@ namespace bullet
 				normals.push_back( normal );
 
 				// Set tex coord
-				texCoords.push_back( normal.xy() * 0.5f + Vec2f( 0.5f, 0.5f ) ); 
+				texCoords.push_back( ( normal.xy() + Vec2f::one() ) * 0.5f ); 
 
 				// Add indices
-				int32_t n = t + 1 >= segments ? 0 : t + 1;
+				uint32_t n = t + 1 >= segments ? 0 : t + 1;
 				indices.push_back( p * segments + t );
 				indices.push_back( ( p + 1 ) * segments + t );
 				indices.push_back( p * segments + n );
@@ -466,14 +467,13 @@ namespace bullet
 
 	}
 
-	VboMeshManager::PrimitiveInfo::PrimitiveInfo( VboMeshManager::PrimitiveType type, const ci::Vec3f &scale, int32_t segments )
-		: mScale( scale ), mSegments( segments ), mType( type )
+	VboMeshManager::PrimitiveInfo::PrimitiveInfo( VboMeshManager::PrimitiveType type, uint32_t segments )
+		: mSegments( segments ), mType( type )
 	{}
 
 	bool VboMeshManager::PrimitiveInfo::operator==( const VboMeshManager::PrimitiveInfo &rhs ) const
 	{
-		return ( rhs.mSegments == mSegments && rhs.mType == mType && rhs.mScale.x == mScale.x && 
-			rhs.mScale.y == mScale.y && rhs.mScale.z == mScale.z );
+		return ( rhs.mSegments == mSegments && rhs.mType == mType );
 	}
 	bool VboMeshManager::PrimitiveInfo::operator!=( const VboMeshManager::PrimitiveInfo &rhs ) const
 	{
