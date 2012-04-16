@@ -11,12 +11,13 @@ you just use Bullet directly.
 
 BUGS
 
+- Cylinder VBO is not aligned with its Bullet body on the Y axis
+- Cone normals / tex coords needs to be fixed
 - Concave mesh body isn't scaling on Y axis
 - Crash on exit
 
 TO DO LIST
 
-- Cone normals / tex coords
 - Add Iter methods which take *Ref...
   Iter bullet::erase( const CollisionObjectRef &object ) { ... }
   Iter bullet::find( const CollisionObjectRef &object ) { ... }
@@ -25,8 +26,21 @@ TO DO LIST
 - Screen -> dynamics world interaction
 - Investigate if separate object is needed for bullets
 - Static lib
-- XCode static lib + samples
-- Create sample with shadows
+- XCode static lib
+- Samples
+  - Rigid primitive
+  - Rigid mesh
+  - Dynamic rigid mesh (camera terrain: how to extend an existing body)
+  - GPU dynamic terrain (Bullet + GLSL: how to use a shader to update VBO)
+  - Torus (how to create a custom body by extending CollisionObject)
+  - Multisphere (how to implement Bullet shapes not supported by the block)
+  - Soft body (interacts with rigid)
+  - Soft body mesh from OBJ
+  - Interaction / apply force
+  - Ragdoll (springs, collision callback)
+  - Multiple worlds
+  - Vehicle
+  - Bullets / fracture
 
 More about Bullet here:
 http://bulletphysics.org/wordpress/
