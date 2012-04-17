@@ -18,6 +18,23 @@ BUGS
 
 TO DO LIST
 
+- Add iterator comparison operators
+  bool CollisionObjectRef==( const boost::ptr_vector::iterator &iter) 
+  {
+    return *this == &*iter;
+  }
+  bool CollisionObjectRef==( boost::ptr_vector::iterator &iter) 
+  {
+    return *this == &*iter;
+  }
+  bool CollisionObjectRef!=( boost::ptr_vector::iterator &iter) 
+  {
+    return !( *this == &*iter );
+  }
+  bool CollisionObjectRef!=( const boost::ptr_vector::iterator &iter) 
+  {
+    return !( *this == &*iter );
+  }
 - Implement btStaticPlaneShape
 - Soft body convenience methods
 - Screen -> dynamics world interaction
