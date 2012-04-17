@@ -40,6 +40,7 @@
 // Includes
 #include "CollisionObject.h"
 #include "DynamicsWorld.h"
+#include "MeshBody.h"
 #include "Utilities.h"
 
 namespace bullet
@@ -82,7 +83,7 @@ namespace bullet
 														float mass, const ci::Vec3f &position, const ci::Quatf &rotation );
 	};
 
-	class RigidHull : public CollisionObject, public RigidBody 
+	class RigidHull : public CollisionObject, public RigidBody, public MeshBody
 	{
 	protected:
 		RigidHull( const ci::TriMesh &mesh, const ci::Vec3f &scale, float mass, const ci::Vec3f &position, const ci::Quatf &rotation );
@@ -90,7 +91,7 @@ namespace bullet
 													float mass, const ci::Vec3f &position, const ci::Quatf &rotation );
 	};
 
-	class RigidMesh : public CollisionObject, public RigidBody 
+	class RigidMesh : public CollisionObject, public RigidBody, public MeshBody
 	{
 	protected:
 		RigidMesh( const ci::TriMesh &mesh, const ci::Vec3f &scale, float margin, float mass, const ci::Vec3f &position, const ci::Quatf &rotation );
@@ -106,7 +107,7 @@ namespace bullet
 														const ci::Vec3f &position, const ci::Quatf &rotation );
 	};
 
-	class RigidTerrain : public CollisionObject, public RigidBody 
+	class RigidTerrain : public CollisionObject, public RigidBody, public MeshBody
 	{
 	protected:
 		RigidTerrain( const ci::Channel32f &heightField, float minHeight, float maxHeight, const ci::Vec3f &scale, float mass, 

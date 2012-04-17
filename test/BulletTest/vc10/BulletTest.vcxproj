@@ -12,9 +12,9 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{9DA00FEA-5218-413E-B762-35D91045B3B4}</ProjectGuid>
-    <RootNamespace>BasicSample</RootNamespace>
+    <RootNamespace>BulletTest</RootNamespace>
     <Keyword>Win32Proj</Keyword>
-    <ProjectName>BasicSample</ProjectName>
+    <ProjectName>BulletTest</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
@@ -113,9 +113,10 @@
     <ClCompile Include="..\..\..\src\RigidBody.cpp" />
     <ClCompile Include="..\..\..\src\SoftBody.cpp" />
     <ClCompile Include="..\..\..\src\VboMeshManager.cpp" />
-    <ClCompile Include="..\src\BasicSampleApp.cpp" />
+    <ClCompile Include="..\src\BulletTestApp.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\src\MeshBody.h" />
     <ClInclude Include="..\..\..\src\Utilities.h" />
     <ClInclude Include="..\..\..\src\CinderBullet.h" />
     <ClInclude Include="..\..\..\src\CollisionObject.h" />

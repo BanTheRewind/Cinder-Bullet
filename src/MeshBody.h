@@ -37,17 +37,17 @@
 
 #pragma once
 
-// Includes
-#include "CollisionObject.h"
-#include "DynamicsWorld.h"
-#include "MeshBody.h"
-#include "Utilities.h"
+#include "cinder/Vector.h"
+#include <vector>
 
 namespace bullet
 {
-	class SoftBody : public CollisionObject, public MeshBody
+	class MeshBody
 	{
 	protected:
-		SoftBody( const ci::Vec3f &position = ci::Vec3f::zero(), const ci::Quatf &rotation = ci::Quatf() );
+		std::vector<uint32_t>				mIndices;
+		std::vector<ci::Vec3f>				mNormals;
+		std::vector<ci::Vec3f>				mPositions;
+		std::vector<ci::Vec2f>				mTexCoords;
 	};
 }

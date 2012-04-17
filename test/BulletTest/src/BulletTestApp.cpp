@@ -89,7 +89,7 @@ public:
 };
 
 // Bullet physics sample application
-class BasicSampleApp : public ci::app::AppBasic 
+class BulletTestApp : public ci::app::AppBasic 
 {
 
 public:
@@ -110,8 +110,8 @@ private:
 	static const uint32_t		MAX_OBJECTS_TERRAIN = 80;
 
 	void						initDemo();
-	int32_t						mDemo;
-	int32_t						mDemoPrev;
+	int32_t						mTest;
+	int32_t						mTestPrev;
 
 	ci::Surface					mSurface;
 	ci::CameraPersp				mCamera;
@@ -145,41 +145,41 @@ using namespace ci;
 using namespace ci::app;
 using namespace std;
 
-void BasicSampleApp::bindTexture( uint32_t index )
+void BulletTestApp::bindTexture( uint32_t index )
 {
-	if ( mDemo >= 4 && mDemo < 7 ) {
+	if ( mTest >= 4 && mTest < 7 ) {
 		if ( index == 0 ) {
 			mTexTerrain.bind();
 		} else {
-			if ( mDemo < 6 ) {
+			if ( mTest < 6 ) {
 				mTexSphere.bind();
 			}
 		}
 	} else {
-		if ( ( ( mDemo == 0 || mDemo == 3 ) && index > 0 ) || mDemo == 1 ) {
+		if ( ( ( mTest == 0 || mTest == 3 ) && index > 0 ) || mTest == 1 ) {
 			mTexSquare.bind();
 		}
 	}
 }
 
-void BasicSampleApp::unbindTexture( uint32_t index )
+void BulletTestApp::unbindTexture( uint32_t index )
 {
-	if ( mDemo >= 4 && mDemo < 7 ) {
+	if ( mTest >= 4 && mTest < 7 ) {
 		if ( index == 0 ) {
 			mTexTerrain.unbind();
 		} else {
-			if ( mDemo < 6 ) {
+			if ( mTest < 6 ) {
 				mTexSphere.unbind();
 			}
 		}
 	} else {
-		if ( ( ( mDemo == 0 || mDemo == 3 ) && index > 0 ) || mDemo == 1 ) {
+		if ( ( ( mTest == 0 || mTest == 3 ) && index > 0 ) || mTest == 1 ) {
 			mTexSquare.unbind();
 		}
 	}
 }
 
-void BasicSampleApp::draw()
+void BulletTestApp::draw()
 {
 	gl::setViewport( getWindowBounds() );
 	gl::setMatrices( mCamera );
@@ -201,7 +201,7 @@ void BasicSampleApp::draw()
 	mParams.draw();
 }
 
-void BasicSampleApp::initDemo()
+void BulletTestApp::initDemo()
 {
 
 	// Clean up last demo
@@ -218,7 +218,7 @@ void BasicSampleApp::initDemo()
 
 	// Create and add the wobbly box
 	mGroundTransform.setIdentity();
-	switch ( mDemo ) {
+	switch ( mTest ) {
 	case 0:
 		mGround = bullet::createRigidBox( mWorld, Vec3f( 200.0f, 35.0f, 200.0f ), 0.0f );
 		bullet::createRigidSphere( mWorld, 50.0f, 64, 0.0f, Vec3f( 0.0f, -50.0f, 0.0f ) );
@@ -259,14 +259,14 @@ void BasicSampleApp::initDemo()
 	}
 
 	// Set friction for box
-	if ( mDemo < 5 ) {
+	if ( mTest < 5 ) {
 		btRigidBody* boxBody = bullet::toBulletRigidBody( mGround );
 		boxBody->setFriction( 0.95f );
 	}
 
 }
 
-void BasicSampleApp::keyDown( KeyEvent event )
+void BulletTestApp::keyDown( KeyEvent event )
 {
 	switch ( event.getCode() )
 	{
@@ -279,7 +279,7 @@ void BasicSampleApp::keyDown( KeyEvent event )
 	}
 }
 
-void BasicSampleApp::loadModels()
+void BulletTestApp::loadModels()
 {
 	ObjLoader loader( loadResource( RES_OBJ_SPHERE )->createStream() );
 	loader.load( & mConvex );
@@ -288,7 +288,7 @@ void BasicSampleApp::loadModels()
 }
 
 // Handles mouse button press
-void BasicSampleApp::mouseDown( MouseEvent event )
+void BulletTestApp::mouseDown( MouseEvent event )
 {
 
 	for ( uint32_t i = 0; i < 10; i++ ) {
@@ -301,7 +301,7 @@ void BasicSampleApp::mouseDown( MouseEvent event )
 		// Add a body
 		CollisionObjectRef body;
 		btRigidBody* shape;
-		switch ( mDemo ) {
+		switch ( mTest ) {
 		case 3:
 			body = bullet::createRigidCylinder( mWorld, Vec3f( size, size * 3, size ), 24, size * size, position );
 			shape = bullet::toBulletRigidBody( body );
@@ -335,15 +335,12 @@ void BasicSampleApp::mouseDown( MouseEvent event )
 
 }
 
-void BasicSampleApp::mouseWheel( MouseEvent event )
+void BulletTestApp::mouseWheel( MouseEvent event )
 {
-
-	// Zoom
 	mCamera.setEyePoint( mCamera.getEyePoint() + Vec3f( 0.0f, 0.0f, event.getWheelIncrement() * 20.0f ) );
-
 }
 
-void BasicSampleApp::prepareSettings( Settings * settings )
+void BulletTestApp::prepareSettings( Settings * settings )
 {
 	settings->setFrameRate( 60.0f );
 	settings->setFullScreen( false );
@@ -351,7 +348,7 @@ void BasicSampleApp::prepareSettings( Settings * settings )
 	settings->setWindowSize( 1280, 720 );
 }
 
-void BasicSampleApp::resize( ResizeEvent event )
+void BulletTestApp::resize( ResizeEvent event )
 {
 
 	// Reset camera
@@ -373,12 +370,12 @@ void BasicSampleApp::resize( ResizeEvent event )
 
 }
 
-void BasicSampleApp::setup()
+void BulletTestApp::setup()
 {
 
 	// Set demo mode
-	mDemo = 0;
-	mDemoPrev = mDemo;
+	mTest = 0;
+	mTestPrev = mTest;
 
 	// Set up lighting
 	mLight = new gl::Light( gl::Light::DIRECTIONAL, 0 );
@@ -407,7 +404,7 @@ void BasicSampleApp::setup()
 	mFrameRate = 0.0f;
 	mParams = params::InterfaceGl( "Params", Vec2i( 150, 100) );
 	mParams.addParam( "Frame Rate", &mFrameRate, "", true );
-	mParams.addParam( "Demo", &mDemo, "min=0 max=7 step=1 keyDecr=d keyIncr=D" ); 
+	mParams.addParam( "Demo", &mTest, "min=0 max=7 step=1 keyDecr=d keyIncr=D" ); 
 
 	// Initialize
 	initDemo();
@@ -417,7 +414,7 @@ void BasicSampleApp::setup()
 
 }
 
-void BasicSampleApp::shutdown()
+void BulletTestApp::shutdown()
 {
 
 	// Clean up
@@ -433,13 +430,13 @@ void BasicSampleApp::shutdown()
 
 }
 
-void BasicSampleApp::update()
+void BulletTestApp::update()
 {
 
 	// Run next demo
-	if ( mDemo != mDemoPrev ) {
+	if ( mTest != mTestPrev ) {
 		initDemo();
-		mDemoPrev = mDemo;
+		mTestPrev = mTest;
 		return;
 	}
 
@@ -448,7 +445,7 @@ void BasicSampleApp::update()
 	// Update light
 	mLight->update( mCamera );
 
-	if ( mDemo < 3 ) {
+	if ( mTest < 3 ) {
 
 		// Set box rotation
 		float rotation = math<float>::sin( ( float )getElapsedSeconds() * 0.3333f ) * 0.35f	;
@@ -460,7 +457,7 @@ void BasicSampleApp::update()
 		body->getMotionState()->setWorldTransform( mGroundTransform );
 		body->setWorldTransform( mGroundTransform );
 
-	} else if ( mDemo == 5 ) {
+	} else if ( mTest == 5 ) {
 
 		// Read data
 		Channel32f& input = mTerrain->getData();
@@ -495,7 +492,7 @@ void BasicSampleApp::update()
 		// Update terrain VBO
 		mTerrain->updateVbo();
 
-	} else if ( mDemo == 6 ) {
+	} else if ( mTest == 6 ) {
 
 		bool init = !mSurface;
 		
@@ -522,9 +519,9 @@ void BasicSampleApp::update()
 	// Update dynamics world
 	mWorld->update();
 
-	/*Iter iter = mWorld->find( mGround );
+	Iter iter = mWorld->find( mGround );
 	OutputDebugStringA( toString( iter->getPosition().x ).c_str() );
-	OutputDebugStringA( "\n" );*/
+	OutputDebugStringA( "\n" );
 
 	// Remove out of bounbds objects
 	for ( bullet::Iter object = mWorld->begin(); object != mWorld->end(); ) {
@@ -536,7 +533,7 @@ void BasicSampleApp::update()
 	}
 
 	// Remove objects when count is too high
-	uint32_t max = mDemo >= 4 ? MAX_OBJECTS_TERRAIN : MAX_OBJECTS;
+	uint32_t max = mTest >= 4 ? MAX_OBJECTS_TERRAIN : MAX_OBJECTS;
 	if ( mWorld->getNumObjects() > max + 1 ) {
 		for ( uint32_t i = 1; i < mWorld->getNumObjects() - MAX_OBJECTS_TERRAIN; i++ ) {
 			mWorld->erase( mWorld->begin() + 1 );
@@ -545,4 +542,4 @@ void BasicSampleApp::update()
 
 }
 
-CINDER_APP_BASIC( BasicSampleApp, RendererGl )
+CINDER_APP_BASIC( BulletTestApp, RendererGl )

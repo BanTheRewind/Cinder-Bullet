@@ -70,6 +70,7 @@ namespace bullet {
 		Iter												end();
 		ConstIter											end() const;
 		Iter												erase( Iter pos );
+		Iter												erase( CollisionObjectRef &object );
 		Iter												find( CollisionObjectRef &object );
 		ConstIter											find( const CollisionObjectRef &object ) const;
 		CollisionObjectRef									pushBack( CollisionObject *object );

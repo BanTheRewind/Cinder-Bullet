@@ -18,9 +18,6 @@ BUGS
 
 TO DO LIST
 
-- Add Iter methods which take *Ref...
-  Iter bullet::erase( const CollisionObjectRef &object ) { ... }
-  Iter bullet::find( const CollisionObjectRef &object ) { ... }
 - Implement btStaticPlaneShape
 - Soft body convenience methods
 - Screen -> dynamics world interaction

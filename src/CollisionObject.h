@@ -46,8 +46,6 @@ namespace bullet
 {
 
 	class DynamicsWorld;
-	class RigidBody;
-	class SoftBody;
 
 	class CollisionObject
 	{
@@ -80,7 +78,6 @@ namespace bullet
 			const ci::Vec3f &scale, float margin );
 		static btConvexHullShape*			createConvexHullShape( const std::vector<ci::Vec3f> &vertices, const ci::Vec3f &scale );
 
-
 		CollisionObject( const ci::Vec3f &position = ci::Vec3f::zero(), const ci::Quatf &rotation = ci::Quatf() );
 
 		btRigidBody							*mRigidBody;
@@ -89,12 +86,8 @@ namespace bullet
 		ci::Vec3f							mScale;
 		VboMeshRef							mVboMesh;
 
-		std::vector<uint32_t>				mIndices;
-		std::vector<ci::Vec3f>				mNormals;
-		std::vector<ci::Vec3f>				mPositions;
-		std::vector<ci::Vec2f>				mTexCoords;
-
 		friend class						DynamicsWorld;
+		friend class						VboMeshManager;
 
 	};
 

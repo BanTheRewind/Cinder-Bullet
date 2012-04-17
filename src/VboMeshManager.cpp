@@ -25,7 +25,7 @@ namespace bullet
 
 		// Find VBO -- this will return an expired weak reference if not found
 		PrimitiveInfo info( type, segments );
-		VboMeshWeakRef & meshWeakRef = sVboMeshList[ info ];
+		VboMeshWeakRef& meshWeakRef = sVboMeshList[ info ];
       
 		// Check if the weak texture is expired
 		if ( meshWeakRef.expired() ) {

@@ -44,11 +44,11 @@
     <ClInclude Include="..\..\..\src\VboMeshManager.h">
       <Filter>blocks\bullet</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\MeshBody.h">
+      <Filter>blocks\bullet</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\BasicSampleApp.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\DynamicsWorld.cpp">
       <Filter>blocks\bullet</Filter>
     </ClCompile>
@@ -66,6 +66,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\VboMeshManager.cpp">
       <Filter>blocks\bullet</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\BulletTestApp.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

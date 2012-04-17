@@ -112,15 +112,21 @@ namespace bullet {
 		return mObjects.erase( pos );
 	}
 
+	Iter DynamicsWorld::erase( CollisionObjectRef &object )
+	{
+		Iter pos = find( object );
+		erase( pos );
+	}
+
 	Iter DynamicsWorld::find( CollisionObjectRef &object )
 	{
 		Iter iter;
 		for ( Iter objectIt = mObjects.begin(); objectIt != mObjects.end(); ++objectIt ) {
-			if ( *iter.base() == object ) {
-				iter = objectIt;
-				break;
+			if ( object == &*objectIt ) {
+				return objectIt;
 			}
 		}
+		// TO DO: throw exception here
 		return iter;
 	}
 
@@ -128,11 +134,11 @@ namespace bullet {
 	{
 		ConstIter iter;
 		for ( ConstIter objectIt = mObjects.begin(); objectIt != mObjects.end(); ++objectIt ) {
-			if ( *iter.base() == object ) {
-				iter = objectIt;
-				break;
+			if ( object == &*objectIt ) {
+				return objectIt;
 			}
 		}
+		// TO DO: throw exception here
 		return iter;
 	}
 
