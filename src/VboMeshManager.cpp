@@ -7,10 +7,10 @@ namespace bullet
 	using namespace ci;
 	using namespace std;
 
-	// Initialize the texture list
-	VboMeshManager::VboMeshList VboMeshManager::sVboMeshList = VboMeshManager::VboMeshList();
+	// Initialize the VBO list
+	VboMeshManager::VboMeshList VboMeshManager::sVboMeshList;
 
-	// Find and return a texture
+	// Find and return a VBO
 	VboMeshRef VboMeshManager::create( PrimitiveType type, uint32_t segments )
 	{
 
@@ -27,7 +27,7 @@ namespace bullet
 		PrimitiveInfo info( type, segments );
 		VboMeshWeakRef& meshWeakRef = sVboMeshList[ info ];
       
-		// Check if the weak texture is expired
+		// Check if the weak reference is expired
 		if ( meshWeakRef.expired() ) {
 
 			// Create the VBO
