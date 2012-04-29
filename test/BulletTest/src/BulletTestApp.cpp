@@ -109,7 +109,7 @@ private:
 	static const uint32_t		MAX_OBJECTS = 300;
 	static const uint32_t		MAX_OBJECTS_TERRAIN = 80;
 
-	void						initDemo();
+	void						initTest();
 	int32_t						mTest;
 	int32_t						mTestPrev;
 
@@ -147,11 +147,11 @@ using namespace std;
 
 void BulletTestApp::bindTexture( uint32_t index )
 {
-	if ( mTest >= 4 && mTest < 7 ) {
+	if ( mTest > 4 ) {
 		if ( index == 0 ) {
 			mTexTerrain.bind();
 		} else {
-			if ( mTest < 6 ) {
+			if ( mTest < 7 ) {
 				mTexSphere.bind();
 			}
 		}
@@ -164,11 +164,11 @@ void BulletTestApp::bindTexture( uint32_t index )
 
 void BulletTestApp::unbindTexture( uint32_t index )
 {
-	if ( mTest >= 4 && mTest < 7 ) {
+	if ( mTest > 4 ) {
 		if ( index == 0 ) {
 			mTexTerrain.unbind();
 		} else {
-			if ( mTest < 6 ) {
+			if ( mTest < 7 ) {
 				mTexSphere.unbind();
 			}
 		}
@@ -182,9 +182,8 @@ void BulletTestApp::unbindTexture( uint32_t index )
 void BulletTestApp::draw()
 {
 	gl::setViewport( getWindowBounds() );
-	gl::setMatrices( mCamera );
 	gl::clear( ColorAf::black() );
-
+	gl::setMatrices( mCamera );
 	gl::pushMatrices();
 	gl::rotate( Vec3f( -45.0f, 0.0f, 0.0f ) );
 	uint32_t i = 0;
@@ -201,18 +200,14 @@ void BulletTestApp::draw()
 	mParams.draw();
 }
 
-void BulletTestApp::initDemo()
+void BulletTestApp::initTest()
 {
 
-	// Clean up last demo
+	// Clean up last test
 	if ( mWorld ) {
 		mWorld->clear();
 	}
-	if ( mCapture && mCapture.isCapturing() ) {
-		mCapture.stop();
-		mCapture.reset();
-	}
-
+	
 	// Used when generating terrain
 	Channel32f heightField;
 
@@ -233,10 +228,13 @@ void BulletTestApp::initDemo()
 		mGround = bullet::createRigidBox( mWorld, Vec3f( 200.0f, 35.0f, 200.0f ), 0.0f );
 		break;
 	case 4:
+		mGround = bullet::createRigidBox( mWorld, Vec3f( 200.0f, 35.0f, 200.0f ), 0.0f );
+		break;
+	case 5:
 		heightField = Channel32f( loadImage( loadResource( RES_IMAGE_HEIGHTFIELD_SM ) ) );
 		mGround = bullet::createRigidTerrain( mWorld, heightField, -1.0f, 1.0f, Vec3f( 6.0f, 80.0f, 6.0f ), 0.0f );
 		break;
-	case 5:
+	case 6:
 
 		// ADVANCED: To add a custom class, create a standard pointer to it and 
 		// pushBack it into your world. Be sure to delete this pointer when you no loinger need it
@@ -245,15 +243,14 @@ void BulletTestApp::initDemo()
 		mWorld->pushBack( mTerrain );
 		break;
 
-	case 6:
+	case 7:
 
 		// Start capture
-		mCapture = Capture( 320, 240 );
-		mCapture.start();
+		if ( !mCapture ) {
+			mCapture = Capture( 320, 240 );
+			mCapture.start();
+		}
 
-		break;
-	case 7:
-		mGround = bullet::createRigidBox( mWorld, Vec3f( 200.0f, 35.0f, 200.0f ), 0.0f );
 		break;
 
 	}
@@ -274,7 +271,7 @@ void BulletTestApp::keyDown( KeyEvent event )
 		quit();
 		break;
 	case KeyEvent::KEY_SPACE:
-		writeImage( getAppPath() / "\\frame_" / toString( getElapsedFrames() ) / ".png", copyWindowSurface() );
+		writeImage( getAppPath() / string( "frame_" + toString( getElapsedFrames() ) + ".png" ), copyWindowSurface() );
 		break;
 	}
 }
@@ -291,7 +288,7 @@ void BulletTestApp::loadModels()
 void BulletTestApp::mouseDown( MouseEvent event )
 {
 
-	for ( uint32_t i = 0; i < 10; i++ ) {
+	for ( uint32_t i = 0; i < 5; i++ ) {
 
 		// Set random size and position
 		float size = Rand::randFloat( 3.0f, 10.0f );
@@ -308,23 +305,23 @@ void BulletTestApp::mouseDown( MouseEvent event )
 			shape->setAngularFactor( 0.95f );
 			break;
 		case 4:
-			bullet::createRigidSphere( mWorld, size, 16, size * size, position );
+			body = bullet::createRigidCone( mWorld, size, size * 2.0f, 24, size * size, position );
+			shape = bullet::toBulletRigidBody( body );
+			shape->setAngularVelocity( btVector3( 0.21f, 0.21f, 0.21f ) );
+			shape->setAngularFactor( 0.82f );
 			break;
 		case 5:
 			bullet::createRigidSphere( mWorld, size, 16, size * size, position );
 			break;
 		case 6:
+			bullet::createRigidSphere( mWorld, size, 16, size * size, position );
+			break;
+		case 7:
 			body = bullet::createRigidBox( mWorld, Vec3f::one() * size, size * size, position );
 			shape = bullet::toBulletRigidBody( body );
 			shape->setAngularVelocity( btVector3( 0.21f, 0.21f, 0.21f ) );
 			shape->setFriction( 0.6f );
 			shape->setAngularFactor( 0.95f );
-			break;
-		case 7:
-			body = bullet::createRigidCone( mWorld, size, size * 2.0f, 24, size * size, position );
-			shape = bullet::toBulletRigidBody( body );
-			shape->setAngularVelocity( btVector3( 0.21f, 0.21f, 0.21f ) );
-			shape->setAngularFactor( 0.82f );
 			break;
 		default:
 			bullet::createRigidBox( mWorld, Vec3f::one() * size, size * size, position );
@@ -342,7 +339,7 @@ void BulletTestApp::mouseWheel( MouseEvent event )
 
 void BulletTestApp::prepareSettings( Settings * settings )
 {
-	settings->setFrameRate( 60.0f );
+	settings->setFrameRate( 1000.0f );
 	settings->setFullScreen( false );
 	settings->setResizable( false );
 	settings->setWindowSize( 1280, 720 );
@@ -373,7 +370,7 @@ void BulletTestApp::resize( ResizeEvent event )
 void BulletTestApp::setup()
 {
 
-	// Set demo mode
+	// Set test mode
 	mTest = 0;
 	mTestPrev = mTest;
 
@@ -404,10 +401,10 @@ void BulletTestApp::setup()
 	mFrameRate = 0.0f;
 	mParams = params::InterfaceGl( "Params", Vec2i( 150, 100) );
 	mParams.addParam( "Frame Rate", &mFrameRate, "", true );
-	mParams.addParam( "Demo", &mTest, "min=0 max=7 step=1 keyDecr=d keyIncr=D" ); 
+	mParams.addParam( "Test", &mTest, "min=0 max=7 step=1 keyDecr=d keyIncr=D" ); 
 
 	// Initialize
-	initDemo();
+	initTest();
 
 	// Run first resize to initialize view
 	resize( ResizeEvent( getWindowSize() ) );
@@ -433,11 +430,10 @@ void BulletTestApp::shutdown()
 void BulletTestApp::update()
 {
 
-	// Run next demo
+	// Run next test
 	if ( mTest != mTestPrev ) {
-		initDemo();
 		mTestPrev = mTest;
-		return;
+		initTest();
 	}
 
 	mFrameRate = getAverageFps();
@@ -457,7 +453,7 @@ void BulletTestApp::update()
 		body->getMotionState()->setWorldTransform( mGroundTransform );
 		body->setWorldTransform( mGroundTransform );
 
-	} else if ( mTest == 5 ) {
+	} else if ( mTest == 6 ) {
 
 		// Read data
 		Channel32f& input = mTerrain->getData();
@@ -492,7 +488,7 @@ void BulletTestApp::update()
 		// Update terrain VBO
 		mTerrain->updateVbo();
 
-	} else if ( mTest == 6 ) {
+	} else if ( mTest == 7 ) {
 
 		bool init = !mSurface;
 		
@@ -517,11 +513,13 @@ void BulletTestApp::update()
 	}
 	
 	// Update dynamics world
-	mWorld->update();
+	mWorld->update( mFrameRate );
 
-	Iter iter = mWorld->find( mGround );
-	OutputDebugStringA( toString( iter->getPosition().x ).c_str() );
-	OutputDebugStringA( "\n" );
+	/*if ( mGround ) { 
+		Iter iter = mWorld->find( mGround );
+		OutputDebugStringA( toString( iter->getPosition().x ).c_str() );
+		OutputDebugStringA( "\n" );
+	}*/
 
 	// Remove out of bounbds objects
 	for ( bullet::Iter object = mWorld->begin(); object != mWorld->end(); ) {

@@ -71,7 +71,7 @@ namespace bullet
 	}
 
 	// Creates a rigid box
-	btRigidBody* RigidBody::createBox( const Vec3f& size, float mass, const Vec3f& position, const Quatf& rotation )
+	btRigidBody* RigidBody::createBox( const Vec3f &size, float mass, const Vec3f &position, const Quatf &rotation )
 	{
 
 		// Create Bullet box
@@ -85,7 +85,7 @@ namespace bullet
 	}
 
 	// Creates rigid cone
-	btRigidBody* RigidBody::createCone( float radius, float height, int32_t segments, float mass, const Vec3f& position, const Quatf& rotation )
+	btRigidBody* RigidBody::createCone( float radius, float height, int32_t segments, float mass, const Vec3f &position, const Quatf &rotation )
 	{
 
 		// Create cylinder
@@ -98,7 +98,7 @@ namespace bullet
 	}
 
 	// Creates rigid cylinder
-	btRigidBody* RigidBody::createCylinder( const Vec3f &scale, int32_t segments, float mass, const Vec3f& position, const Quatf& rotation )
+	btRigidBody* RigidBody::createCylinder( const Vec3f &scale, int32_t segments, float mass, const Vec3f &position, const Quatf &rotation )
 	{
 
 		// Create cylinder
@@ -112,7 +112,7 @@ namespace bullet
 	}
 
 	// Create rigid body from convex hull shape
-	btRigidBody* RigidBody::createHull( btConvexHullShape* shape, float mass, const Vec3f& position, const Quatf& rotation )
+	btRigidBody* RigidBody::createHull( btConvexHullShape* shape, float mass, const Vec3f &position, const Quatf &rotation )
 	{
 
 		// Create and return rigid body
@@ -122,7 +122,7 @@ namespace bullet
 	}
 
 	// Create rigid body from triangle mesh
-	btRigidBody* RigidBody::createMesh( btBvhTriangleMeshShape* shape, float mass, const Vec3f& position, const Quatf& rotation )
+	btRigidBody* RigidBody::createMesh( btBvhTriangleMeshShape* shape, float mass, const Vec3f &position, const Quatf &rotation )
 	{
 
 		// Create and return rigid body
@@ -132,7 +132,7 @@ namespace bullet
 	}
 
 	// Creates a rigid sphere
-	btRigidBody* RigidBody::createSphere( float radius, float mass, const Vec3f& position, const Quatf& rotation )
+	btRigidBody* RigidBody::createSphere( float radius, float mass, const Vec3f &position, const Quatf &rotation )
 	{
 
 		// Create Bullet sphere
@@ -140,6 +140,19 @@ namespace bullet
 
 		// Create and return rigid body
 		btRigidBody* body = create( shape, mass, position, rotation );
+		return body;
+
+	}
+
+	// Creates a static plane
+	btRigidBody* RigidBody::createStaticPlane( const Vec3f &normal, float planeConstant, const Vec3f &position, const Quatf &rotation )
+	{
+
+		// Create Bullet floor
+		btCollisionShape* shape = new btStaticPlaneShape( toBulletVector3( normal ), planeConstant );
+
+		// Create and return rigid body
+		btRigidBody* body = create( shape, 0.0f, position, rotation );
 		return body;
 
 	}
@@ -259,6 +272,19 @@ namespace bullet
 
 		// Create VBO
 		mVboMesh = VboMeshManager::create( VboMeshManager::PRIMITIVE_SPHERE, segments );
+
+	}
+
+	// Static plane
+	RigidStaticPlane::RigidStaticPlane( const Vec3f &normal, float planeConstant, const Vec3f &position, const Quatf &rotation ) 
+		: CollisionObject( position, rotation )
+	{
+
+		// Create body
+		mRigidBody = createStaticPlane( normal, planeConstant, position, rotation );
+
+		// Set scale
+		mScale = Vec3f::one();
 
 	}
 

@@ -89,7 +89,7 @@ namespace bullet {
 
 		void												setInfo( const btSoftBodyWorldInfo &info );
 
-		void												update();
+		void												update( float frameRate = 60.0f );
 
 	private:
 
@@ -138,6 +138,9 @@ namespace bullet {
 																			const ci::Quatf &rotation = ci::Quatf() );
 	CollisionObjectRef										createRigidSphere( const DynamicsWorldRef &world, float radius = 10.0f, int32_t segments = 16, 
 																				float mass = 1.0f, const ci::Vec3f &position = ci::Vec3f::zero(), 
+																				const ci::Quatf &rotation = ci::Quatf() );
+	CollisionObjectRef										createStaticPlane( const DynamicsWorldRef &world, const ci::Vec3f &normal = ci::Vec3f( 0.0f, 1.0f, 0.0f ), 
+																				float planeConstant = 0.0f, const ci::Vec3f &position = ci::Vec3f::zero(), 
 																				const ci::Quatf &rotation = ci::Quatf() );
 	CollisionObjectRef										createRigidTerrain( const DynamicsWorldRef &world, const ci::Channel32f &heightField, float minHeight = -1.0f, 
 																				float maxHeight = 1.0f, const ci::Vec3f &scale = ci::Vec3f::one(), float mass = 1.0f, 

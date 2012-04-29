@@ -115,7 +115,7 @@ namespace bullet {
 	Iter DynamicsWorld::erase( CollisionObjectRef &object )
 	{
 		Iter pos = find( object );
-		erase( pos );
+		return erase( pos );
 	}
 
 	Iter DynamicsWorld::find( CollisionObjectRef &object )
@@ -208,7 +208,7 @@ namespace bullet {
 	/////////////////////////////////////////////////////////////////////////////////////////////////
 
 	// Runs update logic
-	void DynamicsWorld::update()
+	void DynamicsWorld::update( float frameRate )
 	{
 
 		// Check if object count has changed
@@ -240,7 +240,7 @@ namespace bullet {
 		mNumObjects = numObjects;
 
 		// Update dynamics world
-		mWorld->stepSimulation( 1.0f, 10, 1.0f / math<float>::max( 1.0f, getFrameRate() ) );
+		mWorld->stepSimulation( 1.0f, 10, 1.0f / math<float>::max( 1.0f, frameRate ) );
 
 	}
 
@@ -296,6 +296,10 @@ namespace bullet {
 	CollisionObjectRef createRigidSphere( const DynamicsWorldRef &world, float radius, int32_t segments, float mass, const ci::Vec3f &position, const ci::Quatf &rotation )
 	{
 		return world->pushBack( new RigidSphere( radius, segments, mass, position, rotation ) );
+	}
+	CollisionObjectRef createRigidStaticPlane( const DynamicsWorldRef &world, const Vec3f &normal, float planeConstant, const ci::Vec3f &position, const ci::Quatf &rotation )
+	{
+		return world->pushBack( new RigidStaticPlane( normal, planeConstant, position, rotation ) );
 	}
 	CollisionObjectRef createRigidTerrain( const DynamicsWorldRef &world, const ci::Channel32f &heightField, float minHeight, float maxHeight, 
 		const ci::Vec3f &scale, float mass, const ci::Vec3f &position, const ci::Quatf &rotation )

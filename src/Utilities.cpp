@@ -45,7 +45,7 @@ namespace bullet
 	using namespace ci;
 	using namespace std;
 
-	Quatf fromBulletQuaternion( const btQuaternion& q )
+	Quatf fromBulletQuaternion( const btQuaternion &q )
 	{
 		return ci::Quatf( q.getX(), q.getY(), q.getZ(), q.getW() );
 	}
@@ -58,12 +58,12 @@ namespace bullet
 		return matrix;
 	}
 	
-	Vec3f fromBulletVector3( const btVector3& v )
+	Vec3f fromBulletVector3( const btVector3 &v )
 	{
 		return Vec3f( v.x(), v.y(), v.z() );
 	}
 
-	btQuaternion toBulletQuaternion( const Quatf& q )
+	btQuaternion toBulletQuaternion( const Quatf &q )
 	{
 		return btQuaternion( q.v.x, q.v.y, q.v.z, q.w );
 	}
@@ -75,7 +75,7 @@ namespace bullet
 		return trans;
 	}
 
-	btVector3 toBulletVector3( const Vec3f& v )
+	btVector3 toBulletVector3( const Vec3f &v )
 	{
 		return btVector3( v.x, v.y, v.z );
 	}
