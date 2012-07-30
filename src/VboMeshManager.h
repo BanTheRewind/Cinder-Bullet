@@ -41,52 +41,50 @@
 #include "cinder/Vector.h"
 #include <map>
 
-namespace bullet
+// Texture pointer alias
+typedef std::shared_ptr<ci::gl::VboMesh> VboMeshRef;
+typedef std::weak_ptr<ci::gl::VboMesh> VboMeshWeakRef;
+
+// Manages VBO meshes
+class VboMeshManager 
 {
 
-	// Texture pointer alias
-	typedef std::shared_ptr<ci::gl::VboMesh> VboMeshRef;
-	typedef std::weak_ptr<ci::gl::VboMesh> VboMeshWeakRef;
+public:
 
-	// Manages VBO meshes
-	class VboMeshManager 
+	typedef enum 
 	{
+		PRIMITIVE_NONE, PRIMITIVE_BOX, PRIMITIVE_CIRCLE, PRIMITIVE_CONE, PRIMITIVE_CYLINDER, PRIMITIVE_SQUARE, PRIMITIVE_SPHERE
+	} PrimitiveType;
 
+	static VboMeshRef	create( PrimitiveType type, uint32_t segments = 0 );
+	static VboMeshRef	create( const std::vector<uint32_t> &indices, const std::vector<ci::Vec3f> &positions, 
+								const std::vector<ci::Vec3f> &normals, const std::vector<ci::Vec2f> &texCoords, 
+								GLenum primitiveType = GL_TRIANGLES );
+	
+	static VboMeshRef	createBox();
+	static VboMeshRef	createCircle( uint32_t segments );
+	static VboMeshRef	createCone( uint32_t segments );
+	static VboMeshRef	createCylinder( uint32_t segments );
+	static VboMeshRef	createSphere( uint32_t segments );
+	static VboMeshRef	createSquare();
+
+private:
+
+	class PrimitiveInfo
+	{
 	public:
-
-		typedef enum 
-		{
-			PRIMITIVE_NONE, PRIMITIVE_BOX, PRIMITIVE_CONE, PRIMITIVE_CYLINDER, PRIMITIVE_SPHERE
-		} PrimitiveType;
-
-		static VboMeshRef	create( PrimitiveType type, uint32_t segments = 0 );
-		static VboMeshRef	create( const std::vector<uint32_t> &indices, const std::vector<ci::Vec3f> &positions, 
-									const std::vector<ci::Vec3f> &normals, const std::vector<ci::Vec2f> &texCoords, 
-									GLenum primitiveType = GL_TRIANGLES );
-
+		PrimitiveInfo( PrimitiveType type, uint32_t segments );
+		bool			operator==( const PrimitiveInfo &rhs ) const;
+		bool			operator!=( const PrimitiveInfo &rhs ) const;
+		bool			operator>( const PrimitiveInfo &rhs ) const;
+		bool			operator<( const PrimitiveInfo &rhs ) const;
 	private:
-		
-		static VboMeshRef	createBox();
-		static VboMeshRef	createCone( uint32_t segments );
-		static VboMeshRef	createCylinder( uint32_t segments );
-		static VboMeshRef	createSphere( uint32_t segments );
-
-		class PrimitiveInfo
-		{
-		public:
-			PrimitiveInfo( PrimitiveType type, const uint32_t segments );
-			bool			operator<( const PrimitiveInfo &rhs ) const;
-			bool			operator==( const PrimitiveInfo &rhs ) const;
-			bool			operator!=( const PrimitiveInfo &rhs ) const;
-		private:
-			uint32_t		mSegments;
-			PrimitiveType	mType;
-		};
-
-		// List of weak pointers to textures
-		typedef std::map<PrimitiveInfo, VboMeshWeakRef> VboMeshList;
-		static VboMeshList	sVboMeshList;
-
+		uint32_t		mSegments;
+		PrimitiveType	mType;
 	};
 
-}
+	// List of weak pointers to textures
+	typedef std::map<PrimitiveInfo, VboMeshWeakRef> VboMeshList;
+	static VboMeshList	sVboMeshList;
+
+};
