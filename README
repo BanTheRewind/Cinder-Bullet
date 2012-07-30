@@ -11,17 +11,14 @@ you just use Bullet directly.
 
 BUGS
 
-- Cylinder VBO is not aligned with its Bullet body on the Y axis
 - Cone normals / tex coords needs to be fixed
 - Concave mesh body isn't scaling on Y axis
 - Crash on exit
 
 TO DO LIST
 
-- Implement btStaticPlaneShape
+- Screen -> dynamics world interaction / constraints
 - Soft body convenience methods
-- Screen -> dynamics world interaction
-- Investigate if separate object is needed for bullets
 - Static lib
 - XCode static lib
 - Samples
@@ -41,6 +38,8 @@ TO DO LIST
 
 More about Bullet here:
 http://bulletphysics.org/wordpress/
+
+http://code.google.com/p/bullet/downloads/detail?name=bullet-2.80-rev2531.zip&can=2&q=
 
 -----------------------------------------
 
