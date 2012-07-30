@@ -10,36 +10,31 @@
 
 namespace bullet {
 
-	// Import namespaces
 	using namespace ci;
 	using namespace ci::app;
 	using namespace std;
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////
 
-	DynamicsWorldRef DynamicsWorld::create()
+	DynamicsWorld::DynamicsWorld( const CameraPersp &camera )
 	{
-		return DynamicsWorldRef( new DynamicsWorld() );
-	}
 
-	// Constructor
-	DynamicsWorld::DynamicsWorld()
-	{
+		mCamera = camera;
 
 		// Setup physics environment
-		mCollisionConfiguration = new btDefaultCollisionConfiguration();
-		mDispatcher = new btCollisionDispatcher( mCollisionConfiguration );
-		mBroadphase = new btDbvtBroadphase();
-		mSolver = new btSequentialImpulseConstraintSolver();
+		mCollisionConfiguration	= new btDefaultCollisionConfiguration();
+		mDispatcher				= new btCollisionDispatcher( mCollisionConfiguration );
+		mBroadphase				= new btDbvtBroadphase();
+		mSolver					= new btSequentialImpulseConstraintSolver();
 	
 		// Default dynamics
-		mSoftBodyWorldInfo.air_density = 1.2f;
-		mSoftBodyWorldInfo.m_broadphase = mBroadphase;
-		mSoftBodyWorldInfo.m_dispatcher = mDispatcher;
+		mSoftBodyWorldInfo.air_density		= 1.2f;
+		mSoftBodyWorldInfo.m_broadphase		= mBroadphase;
+		mSoftBodyWorldInfo.m_dispatcher		= mDispatcher;
 		mSoftBodyWorldInfo.m_gravity.setValue( 0.0f, -10.0f, 0.0f );
-		mSoftBodyWorldInfo.water_density = 0.0f;
-		mSoftBodyWorldInfo.water_offset = 0.0f;
-		mSoftBodyWorldInfo.water_normal = btVector3( 0.0f, 0.0f, 0.0f );
+		mSoftBodyWorldInfo.water_density	= 0.0f;
+		mSoftBodyWorldInfo.water_offset		= 0.0f;
+		mSoftBodyWorldInfo.water_normal		= btVector3( 0.0f, 0.0f, 0.0f );
 		mSoftBodyWorldInfo.m_sparsesdf.Initialize();
 
 		// Build world
@@ -47,13 +42,42 @@ namespace bullet {
 		mWorld->setGravity( btVector3( 0.0f, -10.0f, 0.0f ) );
 		mWorld->getDispatchInfo().m_enableSPU = true;
 
-		// Set tracking properties
 		mElapsedSeconds = getElapsedSeconds();
 		mNumObjects = 0;
 
 	}
 
-	// Destructor
+	const DynamicsWorld& DynamicsWorld::operator=( const DynamicsWorld &rhs )
+	{
+		mBroadphase				= rhs.mBroadphase;
+		mCamera					= rhs.mCamera;
+		mCollisionConfiguration	= rhs.mCollisionConfiguration;
+		mDispatcher				= rhs.mDispatcher;
+		mElapsedSeconds			= rhs.mElapsedSeconds;
+		mNumObjects				= rhs.mNumObjects;
+		mSoftBodyWorldInfo		= rhs.mSoftBodyWorldInfo;
+		mSolver					= rhs.mSolver;
+		mWorld					= rhs.mWorld;
+		mObjects.clear();
+		mObjects.transfer( mObjects.begin(), rhs.mObjects );
+		return *this;
+	}
+
+	DynamicsWorld::DynamicsWorld( const DynamicsWorld &rhs )
+	{
+		mBroadphase				= rhs.mBroadphase;
+		mCamera					= rhs.mCamera;
+		mCollisionConfiguration	= rhs.mCollisionConfiguration;
+		mDispatcher				= rhs.mDispatcher;
+		mElapsedSeconds			= rhs.mElapsedSeconds;
+		mNumObjects				= rhs.mNumObjects;
+		mSoftBodyWorldInfo		= rhs.mSoftBodyWorldInfo;
+		mSolver					= rhs.mSolver;
+		mWorld					= rhs.mWorld;
+		mObjects.clear();
+		mObjects.transfer( mObjects.begin(), rhs.mObjects );
+	}
+
 	DynamicsWorld::~DynamicsWorld()
 	{
 		if ( mBroadphase != 0 ) {
@@ -159,42 +183,52 @@ namespace bullet {
 	{ 
 		return mBroadphase; 
 	}
+
 	btDefaultCollisionConfiguration* DynamicsWorld::getCollisionConfiguration() 
 	{ 
 		return mCollisionConfiguration; 
 	}
+
 	btCollisionDispatcher* DynamicsWorld::getDispatcher() 
 	{ 
 		return mDispatcher; 
 	}
+
 	btSoftBodyWorldInfo& DynamicsWorld::getInfo() 
 	{ 
 		return mSoftBodyWorldInfo; 
 	}
+
 	const btSoftBodyWorldInfo& DynamicsWorld::getInfo() const
 	{ 
 		return mSoftBodyWorldInfo; 
 	}
+
 	uint32_t DynamicsWorld::getNumObjects()
 	{
 		return mNumObjects;
 	}
+
 	const uint32_t DynamicsWorld::getNumObjects() const
 	{
 		return mNumObjects;
 	}
+
 	CollisionObjectList& DynamicsWorld::getObjects()
 	{
 		return mObjects;
 	}
+
 	const CollisionObjectList& DynamicsWorld::getObjects() const
 	{
 		return mObjects;
 	}
+
 	btConstraintSolver* DynamicsWorld::getSolver() 
 	{ 
 		return mSolver; 
 	}
+
 	btDiscreteDynamicsWorld* DynamicsWorld::getWorld() 
 	{ 
 		return mWorld; 
@@ -207,7 +241,62 @@ namespace bullet {
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////
 
-	// Runs update logic
+	void DynamicsWorld::addConstraint( const Constraint &constraint, float clamping, float tau )
+	{
+		mWorld->addConstraint( constraint.mConstraint );
+		constraint.mConstraint->m_setting.m_impulseClamp = clamping;
+		constraint.mConstraint->m_setting.m_tau = tau;
+	}
+
+	CameraPersp& DynamicsWorld::getCamera()
+	{
+		return mCamera;
+	}
+
+	const CameraPersp& DynamicsWorld::getCamera() const
+	{
+		return mCamera;
+	}
+
+	bool DynamicsWorld::intersects( const Vec2f &pos, Constraint *constraint )
+	{
+		Ray ray				= mCamera.generateRay( pos.x, pos.y, getWindowAspectRatio() );
+		btVector3 rayFrom	= toBulletVector3( mCamera.getEyePoint() );
+		btVector3 rayTo		= toBulletVector3( ray.getOrigin() );
+
+		btCollisionWorld::ClosestRayResultCallback rayCallback( rayFrom, rayTo );
+		mWorld->rayTest( rayFrom, rayTo, rayCallback );
+		if ( rayCallback.hasHit() ) {
+
+			btRigidBody* collisionBody = btRigidBody::upcast( rayCallback.m_collisionObject );
+			if ( collisionBody ) {
+				btVector3 position	= rayCallback.m_hitPointWorld;
+				btVector3 pivot		= collisionBody->getCenterOfMassTransform().inverse() * position;
+
+				constraint->mConstraint = new btPoint2PointConstraint( *collisionBody, pivot );
+				constraint->mDistance	= ( position - rayFrom ).length();
+				constraint->mPosition	= fromBulletVector3( rayTo );
+				
+				return true;
+			}
+
+		}
+
+		return false;
+	}
+
+	void DynamicsWorld::removeConstraint( const Constraint &constraint )
+	{
+
+	}
+
+	void DynamicsWorld::setCamera( const CameraPersp &camera )
+	{
+		mCamera = camera;
+	}
+
+	/////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void DynamicsWorld::update( float frameRate )
 	{
 
@@ -250,14 +339,17 @@ namespace bullet {
 	{
 		return (btRigidBody*)( object->getBulletBody() );
 	}
+
 	btRigidBody* DynamicsWorld::toBulletRigidBody( Iter pos )
 	{
 		return (btRigidBody*)( pos->getBulletBody() );
 	}
+
 	btSoftBody* DynamicsWorld::toBulletSoftBody( CollisionObject *object )
 	{
 		return (btSoftBody*)( object->getBulletBody() );
 	}
+
 	btSoftBody* DynamicsWorld::toBulletSoftBody( Iter pos )
 	{
 		return (btSoftBody*)( pos->getBulletBody() );
@@ -265,44 +357,50 @@ namespace bullet {
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////
 
-	DynamicsWorldRef createWorld()
+	DynamicsWorldRef createWorld( const CameraPersp &camera )
 	{
-		return DynamicsWorld::create();
+		return DynamicsWorldRef( new DynamicsWorld( camera ) );
 	}
 
-	CollisionObjectRef createRigidBox( const DynamicsWorldRef &world, const ci::Vec3f &dimensions, float mass, const ci::Vec3f &position, const ci::Quatf &rotation )
+	CollisionObjectRef createRigidBox( const DynamicsWorldRef &world, const Vec3f &dimensions, float mass, const Vec3f &position, const Quatf &rotation )
 	{
 		return world->pushBack( new RigidBox( dimensions, mass, position, rotation ) );
 	}
+
 	CollisionObjectRef createRigidCone( const DynamicsWorldRef &world, float radius, float height, int32_t segments, float mass, 
-		const ci::Vec3f &position, const ci::Quatf &rotation )
+		const Vec3f &position, const Quatf &rotation )
 	{
 		return world->pushBack( new RigidCone( radius, height, segments, mass, position, rotation ) );
 	}
-	CollisionObjectRef createRigidCylinder( const DynamicsWorldRef &world, const ci::Vec3f &scale, int32_t segments, float mass, 
-		const ci::Vec3f &position, const ci::Quatf &rotation )
+
+	CollisionObjectRef createRigidCylinder( const DynamicsWorldRef &world, const Vec3f &scale, int32_t segments, float mass, 
+		const Vec3f &position, const Quatf &rotation )
 	{
 		return world->pushBack( new RigidCylinder( scale, segments, mass, position, rotation ) );
 	}
-	CollisionObjectRef createRigidHull( const DynamicsWorldRef &world, const ci::TriMesh &mesh, const ci::Vec3f &scale, float mass, const ci::Vec3f &position, const ci::Quatf &rotation )
+
+	CollisionObjectRef createRigidHull( const DynamicsWorldRef &world, const TriMesh &mesh, const Vec3f &scale, float mass, const Vec3f &position, const Quatf &rotation )
 	{
 		return world->pushBack( new RigidHull( mesh, scale, mass, position, rotation ) );
 	}
-	CollisionObjectRef createRigidMesh( const DynamicsWorldRef &world, const ci::TriMesh &mesh, const ci::Vec3f &scale, float margin, float mass, 
-		const ci::Vec3f &position, const ci::Quatf &rotation )
+	CollisionObjectRef createRigidMesh( const DynamicsWorldRef &world, const TriMesh &mesh, const Vec3f &scale, float margin, float mass, 
+		const Vec3f &position, const Quatf &rotation )
 	{
 		return world->pushBack( new RigidMesh( mesh, scale, margin, mass, position, rotation ) );
 	}
-	CollisionObjectRef createRigidSphere( const DynamicsWorldRef &world, float radius, int32_t segments, float mass, const ci::Vec3f &position, const ci::Quatf &rotation )
+
+	CollisionObjectRef createRigidSphere( const DynamicsWorldRef &world, float radius, int32_t segments, float mass, const Vec3f &position, const Quatf &rotation )
 	{
 		return world->pushBack( new RigidSphere( radius, segments, mass, position, rotation ) );
 	}
-	CollisionObjectRef createRigidStaticPlane( const DynamicsWorldRef &world, const Vec3f &normal, float planeConstant, const ci::Vec3f &position, const ci::Quatf &rotation )
+
+	CollisionObjectRef createRigidStaticPlane( const DynamicsWorldRef &world, const Vec3f &normal, float planeConstant, const Vec3f &position, const Quatf &rotation )
 	{
 		return world->pushBack( new RigidStaticPlane( normal, planeConstant, position, rotation ) );
 	}
-	CollisionObjectRef createRigidTerrain( const DynamicsWorldRef &world, const ci::Channel32f &heightField, float minHeight, float maxHeight, 
-		const ci::Vec3f &scale, float mass, const ci::Vec3f &position, const ci::Quatf &rotation )
+
+	CollisionObjectRef createRigidTerrain( const DynamicsWorldRef &world, const Channel32f &heightField, float minHeight, float maxHeight, 
+		const Vec3f &scale, float mass, const Vec3f &position, const Quatf &rotation )
 	{
 		return world->pushBack( new RigidTerrain( heightField, minHeight, maxHeight, scale, mass, position, rotation ) );
 	}
@@ -313,6 +411,7 @@ namespace bullet {
 	{
 		return (btRigidBody*)( object->getBulletBody() );
 	}
+
 	btSoftBody* toBulletSoftBody( const CollisionObjectRef &object )
 	{
 		return (btSoftBody*)( object->getBulletBody() );

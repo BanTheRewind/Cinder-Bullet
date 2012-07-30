@@ -95,8 +95,9 @@ class BulletTestApp : public ci::app::AppBasic
 public:
 
 	void						draw();
-	void						keyDown( ci::app::KeyEvent event );
 	void						mouseDown( ci::app::MouseEvent event );
+	void						mouseDrag( ci::app::MouseEvent event );
+	void						mouseUp( ci::app::MouseEvent event );
 	void						mouseWheel( ci::app::MouseEvent event );
 	void						prepareSettings( ci::app::AppBasic::Settings * settings );
 	void						resize( ci::app::ResizeEvent event );
@@ -109,6 +110,7 @@ private:
 	static const uint32_t		MAX_OBJECTS = 300;
 	static const uint32_t		MAX_OBJECTS_TERRAIN = 80;
 
+	void						drop();
 	void						initTest();
 	int32_t						mTest;
 	int32_t						mTestPrev;
@@ -128,6 +130,9 @@ private:
 	btTransform					mGroundTransform;
 	bullet::DynamicsWorldRef	mWorld;
 
+	bullet::Constraint			mDragConstraint;
+	bool						mDragging;
+
 	ci::gl::Texture				mTexSquare;
 	ci::gl::Texture				mTexSphere;
 	ci::gl::Texture				mTexTerrain;
@@ -137,6 +142,7 @@ private:
 
 	float						mFrameRate;
 	ci::params::InterfaceGl		mParams;
+	void						screenShot();
 
 };
 
@@ -200,94 +206,9 @@ void BulletTestApp::draw()
 	mParams.draw();
 }
 
-void BulletTestApp::initTest()
+// Generates rigid bodies
+void BulletTestApp::drop()
 {
-
-	// Clean up last test
-	if ( mWorld ) {
-		mWorld->clear();
-	}
-	
-	// Used when generating terrain
-	Channel32f heightField;
-
-	// Create and add the wobbly box
-	mGroundTransform.setIdentity();
-	switch ( mTest ) {
-	case 0:
-		mGround = bullet::createRigidBox( mWorld, Vec3f( 200.0f, 35.0f, 200.0f ), 0.0f );
-		bullet::createRigidSphere( mWorld, 50.0f, 64, 0.0f, Vec3f( 0.0f, -50.0f, 0.0f ) );
-		break;
-	case 1:
-		mGround = bullet::createRigidHull( mWorld, mConvex, Vec3f::one() * 50.0f, 0.0f );
-		break;
-	case 2:
-		mGround = bullet::createRigidMesh( mWorld, mConcave, Vec3f( 10.0f, 1.0f, 10.0f ), 0.0f, 0.0f );
-		break;
-	case 3:
-		mGround = bullet::createRigidBox( mWorld, Vec3f( 200.0f, 35.0f, 200.0f ), 0.0f );
-		break;
-	case 4:
-		mGround = bullet::createRigidBox( mWorld, Vec3f( 200.0f, 35.0f, 200.0f ), 0.0f );
-		break;
-	case 5:
-		heightField = Channel32f( loadImage( loadResource( RES_IMAGE_HEIGHTFIELD_SM ) ) );
-		mGround = bullet::createRigidTerrain( mWorld, heightField, -1.0f, 1.0f, Vec3f( 6.0f, 80.0f, 6.0f ), 0.0f );
-		break;
-	case 6:
-
-		// ADVANCED: To add a custom class, create a standard pointer to it and 
-		// pushBack it into your world. Be sure to delete this pointer when you no loinger need it
-		heightField = Channel32f( loadImage( loadResource( RES_IMAGE_HEIGHTFIELD ) ) );
-		mTerrain = new DynamicTerrain( heightField, -1.0f, 1.0f, Vec3f( 2.0f, 50.0f, 2.0f ), 0.0f );
-		mWorld->pushBack( mTerrain );
-		break;
-
-	case 7:
-
-		// Start capture
-		if ( !mCapture ) {
-			mCapture = Capture( 320, 240 );
-			mCapture.start();
-		}
-
-		break;
-
-	}
-
-	// Set friction for box
-	if ( mTest < 5 ) {
-		btRigidBody* boxBody = bullet::toBulletRigidBody( mGround );
-		boxBody->setFriction( 0.95f );
-	}
-
-}
-
-void BulletTestApp::keyDown( KeyEvent event )
-{
-	switch ( event.getCode() )
-	{
-	case KeyEvent::KEY_ESCAPE:
-		quit();
-		break;
-	case KeyEvent::KEY_SPACE:
-		writeImage( getAppPath() / string( "frame_" + toString( getElapsedFrames() ) + ".png" ), copyWindowSurface() );
-		break;
-	}
-}
-
-void BulletTestApp::loadModels()
-{
-	ObjLoader loader( loadResource( RES_OBJ_SPHERE )->createStream() );
-	loader.load( & mConvex );
-	loader = ObjLoader( loadResource( RES_OBJ_TORUS )->createStream() );
-	loader.load( & mConcave );
-}
-
-// Handles mouse button press
-void BulletTestApp::mouseDown( MouseEvent event )
-{
-
 	for ( uint32_t i = 0; i < 5; i++ ) {
 
 		// Set random size and position
@@ -327,14 +248,109 @@ void BulletTestApp::mouseDown( MouseEvent event )
 			bullet::createRigidBox( mWorld, Vec3f::one() * size, size * size, position );
 			break;
 		}
-		
+
+	}
+}
+
+void BulletTestApp::initTest()
+{
+
+	// Clean up last test
+	if ( mWorld ) {
+		mWorld->clear();
+	}
+	
+	// Used when generating terrain
+	Channel32f heightField;
+
+	// Create and add the wobbly box
+	mGroundTransform.setIdentity();
+	switch ( mTest ) {
+	case 0:
+		mGround = bullet::createRigidBox( mWorld, Vec3f( 200.0f, 35.0f, 200.0f ), 0.0f );
+		bullet::createRigidSphere( mWorld, 50.0f, 64, 0.0f, Vec3f( 0.0f, -50.0f, 0.0f ) );
+		break;
+	case 1:
+		mGround = bullet::createRigidHull( mWorld, mConvex, Vec3f::one() * 50.0f, 0.0f );
+		break;
+	case 2:
+		mGround = bullet::createRigidMesh( mWorld, mConcave, Vec3f( 10.0f, 1.0f, 10.0f ), 0.0f, 0.0f );
+		break;
+	case 3:
+		mGround = bullet::createRigidBox( mWorld, Vec3f( 200.0f, 35.0f, 200.0f ), 0.0f );
+		break;
+	case 4:
+		mGround = bullet::createRigidBox( mWorld, Vec3f( 200.0f, 35.0f, 200.0f ), 0.0f );
+		break;
+	case 5:
+		heightField = Channel32f( loadImage( loadResource( RES_IMAGE_HEIGHTFIELD_SM ) ) );
+		mGround = bullet::createRigidTerrain( mWorld, heightField, -1.0f, 1.0f, Vec3f( 6.0f, 80.0f, 6.0f ), 0.0f );
+		break;
+	case 6:
+
+		// ADVANCED: To add a custom class, create a standard pointer to it and 
+		// pushBack it into your world. Be sure to delete this pointer when you no longer need it.
+		heightField = Channel32f( loadImage( loadResource( RES_IMAGE_HEIGHTFIELD ) ) );
+		mTerrain = new DynamicTerrain( heightField, -1.0f, 1.0f, Vec3f( 2.0f, 50.0f, 2.0f ), 0.0f );
+		mWorld->pushBack( mTerrain );
+		break;
+
+	case 7:
+
+		// Start capture
+		if ( !mCapture ) {
+			mCapture = Capture( 320, 240 );
+			mCapture.start();
+		}
+
+		break;
+
 	}
 
+	// Set friction for box
+	if ( mTest < 5 ) {
+		btRigidBody* boxBody = bullet::toBulletRigidBody( mGround );
+		boxBody->setFriction( 0.95f );
+	}
+
+}
+
+void BulletTestApp::loadModels()
+{
+	ObjLoader loader( loadResource( RES_OBJ_SPHERE )->createStream() );
+	loader.load( &mConvex );
+	loader = ObjLoader( loadResource( RES_OBJ_TORUS )->createStream() );
+	loader.load( &mConcave );
+}
+
+void BulletTestApp::mouseDown( MouseEvent event )
+{
+	mDragging = mWorld->intersects( event.getPos(), &mDragConstraint );
+	if ( mDragging ) {
+		mWorld->addConstraint( mDragConstraint );
+	}
+}
+
+void BulletTestApp::mouseDrag( MouseEvent event )
+{
+	if ( mDragging ) {
+		
+	}
+}
+
+void BulletTestApp::mouseUp( MouseEvent event )
+{
+	if ( mDragging ) {
+		mWorld->removeConstraint( mDragConstraint );
+	}
 }
 
 void BulletTestApp::mouseWheel( MouseEvent event )
 {
 	mCamera.setEyePoint( mCamera.getEyePoint() + Vec3f( 0.0f, 0.0f, event.getWheelIncrement() * 20.0f ) );
+	if ( mWorld ) {
+		mWorld->setCamera( mCamera );
+	}
 }
 
 void BulletTestApp::prepareSettings( Settings * settings )
@@ -351,28 +367,36 @@ void BulletTestApp::resize( ResizeEvent event )
 	// Reset camera
 	mCamera.setPerspective( 60.0f, getWindowAspectRatio(), 1.0f, 5000.0f );
 	mCamera.lookAt( Vec3f( 0.0f, 0.0f, -200.0f ), Vec3f::zero() );
+	if ( mWorld ) {
+		mWorld->setCamera( mCamera );
+	}
 	gl::setMatrices( mCamera );
 
 	// Set up OpenGL
-	glEnable( GL_BLEND );
-	glEnable( GL_DEPTH_TEST );
+	gl::enable( GL_BLEND );
+	gl::enable( GL_DEPTH_TEST );
 	gl::enable( GL_TEXTURE_2D );
 	glShadeModel( GL_SMOOTH );
-	glEnable( GL_POLYGON_SMOOTH );
+	gl::enable( GL_POLYGON_SMOOTH );
 	glHint( GL_POLYGON_SMOOTH_HINT, GL_NICEST );
-	glEnable( GL_LIGHTING );
-	glEnable( GL_NORMALIZE );
+	gl::enable( GL_LIGHTING );
+	gl::enable( GL_NORMALIZE );
 	gl::enableAlphaBlending();
 	glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 
 }
 
+void BulletTestApp::screenShot()
+{
+	writeImage( getAppPath() / ( "frame_" + toString( getElapsedFrames() ) + ".png" ), copyWindowSurface() );
+}
+
 void BulletTestApp::setup()
 {
-
-	// Set test mode
-	mTest = 0;
-	mTestPrev = mTest;
+	mDragging	= false;
+	mFrameRate	= 0.0f;
+	mTest		= 0;
+	mTestPrev	= mTest;
 
 	// Set up lighting
 	mLight = new gl::Light( gl::Light::DIRECTIONAL, 0 );
@@ -388,9 +412,9 @@ void BulletTestApp::setup()
 	mWorld = bullet::createWorld();
 
 	// Load texture
-	mTexSquare = gl::Texture( loadImage( loadResource( RES_TEX_SQUARE ) ) );
-	mTexSphere = gl::Texture( loadImage( loadResource( RES_TEX_SPHERE ) ) );
-	mTexTerrain = gl::Texture( loadImage( loadResource( RES_TEX_TERRAIN ) ) );
+	mTexSquare	= gl::Texture( loadImage( loadResource( RES_TEX_SQUARE ) ) );
+	mTexSphere	= gl::Texture( loadImage( loadResource( RES_TEX_SPHERE ) ) );
+	mTexTerrain	= gl::Texture( loadImage( loadResource( RES_TEX_TERRAIN ) ) );
 	mTexTerrain.setWrap( GL_REPEAT, GL_REPEAT );
 	mTexTerrain.unbind();
 
@@ -398,10 +422,12 @@ void BulletTestApp::setup()
 	mTerrain = 0;
 
 	// Parameters
-	mFrameRate = 0.0f;
-	mParams = params::InterfaceGl( "Params", Vec2i( 150, 100) );
-	mParams.addParam( "Frame Rate", &mFrameRate, "", true );
-	mParams.addParam( "Test", &mTest, "min=0 max=7 step=1 keyDecr=d keyIncr=D" ); 
+	mParams = params::InterfaceGl( "Params", Vec2i( 200, 100 ) );
+	mParams.addParam( "Frame Rate",		&mFrameRate,								"", true );
+	mParams.addParam( "Test",			&mTest,										"min=0 max=7 step=1 keyDecr=t keyIncr=T" ); 
+	mParams.addButton( "Drop",			bind( &BulletTestApp::drop, this ),			"key=space" );
+	mParams.addButton( "Screen shot",	bind( &BulletTestApp::screenShot, this ),	"key=s" );
+	mParams.addButton( "Quit",			bind( &BulletTestApp::quit, this ),			"key=q" );
 
 	// Initialize
 	initTest();
@@ -521,7 +547,7 @@ void BulletTestApp::update()
 		OutputDebugStringA( "\n" );
 	}*/
 
-	// Remove out of bounbds objects
+	// Remove out of bounds objects
 	for ( bullet::Iter object = mWorld->begin(); object != mWorld->end(); ) {
 		if ( object != mWorld->begin() && object->getPosition().y < -800.0f ) {
 			object = mWorld->erase( object );

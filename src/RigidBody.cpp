@@ -58,10 +58,10 @@ namespace bullet
 		}
 
 		// Define bullet body
-		btQuaternion btRotation = toBulletQuaternion( rotation );
-		btVector3 btPosition = toBulletVector3( position );
+		btQuaternion btRotation				= toBulletQuaternion( rotation );
+		btVector3 btPosition				= toBulletVector3( position );
 		btTransform worldTransform( btRotation, btPosition );
-		btDefaultMotionState* motionState = new btDefaultMotionState( worldTransform );
+		btDefaultMotionState* motionState	= new btDefaultMotionState( worldTransform );
 		btRigidBody::btRigidBodyConstructionInfo info( mass, motionState, shape, inertia );
 
 		// Create and return body
@@ -102,7 +102,7 @@ namespace bullet
 	{
 
 		// Create cylinder
-		btVector3 size = toBulletVector3( scale );
+		btVector3 size			= toBulletVector3( scale );
 		btCollisionShape* shape = new btCylinderShape( size );
 
 		// Create and return rigid body
@@ -249,10 +249,10 @@ namespace bullet
 		mRigidBody = createMesh( shape, mass, position, rotation );
 
 		// Set data from TriMesh
-		mIndices = mesh.getIndices();
-		mNormals = mesh.getNormals();
-		mPositions = mesh.getVertices();
-		mTexCoords = mesh.getTexCoords();
+		mIndices	= mesh.getIndices();
+		mNormals	= mesh.getNormals();
+		mPositions	= mesh.getVertices();
+		mTexCoords	= mesh.getTexCoords();
 
 		// Set VBO data
 		mVboMesh = VboMeshManager::create( mIndices, mPositions, mNormals, mTexCoords );
@@ -305,8 +305,8 @@ namespace bullet
 		mRigidBody = createTerrain( shape, mass, position, rotation );
 
 		// Get image dimensions
-		int32_t height = mChannel.getHeight();
-		int32_t width = mChannel.getWidth();
+		int32_t height	= mChannel.getHeight();
+		int32_t width	= mChannel.getWidth();
 
 		// Iterate through dimensions to set indices and texture coordinates
 		for ( int32_t y = 0; y < height; y++ ) {
@@ -345,10 +345,10 @@ namespace bullet
 		mPositions.clear();
 
 		// Get image dimensions
-		int32_t height = mChannel.getHeight();
-		int32_t width = mChannel.getWidth();
-		float halfHeight = (float)height * 0.5f;
-		float halfWidth = (float)width * 0.5f;
+		int32_t height		= mChannel.getHeight();
+		int32_t width		= mChannel.getWidth();
+		float halfHeight	= (float)height * 0.5f;
+		float halfWidth =	(float)width * 0.5f;
 		
 		// Iterate through dimensions
 		for ( int32_t y = 0; y < height; y++ ) {

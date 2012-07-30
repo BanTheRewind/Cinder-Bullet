@@ -37,7 +37,6 @@
 
 #pragma once
 
-// Cinder includes
 #include "btBulletDynamicsCommon.h"
 #include "BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h"
 #include "BulletSoftBody/btSoftBody.h"

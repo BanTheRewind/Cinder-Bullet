@@ -292,9 +292,9 @@ namespace bullet
 			for ( float theta = delta; i < segments; i++, theta += delta ) {
 
 				// Set position
-				float t = 2.0f * (float)M_PI * theta;
-				float cosT = math<float>::cos( t );
-				float sinT = math<float>::sin( t );
+				float t		= 2.0f * (float)M_PI * theta;
+				float cosT	= math<float>::cos( t );
+				float sinT	= math<float>::sin( t );
 				Vec3f position( 
 					cosT * radius, 
 					(float)p - 0.5f, 

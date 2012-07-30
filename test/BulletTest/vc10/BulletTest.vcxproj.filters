@@ -47,6 +47,9 @@
     <ClInclude Include="..\..\..\src\MeshBody.h">
       <Filter>blocks\bullet</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\Constraint.h">
+      <Filter>blocks\bullet</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\DynamicsWorld.cpp">
@@ -69,6 +72,9 @@
     </ClCompile>
     <ClCompile Include="..\src\BulletTestApp.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Constraint.cpp">
+      <Filter>blocks\bullet</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

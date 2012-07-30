@@ -180,12 +180,12 @@ namespace bullet
 	{
 
 		// Get stick size from image dimensions
-		int32_t length = heightField.getHeight(); 
-		int32_t width = heightField.getWidth();
+		int32_t len		= heightField.getHeight(); 
+		int32_t width	= heightField.getWidth();
 
         // Create height field shape from channel data
 		float heightScale = math<float>::abs( minHeight ) + math<float>::abs( maxHeight );
-		btHeightfieldTerrainShape* shape = new btHeightfieldTerrainShape( width, length, heightField.getData(), heightScale, minHeight, maxHeight, 1, PHY_FLOAT, false );
+		btHeightfieldTerrainShape* shape = new btHeightfieldTerrainShape( width, len, heightField.getData(), heightScale, minHeight, maxHeight, 1, PHY_FLOAT, false );
 
 		// Scale and return shape
 		shape->setLocalScaling( toBulletVector3( scale ) );

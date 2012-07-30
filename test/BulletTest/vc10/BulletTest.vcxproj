@@ -107,6 +107,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\src\Constraint.cpp" />
     <ClCompile Include="..\..\..\src\Utilities.cpp" />
     <ClCompile Include="..\..\..\src\CollisionObject.cpp" />
     <ClCompile Include="..\..\..\src\DynamicsWorld.cpp" />
@@ -116,6 +117,7 @@
     <ClCompile Include="..\src\BulletTestApp.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\src\Constraint.h" />
     <ClInclude Include="..\..\..\src\MeshBody.h" />
     <ClInclude Include="..\..\..\src\Utilities.h" />
     <ClInclude Include="..\..\..\src\CinderBullet.h" />
