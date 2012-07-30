@@ -56,7 +56,6 @@ namespace bullet
 		static btRigidBody*	createHull( btConvexHullShape* shape, float mass, const ci::Vec3f &position, const ci::Quatf &rotation );
 		static btRigidBody*	createMesh( btBvhTriangleMeshShape* shape, float mass, const ci::Vec3f &position, const ci::Quatf &rotation );
 		static btRigidBody*	createSphere( float radius, float mass, const ci::Vec3f &position, const ci::Quatf &rotation );
-		static btRigidBody* createStaticPlane( const ci::Vec3f &normal, float planeConstant, const ci::Vec3f &position, const ci::Quatf &rotation );
 		static btRigidBody*	createTerrain( btHeightfieldTerrainShape* shape, float mass, const ci::Vec3f &position, const ci::Quatf &rotation );
 	};
 
@@ -106,14 +105,6 @@ namespace bullet
 		RigidSphere( float radius, int32_t segments, float mass, const ci::Vec3f &position, const ci::Quatf &rotation );
 		friend CollisionObjectRef	createRigidSphere( const DynamicsWorldRef &world, float radius, int32_t segments, float mass, 
 														const ci::Vec3f &position, const ci::Quatf &rotation );
-	};
-
-	class RigidStaticPlane : public CollisionObject, public RigidBody, public MeshBody 
-	{
-	protected:
-		RigidStaticPlane( const ci::Vec3f &normal, float planeConstant, const ci::Vec3f &position, const ci::Quatf &rotation );
-		friend CollisionObjectRef	createRigidStaticPlane( const DynamicsWorldRef &world, const ci::Vec3f &normal, float planeConstant, 
-															const ci::Vec3f &position, const ci::Quatf &rotation );
 	};
 
 	class RigidTerrain : public CollisionObject, public RigidBody, public MeshBody

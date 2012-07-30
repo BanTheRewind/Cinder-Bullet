@@ -38,6 +38,9 @@
 // Include header
 #include "SoftBody.h"
 
+
+#include "bullet/BulletSoftBody//btSoftBodyHelpers.h"
+
 namespace bullet
 {
 
@@ -45,9 +48,95 @@ namespace bullet
 	using namespace ci;
 	using namespace std;
 
-	SoftBody::SoftBody( const Vec3f &position, const Quatf &rotation )
+	// Creates soft cloth
+	btSoftBody* SoftBody::createSoftCloth( btSoftBodyWorldInfo &info, const Vec2f &size, const Vec2i &resolution, 
+		int32_t corners, const Vec3f &position, const Quatf &rotation )
+	{
+
+		// Use a matrix to position corners
+		Matrix44f transform;
+		transform.setToIdentity();
+		transform.translate( position );
+		transform.rotate( rotation.v );
+		transform.translate( position * -1.0f );
+		transform.translate( position );
+
+		// Create and return soft body
+		float h = size.y * 0.5f;
+		float w = size.x * 0.5f;
+		btSoftBody*		body = btSoftBodyHelpers::CreatePatch(
+			info,
+			toBulletVector3( transform.transformPoint( Vec3f( -w, h, -w ) ) ), 
+			toBulletVector3( transform.transformPoint( Vec3f(  w, h, -w ) ) ), 
+			toBulletVector3( transform.transformPoint( Vec3f( -w, h,  w ) ) ), 
+			toBulletVector3( transform.transformPoint( Vec3f(  w, h,  w ) ) ),
+			resolution.x, resolution.y, 
+			corners, true
+			);
+		return body;
+
+	}
+
+	SoftCloth::SoftCloth( btSoftBodyWorldInfo &info, const Vec2f &size, const Vec2i &resolution, int32_t corners, 
+			const Vec3f &position, const Quatf &rotation ) 
 		: CollisionObject( position, rotation )
 	{
+
+		// Create body
+		mSoftBody = createSoftCloth( info, size, resolution, corners, position, rotation );
+
+		// Set scale
+		mScale = Vec3f( size, 1.0f );
+
+		// Iterate through dimensions to set vertex data
+		float halfHeight	= size.y * 0.5f;
+		float halfWidth		= size.x * 0.5f;
+		int32_t height		= resolution.y;
+		int32_t width		= resolution.x;
+		Vec2f delta			= size / Vec2f( resolution );
+		for ( int32_t y = 0; y < height; y++ ) {
+			for ( int32_t x = 0; x < width; x++ ) {
+
+				// Add texture coordinate
+				mTexCoords.push_back( Vec2f( (float)x / (float)width, (float)y / (float)height ) );
+
+				// Add indices for this quad
+				int32_t xn = x + 1 >= width ? 0 : 1;
+				int32_t yn = y + 1 >= height ? 0 : 1;
+				mIndices.push_back( x + height * y );
+				mIndices.push_back( ( x + xn ) + height * y);
+				mIndices.push_back( ( x + xn ) + height * ( y + yn ) );
+				mIndices.push_back( x + height * ( y + yn ) );
+				mIndices.push_back( ( x + xn ) + height * ( y + yn ) );
+				mIndices.push_back( x + height * y );
+
+				Vec3f position( (float)x * delta.x - halfWidth, 0.0f, (float)y * delta.y - halfHeight );
+				mPositions.push_back( position );
+
+				mNormals.push_back( Vec3f::zero() );
+
+			}
+
+		}
+
+		// Loop through again to set normals
+		for ( int32_t y = 0; y < height - 1; y++ ) {
+			for (int32_t x = 0; x < width - 1; x++) {
+
+				// Get vertices of this triangle
+				Vec3f vert0 = mPositions[ mIndices[ ( x + height * y ) * 6 ] ];
+				Vec3f vert1 = mPositions[ mIndices[ ( ( x + 1 ) + height * y ) * 6 ] ];
+				Vec3f vert2 = mPositions[ mIndices[ ( ( x + 1 ) + height * ( y + 1 ) ) * 6 ] ];
+
+				// Calculate normal
+				mNormals[ x + height * y ] = Vec3f( ( vert1 - vert0 ).cross( vert1 - vert2 ).normalized() );
+
+			}
+		}
+
+		// Set VBO
+		mVboMesh = VboMeshManager::create( mIndices, mPositions, mNormals, mTexCoords );
+
 	}
 
 }

@@ -144,19 +144,6 @@ namespace bullet
 
 	}
 
-	// Creates a static plane
-	btRigidBody* RigidBody::createStaticPlane( const Vec3f &normal, float planeConstant, const Vec3f &position, const Quatf &rotation )
-	{
-
-		// Create Bullet floor
-		btCollisionShape* shape = new btStaticPlaneShape( toBulletVector3( normal ), planeConstant );
-
-		// Create and return rigid body
-		btRigidBody* body = create( shape, 0.0f, position, rotation );
-		return body;
-
-	}
-
 	// Creates terrain
 	btRigidBody* RigidBody::createTerrain( btHeightfieldTerrainShape* shape, float mass, const ci::Vec3f &position, const ci::Quatf &rotation )
 	{
@@ -272,19 +259,6 @@ namespace bullet
 
 		// Create VBO
 		mVboMesh = VboMeshManager::create( VboMeshManager::PRIMITIVE_SPHERE, segments );
-
-	}
-
-	// Static plane
-	RigidStaticPlane::RigidStaticPlane( const Vec3f &normal, float planeConstant, const Vec3f &position, const Quatf &rotation ) 
-		: CollisionObject( position, rotation )
-	{
-
-		// Create body
-		mRigidBody = createStaticPlane( normal, planeConstant, position, rotation );
-
-		// Set scale
-		mScale = Vec3f::one();
 
 	}
 

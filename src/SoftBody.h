@@ -45,9 +45,26 @@
 
 namespace bullet
 {
-	class SoftBody : public CollisionObject, public MeshBody
+	class SoftBody
 	{
 	protected:
-		SoftBody( const ci::Vec3f &position = ci::Vec3f::zero(), const ci::Quatf &rotation = ci::Quatf() );
+		static btSoftBody*	createSoftCloth( btSoftBodyWorldInfo &info, const ci::Vec2f &size, const ci::Vec2i &resolution, 
+			int32_t corners, const ci::Vec3f &position, const ci::Quatf &rotation );
+	};
+
+	class SoftCloth : public CollisionObject, public SoftBody, public MeshBody
+	{
+	public:
+		static const int32_t	CLOTH_ATTACH_CORNER_NONE	= 0;
+		static const int32_t	CLOTH_ATTACH_CORNER_0		= 1;
+		static const int32_t	CLOTH_ATTACH_CORNER_1		= 2; 
+		static const int32_t	CLOTH_ATTACH_CORNER_2		= 4; 
+		static const int32_t	CLOTH_ATTACH_CORNER_3		= 8; 
+		static const int32_t	CLOTH_ATTACH_CORNER_ALL		= 15;
+	protected:
+		SoftCloth( btSoftBodyWorldInfo &info, const ci::Vec2f &size, const ci::Vec2i &resolution, int32_t corners, 
+			const ci::Vec3f &position, const ci::Quatf &rotation );
+		friend CollisionObjectRef	createSoftCloth( const DynamicsWorldRef &world, const ci::Vec2f &size, 
+			const ci::Vec2i &resolution, int32_t corners, const ci::Vec3f &position, const ci::Quatf &rotation );
 	};
 }

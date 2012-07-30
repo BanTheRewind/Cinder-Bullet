@@ -221,7 +221,7 @@ void BulletTestApp::drop()
 		btRigidBody* shape;
 		switch ( mTest ) {
 		case 3:
-			body = bullet::createRigidCylinder( mWorld, Vec3f( size, size * 3, size ), 24, size * size, position );
+			body = bullet::createRigidCylinder( mWorld, Vec3f( size, size * 3, size ), 24, size * size * size, position );
 			shape = bullet::toBulletRigidBody( body );
 			shape->setAngularFactor( 0.95f );
 			break;
@@ -294,7 +294,6 @@ void BulletTestApp::initTest()
 		mTerrain = new DynamicTerrain( heightField, -1.0f, 1.0f, Vec3f( 2.0f, 50.0f, 2.0f ), 0.0f );
 		mWorld->pushBack( mTerrain );
 		break;
-
 	case 7:
 
 		// Start capture
@@ -304,7 +303,9 @@ void BulletTestApp::initTest()
 		}
 
 		break;
-
+	case 8:
+		mGround = bullet::createSoftCloth( mWorld, Vec2f::one() * 100.0f );
+		break;
 	}
 
 	// Set friction for box
@@ -330,7 +331,7 @@ void BulletTestApp::mouseDown( MouseEvent event )
 	Ray ray		= mCamera.generateRay( pos.x, pos.y, getWindowAspectRatio() );
 	mDragging	= mWorld->intersects( ray, mCamera.getFarClip(), &mDragConstraint );
 	if ( mDragging ) {
-		mWorld->addConstraint( mDragConstraint, 100.0f, 0.0f );
+		mWorld->addConstraint( mDragConstraint, 0.0f, 0.01f );
 	}
 }
 
@@ -360,7 +361,7 @@ void BulletTestApp::mouseWheel( MouseEvent event )
 
 void BulletTestApp::prepareSettings( Settings * settings )
 {
-	settings->setFrameRate( 1000.0f );
+	settings->setFrameRate( 60.0f );
 	settings->setFullScreen( false );
 	settings->setResizable( false );
 	settings->setWindowSize( 1280, 720 );
@@ -426,7 +427,7 @@ void BulletTestApp::setup()
 	// Parameters
 	mParams = params::InterfaceGl( "Params", Vec2i( 200, 100 ) );
 	mParams.addParam( "Frame Rate",		&mFrameRate,								"", true );
-	mParams.addParam( "Test",			&mTest,										"min=0 max=7 step=1 keyDecr=t keyIncr=T" ); 
+	mParams.addParam( "Test",			&mTest,										"min=0 max=8 step=1 keyDecr=t keyIncr=T" ); 
 	mParams.addButton( "Drop",			bind( &BulletTestApp::drop, this ),			"key=space" );
 	mParams.addButton( "Screen shot",	bind( &BulletTestApp::screenShot, this ),	"key=s" );
 	mParams.addButton( "Quit",			bind( &BulletTestApp::quit, this ),			"key=q" );

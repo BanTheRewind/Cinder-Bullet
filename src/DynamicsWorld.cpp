@@ -4,8 +4,6 @@
 #include "cinder/app/App.h"
 #include "cinder/Utilities.h"
 
-#include "bullet/BulletSoftBody/btSoftRigidDynamicsWorld.h"
-
 #include "RigidBody.h"
 #include "SoftBody.h"
 
@@ -37,7 +35,7 @@ namespace bullet {
 		mSoftBodyWorldInfo.m_sparsesdf.Initialize();
 
 		// Build world
-		mWorld = new btDiscreteDynamicsWorld( mDispatcher, mBroadphase, mSolver, mCollisionConfiguration );
+		mWorld = new btSoftRigidDynamicsWorld( mDispatcher, mBroadphase, mSolver, mCollisionConfiguration );
 		mWorld->setGravity( btVector3( 0.0f, -10.0f, 0.0f ) );
 		mWorld->getDispatchInfo().m_enableSPU = true;
 
@@ -167,9 +165,11 @@ namespace bullet {
 	{
 		mObjects.push_back( object );
 		if ( object->isRigidBody() ) {
+			btRigidBody* body = toBulletRigidBody( object );
 			mWorld->addRigidBody( toBulletRigidBody( object ) );
 		} else if ( object->isSoftBody() ) {
-			( (btSoftRigidDynamicsWorld*)mWorld )->addSoftBody( toBulletSoftBody( object ) );
+			btSoftBody* body = toBulletSoftBody( object );
+			mWorld->addSoftBody( body );
 		}
 		return &mObjects[ mObjects.size() - 1 ];
 	}
@@ -390,15 +390,16 @@ namespace bullet {
 		return world->pushBack( new RigidSphere( radius, segments, mass, position, rotation ) );
 	}
 
-	CollisionObjectRef createRigidStaticPlane( const DynamicsWorldRef &world, const Vec3f &normal, float planeConstant, const Vec3f &position, const Quatf &rotation )
-	{
-		return world->pushBack( new RigidStaticPlane( normal, planeConstant, position, rotation ) );
-	}
-
 	CollisionObjectRef createRigidTerrain( const DynamicsWorldRef &world, const Channel32f &heightField, float minHeight, float maxHeight, 
 		const Vec3f &scale, float mass, const Vec3f &position, const Quatf &rotation )
 	{
 		return world->pushBack( new RigidTerrain( heightField, minHeight, maxHeight, scale, mass, position, rotation ) );
+	}
+
+	CollisionObjectRef createSoftCloth( const DynamicsWorldRef &world, const Vec2f &size, const Vec2i &resolution, int32_t corners, 
+		const Vec3f &position, const Quatf &rotation )
+	{
+		return world->pushBack( new SoftCloth( world->getInfo(), size, resolution, corners, position, rotation ) );
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////
