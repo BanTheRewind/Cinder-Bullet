@@ -54,6 +54,8 @@ namespace bullet {
 		ci::Vec3f&				getPosition();
 		const ci::Vec3f&		getPosition() const;
 
+		void					reset();
+
 		void					update( const ci::Ray &ray );
 	private:
 		Constraint( btPoint2PointConstraint *constraint, const ci::Vec3f &position, float distance );

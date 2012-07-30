@@ -245,7 +245,7 @@ namespace bullet {
 		constraint.mConstraint->m_setting.m_tau				= tau;
 	}
 
-	bool DynamicsWorld::intersects( const Vec2f &pos, const Ray &ray, float farClip, Constraint *constraint )
+	bool DynamicsWorld::intersects( const Ray &ray, float farClip, Constraint *constraint )
 	{
 		btVector3 rayFrom	= toBulletVector3( ray.getOrigin() );
 		btVector3 rayTo		= toBulletVector3( ray.calcPosition( farClip ) );

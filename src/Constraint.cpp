@@ -80,6 +80,16 @@ namespace bullet {
 		return mPosition;
 	}
 
+	void Constraint::reset()
+	{
+		if ( mConstraint != 0 ) {
+			delete mConstraint;
+			mConstraint = 0;
+		}
+		mDistance = 0.0f;
+		mPosition = Vec3f::zero();
+	}
+
 	void Constraint::update( const ci::Ray &ray )
 	{
 		mPosition = ray.getOrigin() + ray.getDirection().normalized() * mDistance;

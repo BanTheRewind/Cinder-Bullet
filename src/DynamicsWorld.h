@@ -89,7 +89,7 @@ namespace bullet {
 		btDiscreteDynamicsWorld*							getWorld();
 
 		void												addConstraint( const Constraint &constraint, float clamping = 30.0f, float tau = 0.001f );
-		bool												intersects( const ci::Vec2f &pos, const ci::Ray &ray, float farClip, Constraint *constraint );
+		bool												intersects( const ci::Ray &ray, float farClip, Constraint *constraint );
 		void												removeConstraint( const Constraint &constraint );
 
 		void												setInfo( const btSoftBodyWorldInfo &info );

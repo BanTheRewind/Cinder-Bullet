@@ -325,24 +325,21 @@ void BulletTestApp::loadModels()
 
 void BulletTestApp::mouseDown( MouseEvent event )
 {
-	Vec2f pos = Vec2f( event.getPos() ) / Vec2f( getWindowSize() );
-	pos.y = 1.0f - pos.y;
-
-	Ray ray	= mCamera.generateRay( pos.x, pos.y, getWindowAspectRatio() );
-
-	mDragging = mWorld->intersects( pos, ray, mCamera.getFarClip(), &mDragConstraint );
+	Vec2f pos	= Vec2f( event.getPos() ) / Vec2f( getWindowSize() );
+	pos.y		= 1.0f - pos.y;
+	Ray ray		= mCamera.generateRay( pos.x, pos.y, getWindowAspectRatio() );
+	mDragging	= mWorld->intersects( ray, mCamera.getFarClip(), &mDragConstraint );
 	if ( mDragging ) {
-		mWorld->addConstraint( mDragConstraint );
+		mWorld->addConstraint( mDragConstraint, 100.0f, 0.0f );
 	}
 }
 
 void BulletTestApp::mouseDrag( MouseEvent event )
 {
 	if ( mDragging ) {
-		Vec2f pos = Vec2f( event.getPos() ) / Vec2f( getWindowSize() );
-		pos.y = 1.0f - pos.y;
-
-		Ray ray	= mCamera.generateRay( pos.x, pos.y, getWindowAspectRatio() );
+		Vec2f pos	= Vec2f( event.getPos() ) / Vec2f( getWindowSize() );
+		pos.y		= 1.0f - pos.y;
+		Ray ray		= mCamera.generateRay( pos.x, pos.y, getWindowAspectRatio() );
 		mDragConstraint.update( ray );
 	}
 }
@@ -351,6 +348,8 @@ void BulletTestApp::mouseUp( MouseEvent event )
 {
 	if ( mDragging ) {
 		mWorld->removeConstraint( mDragConstraint );
+		mDragConstraint.reset();
+		mDragging = false;
 	}
 }
 
@@ -398,7 +397,7 @@ void BulletTestApp::setup()
 {
 	mDragging	= false;
 	mFrameRate	= 0.0f;
-	mTest		= 0;
+	mTest		= 3;
 	mTestPrev	= mTest;
 
 	// Set up lighting
