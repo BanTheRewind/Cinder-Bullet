@@ -37,6 +37,8 @@
 
 #include "Constraint.h"
 
+#include "Utilities.h"
+
 namespace bullet {
 
 	using namespace ci;
@@ -54,6 +56,7 @@ namespace bullet {
 		mConstraint = rhs.mConstraint;
 		mDistance	= rhs.mDistance;
 		mPosition	= rhs.mPosition;
+		return *this;
 	}
 	
 	Constraint::Constraint( const Constraint &rhs )
@@ -65,6 +68,22 @@ namespace bullet {
 	
 	Constraint::~Constraint() 
 	{
+	}
+
+	Vec3f& Constraint::getPosition()
+	{
+		return mPosition;
+	}
+
+	const Vec3f& Constraint::getPosition() const
+	{
+		return mPosition;
+	}
+
+	void Constraint::update( const ci::Ray &ray )
+	{
+		mPosition = ray.getOrigin() + ray.getDirection().normalized() * mDistance;
+		mConstraint->setPivotB( toBulletVector3( mPosition ) );
 	}
 
 }

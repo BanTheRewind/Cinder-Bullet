@@ -2,6 +2,7 @@
 #include "DynamicsWorld.h"
 
 #include "cinder/app/App.h"
+#include "cinder/Utilities.h"
 
 #include "bullet/BulletSoftBody/btSoftRigidDynamicsWorld.h"
 
@@ -16,10 +17,8 @@ namespace bullet {
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////
 
-	DynamicsWorld::DynamicsWorld( const CameraPersp &camera )
+	DynamicsWorld::DynamicsWorld()
 	{
-
-		mCamera = camera;
 
 		// Setup physics environment
 		mCollisionConfiguration	= new btDefaultCollisionConfiguration();
@@ -50,7 +49,6 @@ namespace bullet {
 	const DynamicsWorld& DynamicsWorld::operator=( const DynamicsWorld &rhs )
 	{
 		mBroadphase				= rhs.mBroadphase;
-		mCamera					= rhs.mCamera;
 		mCollisionConfiguration	= rhs.mCollisionConfiguration;
 		mDispatcher				= rhs.mDispatcher;
 		mElapsedSeconds			= rhs.mElapsedSeconds;
@@ -59,14 +57,13 @@ namespace bullet {
 		mSolver					= rhs.mSolver;
 		mWorld					= rhs.mWorld;
 		mObjects.clear();
-		mObjects.transfer( mObjects.begin(), rhs.mObjects );
+		//mObjects.transfer( mObjects.begin(), rhs.mObjects );
 		return *this;
 	}
 
 	DynamicsWorld::DynamicsWorld( const DynamicsWorld &rhs )
 	{
 		mBroadphase				= rhs.mBroadphase;
-		mCamera					= rhs.mCamera;
 		mCollisionConfiguration	= rhs.mCollisionConfiguration;
 		mDispatcher				= rhs.mDispatcher;
 		mElapsedSeconds			= rhs.mElapsedSeconds;
@@ -75,7 +72,7 @@ namespace bullet {
 		mSolver					= rhs.mSolver;
 		mWorld					= rhs.mWorld;
 		mObjects.clear();
-		mObjects.transfer( mObjects.begin(), rhs.mObjects );
+//		mObjects.transfer( mObjects.begin(), rhs.mObjects );
 	}
 
 	DynamicsWorld::~DynamicsWorld()
@@ -244,28 +241,18 @@ namespace bullet {
 	void DynamicsWorld::addConstraint( const Constraint &constraint, float clamping, float tau )
 	{
 		mWorld->addConstraint( constraint.mConstraint );
-		constraint.mConstraint->m_setting.m_impulseClamp = clamping;
-		constraint.mConstraint->m_setting.m_tau = tau;
+		constraint.mConstraint->m_setting.m_impulseClamp	= clamping;
+		constraint.mConstraint->m_setting.m_tau				= tau;
 	}
 
-	CameraPersp& DynamicsWorld::getCamera()
+	bool DynamicsWorld::intersects( const Vec2f &pos, const Ray &ray, float farClip, Constraint *constraint )
 	{
-		return mCamera;
-	}
-
-	const CameraPersp& DynamicsWorld::getCamera() const
-	{
-		return mCamera;
-	}
-
-	bool DynamicsWorld::intersects( const Vec2f &pos, Constraint *constraint )
-	{
-		Ray ray				= mCamera.generateRay( pos.x, pos.y, getWindowAspectRatio() );
-		btVector3 rayFrom	= toBulletVector3( mCamera.getEyePoint() );
-		btVector3 rayTo		= toBulletVector3( ray.getOrigin() );
+		btVector3 rayFrom	= toBulletVector3( ray.getOrigin() );
+		btVector3 rayTo		= toBulletVector3( ray.calcPosition( farClip ) );
 
 		btCollisionWorld::ClosestRayResultCallback rayCallback( rayFrom, rayTo );
 		mWorld->rayTest( rayFrom, rayTo, rayCallback );
+
 		if ( rayCallback.hasHit() ) {
 
 			btRigidBody* collisionBody = btRigidBody::upcast( rayCallback.m_collisionObject );
@@ -287,12 +274,7 @@ namespace bullet {
 
 	void DynamicsWorld::removeConstraint( const Constraint &constraint )
 	{
-
-	}
-
-	void DynamicsWorld::setCamera( const CameraPersp &camera )
-	{
-		mCamera = camera;
+		mWorld->removeConstraint( constraint.mConstraint );
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////
@@ -355,11 +337,25 @@ namespace bullet {
 		return (btSoftBody*)( pos->getBulletBody() );
 	}
 
+	void DynamicsWorld::trace( float value )
+	{
+		trace( toString( value ) );
+	}
+
+	void DynamicsWorld::trace( const string &message )
+	{
+#if defined ( CINDER_MSW )
+		OutputDebugStringA( ( message + "\n" ).c_str() );
+#else
+		console() << message << endl;
+#endif
+	}
+
 	/////////////////////////////////////////////////////////////////////////////////////////////////
 
-	DynamicsWorldRef createWorld( const CameraPersp &camera )
+	DynamicsWorldRef createWorld()
 	{
-		return DynamicsWorldRef( new DynamicsWorld( camera ) );
+		return DynamicsWorldRef( new DynamicsWorld() );
 	}
 
 	CollisionObjectRef createRigidBox( const DynamicsWorldRef &world, const Vec3f &dimensions, float mass, const Vec3f &position, const Quatf &rotation )

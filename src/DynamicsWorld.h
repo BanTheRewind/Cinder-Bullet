@@ -41,7 +41,6 @@
 #include "Constraint.h"
 #include "CollisionObject.h"
 
-#include "cinder/Camera.h"
 #include "cinder/gl/gl.h"
 
 #if defined( CINDER_MSW )
@@ -90,11 +89,8 @@ namespace bullet {
 		btDiscreteDynamicsWorld*							getWorld();
 
 		void												addConstraint( const Constraint &constraint, float clamping = 30.0f, float tau = 0.001f );
-		ci::CameraPersp&									getCamera();
-		const ci::CameraPersp&								getCamera() const;
-		bool												intersects( const ci::Vec2f &pos, Constraint *constraint );
+		bool												intersects( const ci::Vec2f &pos, const ci::Ray &ray, float farClip, Constraint *constraint );
 		void												removeConstraint( const Constraint &constraint );
-		void												setCamera( const ci::CameraPersp &camera );
 
 		void												setInfo( const btSoftBodyWorldInfo &info );
 
@@ -102,9 +98,9 @@ namespace bullet {
 
 	private:
 
-		friend DynamicsWorldRef								createWorld( const ci::CameraPersp &camera );
+		friend DynamicsWorldRef								createWorld();
 
-		DynamicsWorld( const ci::CameraPersp &camera );
+		DynamicsWorld();
 		const DynamicsWorld&								operator=( const DynamicsWorld &rhs );
 		DynamicsWorld( const DynamicsWorld &rhs );
 
@@ -118,8 +114,6 @@ namespace bullet {
 		uint32_t											mNumObjects;
 		CollisionObjectList									mObjects;
 
-		ci::CameraPersp										mCamera;
-
 		btBroadphaseInterface								*mBroadphase;
 		btCollisionDispatcher								*mDispatcher;
 		btSoftBodyWorldInfo									mSoftBodyWorldInfo;
@@ -127,9 +121,12 @@ namespace bullet {
 		btDefaultCollisionConfiguration						*mCollisionConfiguration;
 		btDiscreteDynamicsWorld								*mWorld;
 
+		static void											trace( float value );
+		static void											trace( const std::string &message );
+
 	};
 
-	DynamicsWorldRef										createWorld( const ci::CameraPersp &camera = ci::CameraPersp() );
+	DynamicsWorldRef										createWorld();
 
 	CollisionObjectRef										createRigidBox( const DynamicsWorldRef &world, const ci::Vec3f &dimensions = ci::Vec3f::one(), 
 																			float mass = 1.0f, const ci::Vec3f &position = ci::Vec3f::zero(), 

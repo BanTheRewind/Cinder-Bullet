@@ -325,7 +325,12 @@ void BulletTestApp::loadModels()
 
 void BulletTestApp::mouseDown( MouseEvent event )
 {
-	mDragging = mWorld->intersects( event.getPos(), &mDragConstraint );
+	Vec2f pos = Vec2f( event.getPos() ) / Vec2f( getWindowSize() );
+	pos.y = 1.0f - pos.y;
+
+	Ray ray	= mCamera.generateRay( pos.x, pos.y, getWindowAspectRatio() );
+
+	mDragging = mWorld->intersects( pos, ray, mCamera.getFarClip(), &mDragConstraint );
 	if ( mDragging ) {
 		mWorld->addConstraint( mDragConstraint );
 	}
@@ -334,7 +339,11 @@ void BulletTestApp::mouseDown( MouseEvent event )
 void BulletTestApp::mouseDrag( MouseEvent event )
 {
 	if ( mDragging ) {
-		
+		Vec2f pos = Vec2f( event.getPos() ) / Vec2f( getWindowSize() );
+		pos.y = 1.0f - pos.y;
+
+		Ray ray	= mCamera.generateRay( pos.x, pos.y, getWindowAspectRatio() );
+		mDragConstraint.update( ray );
 	}
 }
 
@@ -348,9 +357,6 @@ void BulletTestApp::mouseUp( MouseEvent event )
 void BulletTestApp::mouseWheel( MouseEvent event )
 {
 	mCamera.setEyePoint( mCamera.getEyePoint() + Vec3f( 0.0f, 0.0f, event.getWheelIncrement() * 20.0f ) );
-	if ( mWorld ) {
-		mWorld->setCamera( mCamera );
-	}
 }
 
 void BulletTestApp::prepareSettings( Settings * settings )
@@ -367,9 +373,6 @@ void BulletTestApp::resize( ResizeEvent event )
 	// Reset camera
 	mCamera.setPerspective( 60.0f, getWindowAspectRatio(), 1.0f, 5000.0f );
 	mCamera.lookAt( Vec3f( 0.0f, 0.0f, -200.0f ), Vec3f::zero() );
-	if ( mWorld ) {
-		mWorld->setCamera( mCamera );
-	}
 	gl::setMatrices( mCamera );
 
 	// Set up OpenGL

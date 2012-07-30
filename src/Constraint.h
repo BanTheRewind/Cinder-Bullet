@@ -38,6 +38,7 @@
 #pragma once
 
 #include "BulletDynamics/ConstraintSolver/btPoint2PointConstraint.h"
+#include "cinder/Ray.h"
 #include "cinder/Vector.h"
 
 namespace bullet {
@@ -49,6 +50,11 @@ namespace bullet {
 	public:
 		Constraint();
 		~Constraint();
+
+		ci::Vec3f&				getPosition();
+		const ci::Vec3f&		getPosition() const;
+
+		void					update( const ci::Ray &ray );
 	private:
 		Constraint( btPoint2PointConstraint *constraint, const ci::Vec3f &position, float distance );
 		const Constraint&		operator=( const Constraint &rhs );
