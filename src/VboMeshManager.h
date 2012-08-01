@@ -60,15 +60,15 @@ public:
 	static VboMeshRef	create( const std::vector<uint32_t> &indices, const std::vector<ci::Vec3f> &positions, 
 								const std::vector<ci::Vec3f> &normals, const std::vector<ci::Vec2f> &texCoords, 
 								GLenum primitiveType = GL_TRIANGLES );
-	
+
+private:
+
 	static VboMeshRef	createBox();
 	static VboMeshRef	createCircle( uint32_t segments );
 	static VboMeshRef	createCone( uint32_t segments );
 	static VboMeshRef	createCylinder( uint32_t segments );
 	static VboMeshRef	createSphere( uint32_t segments );
 	static VboMeshRef	createSquare();
-
-private:
 
 	class PrimitiveInfo
 	{
