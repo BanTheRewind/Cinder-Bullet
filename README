@@ -1,7 +1,7 @@
-NOTE: The block is undergoing heavy, new development 2012-7-29 to
-2012-8-1. It may be in an unbuildable state while the repo is used
+NOTE: The block is undergoing heavy, new development 2012-8-1 to
+2012-8-3. It may be in an unbuildable state while the repo is used
 for backup during this time. A stable (read "buildable") beta is
-expected on or by 2012-8-1.
+expected on or by 2012-8-3.
 
 DOWNLOAD AT YOUR OWN RISK.  This repo is being used as a backup for
 a work in progress.
@@ -22,17 +22,18 @@ BUGS
 
 TO DO LIST
 
-- Screen -> dynamics world interaction / constraints
-- Soft body convenience methods
+- IN PROGRESS: Screen -> dynamics world interaction / constraints
+- IN PROGRESS: Soft body convenience methods
+- Collision callbacks
 - Static lib
 - XCode static lib
 - Samples
+  - Trampoline magnet
   - Rigid primitive
   - Rigid mesh
   - Dynamic rigid mesh (camera terrain: how to extend an existing body)
-  - GPU dynamic terrain (Bullet + GLSL: how to use a shader to update VBO)
   - Torus (how to create a custom body by extending CollisionObject)
-  - Multisphere (how to implement Bullet shapes not supported by the block)
+  - Capsule (how to implement Bullet shapes not supported by the block)
   - Soft body (interacts with rigid)
   - Soft body mesh from OBJ
   - Interaction / apply force
