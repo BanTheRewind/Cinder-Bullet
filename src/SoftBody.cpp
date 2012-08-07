@@ -74,18 +74,6 @@ namespace bullet
 			corners, true
 			);
 
-		body->m_cfg.kDF					=	1.0f;
-		body->m_cfg.kSRHR_CL			=	1.0f;
-		body->m_cfg.kSR_SPLT_CL			=	0.0f;
-		body->m_cfg.collisions			=	btSoftBody::fCollision::CL_SS + btSoftBody::fCollision::CL_RS;
-
-		btSoftBody::Material* material	= body->appendMaterial();
-		material->m_kLST				=	0.4f;
-		body->generateBendingConstraints( 2, material );
-
-		body->setTotalMass( 500.0f );
-		body->generateClusters( 0 );
-
 		return body;
 
 	}

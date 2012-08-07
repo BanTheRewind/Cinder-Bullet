@@ -244,6 +244,9 @@ void BulletTestApp::drop()
 			shape->setFriction( 0.6f );
 			shape->setAngularFactor( 0.95f );
 			break;
+		case 8:
+			bullet::createRigidSphere( mWorld, size * 2.0f, 16, size * size, position );
+			break;
 		default:
 			bullet::createRigidBox( mWorld, Vec3f::one() * size, size * size, position );
 			break;
@@ -305,7 +308,28 @@ void BulletTestApp::initTest()
 
 		break;
 	case 8:
-		mGround = bullet::createSoftCloth( mWorld, Vec2f::one() * 150.0f, Vec2i( 24, 24 ), SoftCloth::CLOTH_ATTACH_CORNER_ALL, Vec3f( 0.0f, 0.0f, 20.0f ), Quatf( 0.0f, 0.0f, 45.0f, 0.0f ) );
+		mGround = bullet::createSoftCloth( mWorld, Vec2f::one() * 225.0f, Vec2i( 16, 16 ), SoftCloth::CLOTH_ATTACH_CORNER_ALL, Vec3f( 0.0f, 0.0f, 20.0f ), Quatf( 0.0f, 0.0f, 45.0f, 0.0f ) );
+		
+		btSoftBody* body = toBulletSoftBody( mGround );
+		
+		body->m_materials[ 0 ]->m_kAST	= 0.7f;
+		body->m_materials[ 0 ]->m_kLST	= 0.7f;
+		body->m_materials[ 0 ]->m_kVST	= 1.0f;
+		
+		body->m_cfg.kDF					= 1.0f;
+		body->m_cfg.kSRHR_CL			= 1.0f;
+		body->m_cfg.kSR_SPLT_CL			= 0.0f;
+		body->m_cfg.collisions			= btSoftBody::fCollision::CL_SS + btSoftBody::fCollision::CL_RS;
+		
+		body->setTotalMass( 500.0f );
+		body->generateClusters( 0 );
+
+		/*btSoftBody::Material* material	= body->appendMaterial();
+		material->m_kAST				= 0.5f;
+		material->m_kLST				= 0.5f;
+		material->m_kVST				= 1.0f;
+		body->generateBendingConstraints( 2, material );*/
+
 		break;
 	}
 
@@ -399,7 +423,7 @@ void BulletTestApp::setup()
 {
 	mDragging	= false;
 	mFrameRate	= 0.0f;
-	mTest		= 8;
+	mTest		= 0;
 	mTestPrev	= mTest;
 
 	// Set up lighting
