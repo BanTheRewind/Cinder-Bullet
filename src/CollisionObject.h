@@ -70,6 +70,8 @@ namespace bullet
 
 	protected:
 
+		void								update();
+
 		static ci::Matrix44f				getTransformMatrix( const btRigidBody* body );
 		static ci::Matrix44f				getTransformMatrix( const btSoftBody* body );
 

@@ -7,6 +7,8 @@
 #include "RigidBody.h"
 #include "SoftBody.h"
 
+#include "bullet/BulletSoftBody/btSoftBodyRigidBodyCollisionConfiguration.h"
+
 namespace bullet {
 
 	using namespace ci;
@@ -19,9 +21,10 @@ namespace bullet {
 	{
 
 		// Setup physics environment
-		mCollisionConfiguration	= new btDefaultCollisionConfiguration();
+		mCollisionConfiguration	= new btSoftBodyRigidBodyCollisionConfiguration();
 		mDispatcher				= new btCollisionDispatcher( mCollisionConfiguration );
-		mBroadphase				= new btDbvtBroadphase();
+		// TODO make these settings configurable
+		mBroadphase				= new btAxisSweep3( btVector3( -1000.0f, -1000.0f, -1000.0f ), btVector3( 1000.0f, 1000.0f, 1000.0f ), 32766 );
 		mSolver					= new btSequentialImpulseConstraintSolver();
 	
 		// Default dynamics
@@ -33,9 +36,10 @@ namespace bullet {
 		mSoftBodyWorldInfo.water_offset		= 0.0f;
 		mSoftBodyWorldInfo.water_normal		= btVector3( 0.0f, 0.0f, 0.0f );
 		mSoftBodyWorldInfo.m_sparsesdf.Initialize();
+		btSoftBodySolver *softBodySolver	= 0;
 
 		// Build world
-		mWorld = new btSoftRigidDynamicsWorld( mDispatcher, mBroadphase, mSolver, mCollisionConfiguration );
+		mWorld = new btSoftRigidDynamicsWorld( mDispatcher, mBroadphase, mSolver, mCollisionConfiguration, softBodySolver );
 		mWorld->setGravity( btVector3( 0.0f, -10.0f, 0.0f ) );
 		mWorld->getDispatchInfo().m_enableSPU = true;
 
@@ -44,37 +48,9 @@ namespace bullet {
 
 	}
 
-	const DynamicsWorld& DynamicsWorld::operator=( const DynamicsWorld &rhs )
-	{
-		mBroadphase				= rhs.mBroadphase;
-		mCollisionConfiguration	= rhs.mCollisionConfiguration;
-		mDispatcher				= rhs.mDispatcher;
-		mElapsedSeconds			= rhs.mElapsedSeconds;
-		mNumObjects				= rhs.mNumObjects;
-		mSoftBodyWorldInfo		= rhs.mSoftBodyWorldInfo;
-		mSolver					= rhs.mSolver;
-		mWorld					= rhs.mWorld;
-		mObjects.clear();
-		//mObjects.transfer( mObjects.begin(), rhs.mObjects );
-		return *this;
-	}
-
-	DynamicsWorld::DynamicsWorld( const DynamicsWorld &rhs )
-	{
-		mBroadphase				= rhs.mBroadphase;
-		mCollisionConfiguration	= rhs.mCollisionConfiguration;
-		mDispatcher				= rhs.mDispatcher;
-		mElapsedSeconds			= rhs.mElapsedSeconds;
-		mNumObjects				= rhs.mNumObjects;
-		mSoftBodyWorldInfo		= rhs.mSoftBodyWorldInfo;
-		mSolver					= rhs.mSolver;
-		mWorld					= rhs.mWorld;
-		mObjects.clear();
-//		mObjects.transfer( mObjects.begin(), rhs.mObjects );
-	}
-
 	DynamicsWorld::~DynamicsWorld()
 	{
+		mSoftBodyWorldInfo.m_sparsesdf.GarbageCollect();
 		if ( mBroadphase != 0 ) {
 			delete mBroadphase;
 		}
@@ -84,11 +60,11 @@ namespace bullet {
 		if ( mDispatcher != 0 ) {
 			delete mDispatcher;
 		}
-		if ( mWorld != 0 ) {
-			delete mWorld;
-		}
 		if ( mSolver != 0 ) {
 			delete mSolver;
+		}
+		if ( mWorld != 0 ) {
+			delete mWorld;
 		}
 	}
 
@@ -293,7 +269,7 @@ namespace bullet {
 
 			// Activate all bodies
 			for ( uint32_t i = 0; i < numObjects; i++ ) {
-				btCollisionObject * collisionObject = mWorld->getCollisionObjectArray()[ i ];
+				btCollisionObject* collisionObject = mWorld->getCollisionObjectArray()[ i ];
 				btRigidBody* rigidBody = btRigidBody::upcast( collisionObject );
 				if ( rigidBody ) {
 					rigidBody->activate( true );
@@ -307,11 +283,17 @@ namespace bullet {
 
 		}
 
+		// Update meshes
+		for ( Iter iter = mObjects.begin(); iter != mObjects.end(); ++iter ) {
+			iter->update();
+		}
+
 		// Update object count
 		mNumObjects = numObjects;
 
 		// Update dynamics world
 		mWorld->stepSimulation( 1.0f, 10, 1.0f / math<float>::max( 1.0f, frameRate ) );
+		mSoftBodyWorldInfo.m_sparsesdf.GarbageCollect();
 
 	}
 

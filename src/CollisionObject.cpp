@@ -152,6 +152,30 @@ namespace bullet
 		return mSoftBody != 0;
 	}
 
+	void CollisionObject::update()
+	{
+		if ( mSoftBody != 0 ) {
+			
+			size_t count = mSoftBody->m_faces.size();
+			
+			vector<Vec3f> normals;
+			vector<Vec3f> positions;
+			
+			for ( size_t i = 0; i < count; ++i ) {
+				const btSoftBody::Face&	face = mSoftBody->m_faces[ i ];
+				Vec3f normal = fromBulletVector3( face.m_normal ) * -1.0f;
+				for ( size_t j = 0; j < 3; ++j ) {
+					normals.push_back( normal );
+					Vec3f position = fromBulletVector3( face.m_n[ j ]->m_x );
+					positions.push_back( position );
+				}
+			}
+
+			mVboMesh->bufferNormals( normals );
+			mVboMesh->bufferPositions( positions );
+		}
+	}
+
 	/////////////////////////////////////////////////////////////////////////////////////////////////
 
 	// Convert Bullet matrix to Cinder matrix for rigid bodies

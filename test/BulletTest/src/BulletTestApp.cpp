@@ -153,7 +153,7 @@ using namespace std;
 
 void BulletTestApp::bindTexture( uint32_t index )
 {
-	if ( mTest > 4 ) {
+	if ( mTest > 4 && mTest < 8 ) {
 		if ( index == 0 ) {
 			mTexTerrain.bind();
 		} else {
@@ -170,7 +170,7 @@ void BulletTestApp::bindTexture( uint32_t index )
 
 void BulletTestApp::unbindTexture( uint32_t index )
 {
-	if ( mTest > 4 ) {
+	if ( mTest > 4 && mTest < 8 ) {
 		if ( index == 0 ) {
 			mTexTerrain.unbind();
 		} else {
@@ -258,6 +258,7 @@ void BulletTestApp::initTest()
 	// Clean up last test
 	if ( mWorld ) {
 		mWorld->clear();
+		mWorld->getInfo().m_sparsesdf.Reset();
 	}
 	
 	// Used when generating terrain
@@ -304,7 +305,7 @@ void BulletTestApp::initTest()
 
 		break;
 	case 8:
-		mGround = bullet::createSoftCloth( mWorld, Vec2f::one() * 100.0f );
+		mGround = bullet::createSoftCloth( mWorld, Vec2f::one() * 150.0f, Vec2i( 24, 24 ), SoftCloth::CLOTH_ATTACH_CORNER_ALL, Vec3f( 0.0f, 0.0f, 20.0f ), Quatf( 0.0f, 0.0f, 45.0f, 0.0f ) );
 		break;
 	}
 
@@ -398,7 +399,7 @@ void BulletTestApp::setup()
 {
 	mDragging	= false;
 	mFrameRate	= 0.0f;
-	mTest		= 3;
+	mTest		= 8;
 	mTestPrev	= mTest;
 
 	// Set up lighting

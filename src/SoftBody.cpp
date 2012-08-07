@@ -66,13 +66,26 @@ namespace bullet
 		float w = size.x * 0.5f;
 		btSoftBody*		body = btSoftBodyHelpers::CreatePatch(
 			info,
-			toBulletVector3( transform.transformPoint( Vec3f( -w, h, -w ) ) ), 
-			toBulletVector3( transform.transformPoint( Vec3f(  w, h, -w ) ) ), 
-			toBulletVector3( transform.transformPoint( Vec3f( -w, h,  w ) ) ), 
-			toBulletVector3( transform.transformPoint( Vec3f(  w, h,  w ) ) ),
+			toBulletVector3( transform.transformPoint( Vec3f( -w, 0.0f, -h ) ) ), 
+			toBulletVector3( transform.transformPoint( Vec3f(  w, 0.0f, -h ) ) ), 
+			toBulletVector3( transform.transformPoint( Vec3f( -w, 0.0f,  h ) ) ), 
+			toBulletVector3( transform.transformPoint( Vec3f(  w, 0.0f,  h ) ) ),
 			resolution.x, resolution.y, 
 			corners, true
 			);
+
+		body->m_cfg.kDF					=	1.0f;
+		body->m_cfg.kSRHR_CL			=	1.0f;
+		body->m_cfg.kSR_SPLT_CL			=	0.0f;
+		body->m_cfg.collisions			=	btSoftBody::fCollision::CL_SS + btSoftBody::fCollision::CL_RS;
+
+		btSoftBody::Material* material	= body->appendMaterial();
+		material->m_kLST				=	0.4f;
+		body->generateBendingConstraints( 2, material );
+
+		body->setTotalMass( 500.0f );
+		body->generateClusters( 0 );
+
 		return body;
 
 	}
@@ -86,51 +99,20 @@ namespace bullet
 		mSoftBody = createSoftCloth( info, size, resolution, corners, position, rotation );
 
 		// Set scale
-		mScale = Vec3f( size, 1.0f );
+		mScale = Vec3f::one();
 
-		// Iterate through dimensions to set vertex data
-		float halfHeight	= size.y * 0.5f;
-		float halfWidth		= size.x * 0.5f;
-		int32_t height		= resolution.y;
-		int32_t width		= resolution.x;
-		Vec2f delta			= size / Vec2f( resolution );
-		for ( int32_t y = 0; y < height; y++ ) {
-			for ( int32_t x = 0; x < width; x++ ) {
-
-				// Add texture coordinate
-				mTexCoords.push_back( Vec2f( (float)x / (float)width, (float)y / (float)height ) );
-
-				// Add indices for this quad
-				int32_t xn = x + 1 >= width ? 0 : 1;
-				int32_t yn = y + 1 >= height ? 0 : 1;
-				mIndices.push_back( x + height * y );
-				mIndices.push_back( ( x + xn ) + height * y);
-				mIndices.push_back( ( x + xn ) + height * ( y + yn ) );
-				mIndices.push_back( x + height * ( y + yn ) );
-				mIndices.push_back( ( x + xn ) + height * ( y + yn ) );
-				mIndices.push_back( x + height * y );
-
-				Vec3f position( (float)x * delta.x - halfWidth, 0.0f, (float)y * delta.y - halfHeight );
+		// Build mesh
+		Vec2f offset	= size * 0.5f;
+		size_t count	= mSoftBody->m_faces.size();
+		for ( size_t i = 0; i < count; ++i ) {
+			const btSoftBody::Face&	face = mSoftBody->m_faces[ i ];
+			Vec3f normal = fromBulletVector3( face.m_normal ) * -1.0f;
+			for ( size_t j = 0; j < 3; ++j ) {
+				Vec3f position = fromBulletVector3( face.m_n[ j ]->m_x );
+				mIndices.push_back( i * 3 + j );
+				mNormals.push_back( normal );
 				mPositions.push_back( position );
-
-				mNormals.push_back( Vec3f::zero() );
-
-			}
-
-		}
-
-		// Loop through again to set normals
-		for ( int32_t y = 0; y < height - 1; y++ ) {
-			for (int32_t x = 0; x < width - 1; x++) {
-
-				// Get vertices of this triangle
-				Vec3f vert0 = mPositions[ mIndices[ ( x + height * y ) * 6 ] ];
-				Vec3f vert1 = mPositions[ mIndices[ ( ( x + 1 ) + height * y ) * 6 ] ];
-				Vec3f vert2 = mPositions[ mIndices[ ( ( x + 1 ) + height * ( y + 1 ) ) * 6 ] ];
-
-				// Calculate normal
-				mNormals[ x + height * y ] = Vec3f( ( vert1 - vert0 ).cross( vert1 - vert2 ).normalized() );
-
+				mTexCoords.push_back( ( position.xz() + offset ) / size );
 			}
 		}
 
