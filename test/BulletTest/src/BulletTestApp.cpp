@@ -245,7 +245,11 @@ void BulletTestApp::drop()
 			shape->setAngularFactor( 0.95f );
 			break;
 		case 8:
-			bullet::createRigidSphere( mWorld, size * 2.0f, 16, size * size, position );
+			body = bullet::createRigidBox( mWorld, Vec3f::one() * size * 2.0f, size * size, position );
+			shape = bullet::toBulletRigidBody( body );
+			shape->setAngularVelocity( btVector3( 0.21f, 0.21f, 0.21f ) );
+			shape->setFriction( 0.6f );
+			shape->setAngularFactor( 0.95f );
 			break;
 		default:
 			bullet::createRigidBox( mWorld, Vec3f::one() * size, size * size, position );
@@ -316,12 +320,13 @@ void BulletTestApp::initTest()
 		body->m_materials[ 0 ]->m_kLST	= 0.7f;
 		body->m_materials[ 0 ]->m_kVST	= 1.0f;
 		
-		body->m_cfg.kDF					= 1.0f;
+		body->m_cfg.kDF					= 0.9f; 
 		body->m_cfg.kSRHR_CL			= 1.0f;
 		body->m_cfg.kSR_SPLT_CL			= 0.0f;
 		body->m_cfg.collisions			= btSoftBody::fCollision::CL_SS + btSoftBody::fCollision::CL_RS;
 		
-		body->setTotalMass( 500.0f );
+		body->getCollisionShape()->setMargin( 0.01f );
+		body->setTotalMass( 50.0f );
 		body->generateClusters( 0 );
 
 		/*btSoftBody::Material* material	= body->appendMaterial();
