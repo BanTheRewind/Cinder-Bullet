@@ -1,5 +1,5 @@
-NOTE: The block is undergoing heavy, new development 2012-8-1 to
-2012-8-3. It may be in an unbuildable state while the repo is used
+NOTE: The block is undergoing heavy, new development in early August. 
+It may be in an unbuildable state while the repo is used
 for backup during this time. A stable (read "buildable") beta is
 expected on or by 2012-8-3.
 
@@ -23,8 +23,13 @@ BUGS
 TO DO LIST
 
 - IN PROGRESS: Screen -> dynamics world interaction / constraints
-- IN PROGRESS: Soft body convenience methods
+- IN PROGRESS: Soft body convenience methods (cloth complete)
 - Collision callbacks
+- Decouple mass from CollisionObject
+- Decouple VBOs from CollisionObject
+    - Continue to generate index, normal, uv, and position vectors
+      to use in VBO creation
+- Remove CollisionObject::update()
 - Static lib
 - XCode static lib
 - Samples
