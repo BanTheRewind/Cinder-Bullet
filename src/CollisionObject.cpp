@@ -163,12 +163,40 @@ namespace bullet
 			
 			for ( size_t i = 0; i < count; ++i ) {
 				const btSoftBody::Face&	face = mSoftBody->m_faces[ i ];
-				Vec3f normal = fromBulletVector3( face.m_normal ) * -1.0f;
-				for ( size_t j = 0; j < 3; ++j ) {
-					normals.push_back( normal );
-					Vec3f position = fromBulletVector3( face.m_n[ j ]->m_x );
-					positions.push_back( position );
+
+				Vec3f vert0		= fromBulletVector3( face.m_n[ 0 ]->m_x );
+				Vec3f vert1		= fromBulletVector3( face.m_n[ 1 ]->m_x );
+				Vec3f vert2		= fromBulletVector3( face.m_n[ 2 ]->m_x );
+
+				positions.push_back( vert0 );
+				positions.push_back( vert1 );
+				positions.push_back( vert2 );
+
+			}
+
+			for ( size_t i = 0; i < positions.size(); ++i ) {
+				
+				btVector3 position = toBulletVector3( positions.at( i ) );
+				btVector3 normal( 0.0f, 0.0f, 0.0f );
+
+				int32_t numFaces = 0;
+
+				size_t count = mSoftBody->m_faces.size();
+				for ( size_t i = 0; i < count; ++i ) {
+					const btSoftBody::Face&	face = mSoftBody->m_faces[ i ];
+					if ( face.m_n[ 0 ]->m_x == position || 
+						face.m_n[ 1 ]->m_x == position || 
+						face.m_n[ 2 ]->m_x == position ) {
+						normal += face.m_normal;
+						++numFaces;
+					}
 				}
+		
+				if ( numFaces > 0 ) {
+					normal /= (float)numFaces;
+				}
+
+				normals.push_back( fromBulletVector3( normal ) * -1.0f );
 			}
 
 			mVboMesh->bufferNormals( normals );

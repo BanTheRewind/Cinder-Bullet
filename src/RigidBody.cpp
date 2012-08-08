@@ -344,7 +344,7 @@ namespace bullet
 
 		// Loop through again to set normals
 		for ( int32_t y = 0; y < height - 1; y++ ) {
-			for (int32_t x = 0; x < width - 1; x++) {
+			for ( int32_t x = 0; x < width - 1; x++ ) {
 
 				// Get vertices of this triangle
 				Vec3f vert0 = mPositions[ mIndices[ ( x + height * y ) * 6 ] ];

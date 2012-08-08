@@ -90,22 +90,43 @@ namespace bullet
 		mScale = Vec3f::one();
 
 		// Build mesh
+		Vec3f normal	= Vec3f::zero();
 		Vec2f offset	= size * 0.5f;
 		size_t count	= mSoftBody->m_faces.size();
 		for ( size_t i = 0; i < count; ++i ) {
 			const btSoftBody::Face&	face = mSoftBody->m_faces[ i ];
-			Vec3f normal = fromBulletVector3( face.m_normal ) * -1.0f;
-			for ( size_t j = 0; j < 3; ++j ) {
-				Vec3f position = fromBulletVector3( face.m_n[ j ]->m_x );
-				mIndices.push_back( i * 3 + j );
-				mNormals.push_back( normal );
-				mPositions.push_back( position );
-				mTexCoords.push_back( ( position.xz() + offset ) / size );
-			}
+			
+			Vec3f vert0		= fromBulletVector3( face.m_n[ 0 ]->m_x );
+			Vec3f vert1		= fromBulletVector3( face.m_n[ 1 ]->m_x );
+			Vec3f vert2		= fromBulletVector3( face.m_n[ 2 ]->m_x );
+
+			Vec2f texCoord0	= ( vert0.xz() + offset ) / size;
+			Vec2f texCoord1	= ( vert1.xz() + offset ) / size;
+			Vec2f texCoord2	= ( vert2.xz() + offset ) / size;
+
+			mIndices.push_back( i * 3 + 0 );
+			mIndices.push_back( i * 3 + 1 );
+			mIndices.push_back( i * 3 + 2 );
+
+			mNormals.push_back( normal );
+			mNormals.push_back( normal );
+			mNormals.push_back( normal );
+
+			mPositions.push_back( vert0 );
+			mPositions.push_back( vert1 );
+			mPositions.push_back( vert2 );
+			
+			mTexCoords.push_back( texCoord0 );
+			mTexCoords.push_back( texCoord1 );
+			mTexCoords.push_back( texCoord2 );
+
 		}
 
 		// Set VBO
 		mVboMesh = VboMeshManager::create( mIndices, mPositions, mNormals, mTexCoords );
+
+		// Update to calculate normals
+		update();
 
 	}
 

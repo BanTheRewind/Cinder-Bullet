@@ -90,7 +90,6 @@ namespace bullet
 
 		friend class						DynamicsWorld;
 		friend class						VboMeshManager;
-
 	};
 
 }
