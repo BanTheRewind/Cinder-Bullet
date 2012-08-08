@@ -292,7 +292,8 @@ namespace bullet {
 		mNumObjects = numObjects;
 
 		// Update dynamics world
-		mWorld->stepSimulation( 1.0f, 10, 1.0f / math<float>::max( 1.0f, frameRate ) );
+		float step = 1.0f / math<float>::max( 1.0f, frameRate );
+		mWorld->stepSimulation( 1.0f, 10, step );
 		mSoftBodyWorldInfo.m_sparsesdf.GarbageCollect();
 
 	}

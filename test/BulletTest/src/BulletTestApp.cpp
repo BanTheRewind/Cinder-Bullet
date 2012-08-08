@@ -162,7 +162,7 @@ void BulletTestApp::bindTexture( uint32_t index )
 			}
 		}
 	} else {
-		if ( ( ( mTest == 0 || mTest == 3 ) && index > 0 ) || mTest == 1 ) {
+		if ( ( ( mTest == 0 || mTest == 3 || mTest == 8 ) && index > 0 ) || mTest == 1 ) {
 			mTexSquare.bind();
 		}
 	}
@@ -179,7 +179,7 @@ void BulletTestApp::unbindTexture( uint32_t index )
 			}
 		}
 	} else {
-		if ( ( ( mTest == 0 || mTest == 3 ) && index > 0 ) || mTest == 1 ) {
+		if ( ( ( mTest == 0 || mTest == 3 || mTest == 8 ) && index > 0 ) || mTest == 1 ) {
 			mTexSquare.unbind();
 		}
 	}
@@ -187,6 +187,9 @@ void BulletTestApp::unbindTexture( uint32_t index )
 
 void BulletTestApp::draw()
 {
+	gl::enableDepthRead();
+	gl::enableDepthWrite();
+
 	gl::setViewport( getWindowBounds() );
 	gl::clear( ColorAf::black() );
 	gl::setMatrices( mCamera );
@@ -312,21 +315,23 @@ void BulletTestApp::initTest()
 
 		break;
 	case 8:
-		mGround = bullet::createSoftCloth( mWorld, Vec2f::one() * 225.0f, Vec2i( 16, 16 ), SoftCloth::CLOTH_ATTACH_CORNER_ALL, Vec3f( 0.0f, 0.0f, 20.0f ), Quatf( 0.0f, 0.0f, 45.0f, 0.0f ) );
+		mWorld->getInfo().m_gravity = toBulletVector3( Vec3f( 0.0f, -0.5f, 0.0f ) );
+
+		mGround = bullet::createSoftCloth( mWorld, Vec2f::one() * 180.0f, Vec2i( 18, 20 ), SoftCloth::CLOTH_ATTACH_CORNER_ALL, Vec3f( 0.0f, 0.0f, 40.0f ), Quatf( 0.0f, 0.0f, 0.0f, 0.1f ) );
 		
 		btSoftBody* body = toBulletSoftBody( mGround );
 		
-		body->m_materials[ 0 ]->m_kAST	= 0.7f;
-		body->m_materials[ 0 ]->m_kLST	= 0.7f;
-		body->m_materials[ 0 ]->m_kVST	= 1.0f;
+		body->m_materials[ 0 ]->m_kAST	= 0.2f;
+		body->m_materials[ 0 ]->m_kLST	= 0.2f;
+		body->m_materials[ 0 ]->m_kVST	= 0.2f;
 		
 		body->m_cfg.kDF					= 0.9f; 
 		body->m_cfg.kSRHR_CL			= 1.0f;
 		body->m_cfg.kSR_SPLT_CL			= 0.0f;
 		body->m_cfg.collisions			= btSoftBody::fCollision::CL_SS + btSoftBody::fCollision::CL_RS;
 		
-		body->getCollisionShape()->setMargin( 0.01f );
-		body->setTotalMass( 50.0f );
+		body->getCollisionShape()->setMargin( 0.0001f );
+		body->setTotalMass( 500.0f );
 		body->generateClusters( 0 );
 
 		/*btSoftBody::Material* material	= body->appendMaterial();

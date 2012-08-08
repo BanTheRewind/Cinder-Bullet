@@ -89,7 +89,6 @@ namespace bullet
 		VboMeshRef							mVboMesh;
 
 		friend class						DynamicsWorld;
-		friend class						VboMeshManager;
 	};
 
 }
