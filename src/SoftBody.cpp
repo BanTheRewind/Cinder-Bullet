@@ -92,14 +92,6 @@ namespace bullet {
 			mIndices.push_back( i * 3 + 0 );
 			mIndices.push_back( i * 3 + 1 );
 			mIndices.push_back( i * 3 + 2 );
-
-			mNormals.push_back( normal );
-			mNormals.push_back( normal );
-			mNormals.push_back( normal );
-
-			mPositions.push_back( vert0 );
-			mPositions.push_back( vert1 );
-			mPositions.push_back( vert2 );
 			
 			mTexCoords.push_back( texCoord0 );
 			mTexCoords.push_back( texCoord1 );

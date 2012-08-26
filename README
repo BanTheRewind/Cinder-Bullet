@@ -16,7 +16,7 @@ you just use Bullet directly.
 
 BUGS
 
-- Cone normals / tex coords needs to be fixed
+- Cone tex coords needs to be fixed
 - Concave mesh body isn't scaling on Y axis
 - Crash on exit
 

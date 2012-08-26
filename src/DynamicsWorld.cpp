@@ -80,6 +80,7 @@ namespace bullet {
 	DynamicsWorld::~DynamicsWorld()
 	{
 		mSoftBodyWorldInfo.m_sparsesdf.GarbageCollect();
+		return;
 		if ( mBroadphase != 0 ) {
 			delete mBroadphase;
 		}

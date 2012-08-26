@@ -111,7 +111,7 @@ private:
 	ci::CameraPersp				mCamera;
 	ci::gl::Light				*mLight;
 
-	void						createCone( size_t segments = 24 );
+	void						createCone( size_t segments = 64 );
 	ci::TriMesh					mCone;
 
 	void						loadModels();
@@ -187,7 +187,6 @@ void BulletTestApp::createCone( size_t segments )
 	vector<uint32_t> indices;
 	vector<Vec3f> normals;
 	vector<Vec3f> positions;
-	vector<Vec3f> srcNormals;
 	vector<Vec3f> srcPositions;
 	vector<Vec2f> srcTexCoords;
 	vector<Vec2f> texCoords;
@@ -210,17 +209,13 @@ void BulletTestApp::createCone( size_t segments )
 			float sinT = math<float>::sin( t );
 			Vec3f position( 
 				cosT * radius, 
-				(float)p - 0.5f, 
+				(float)p, 
 				sinT * radius 
 				);
 			srcPositions.push_back( position );
 
-			// Set normal
-			Vec3f normal( theta, cosT, sinT );
-			srcNormals.push_back( normal );
-
 			// Set tex coord
-			Vec2f texCoord( normal.x, position.y + 0.5f );
+			Vec2f texCoord( theta, position.y );
 			srcTexCoords.push_back( texCoord );
 
 		}
@@ -228,26 +223,27 @@ void BulletTestApp::createCone( size_t segments )
 	}
 
 	// Top and bottom center
-	srcNormals.push_back( Vec3f( 0.0f, -1.0f, 0.0f ) );
-	srcNormals.push_back( Vec3f( 0.0f, 1.0f, 0.0f ) );
-	srcPositions.push_back( Vec3f( 0.0f, -0.5f, 0.0f ) );
-	srcPositions.push_back( Vec3f( 0.0f, 0.5f, 0.0f ) );
+	srcPositions.push_back( Vec3f( 0.0f, 0.0f, 0.0f ) );
+	srcPositions.push_back( Vec3f( 0.0f, 1.0f, 0.0f ) );
 	srcTexCoords.push_back( Vec2f( 0.0f, 0.0f ) );
 	srcTexCoords.push_back( Vec2f( 0.0f, 1.0f ) );
 	int32_t bottomCenter = (int32_t)srcPositions.size() - 1;
 	int32_t topCenter = bottomCenter - 1;
 
-	// Build top face
+	Vec3f offset( 0.0f, -0.5f, 0.0f );
+
+	// Build face
+	Vec3f normal( 0.0f, -1.0f, 0.0f );
 	for ( uint32_t t = 0; t < segments; t++ ) {
 		uint32_t n = t + 1 >= segments ? 0 : t + 1;
 
-		normals.push_back( srcNormals[ topCenter ] );
-		normals.push_back( srcNormals[ topCenter ] );
-		normals.push_back( srcNormals[ topCenter ] );
+		normals.push_back( normal );
+		normals.push_back( normal );
+		normals.push_back( normal );
 
-		positions.push_back( srcPositions[ t ] );
-		positions.push_back( srcPositions[ topCenter ] );
-		positions.push_back( srcPositions[ n ] );
+		positions.push_back( srcPositions[ t ] + offset );
+		positions.push_back( srcPositions[ topCenter ] + offset );
+		positions.push_back( srcPositions[ n ] + offset );
 
 		texCoords.push_back( srcTexCoords[ topCenter ] );
 		texCoords.push_back( srcTexCoords[ topCenter ] );
@@ -257,45 +253,42 @@ void BulletTestApp::createCone( size_t segments )
 	// Build body
 	for ( uint32_t t = 0; t < segments; t++ ) {
 		uint32_t n = t + 1 >= segments ? 0 : t + 1;
-			
-		normals.push_back( srcNormals[ t ] );
-		normals.push_back( srcNormals[ segments + t ] );
-		normals.push_back( srcNormals[ n ] );
-		normals.push_back( srcNormals[ n ] );
-		normals.push_back( srcNormals[ segments + t ] );
-		normals.push_back( srcNormals[ segments + n ] );
 
-		positions.push_back( srcPositions[ t ] );
-		positions.push_back( srcPositions[ segments + t ] );
-		positions.push_back( srcPositions[ n ] );
-		positions.push_back( srcPositions[ n ] );
-		positions.push_back( srcPositions[ segments + t ] );
-		positions.push_back( srcPositions[ segments + n ] );
+		Vec3f vert0 = srcPositions[ t ];
+		Vec3f vert1 = srcPositions[ n ];
+		Vec3f vert2 = srcPositions[ segments + t ];
+		Vec3f vert3 = srcPositions[ segments + n ];
 
-		texCoords.push_back( srcTexCoords[ t ] );
-		texCoords.push_back( srcTexCoords[ segments + t ] );
-		texCoords.push_back( srcTexCoords[ n ] );
-		texCoords.push_back( srcTexCoords[ n ] );
-		texCoords.push_back( srcTexCoords[ segments + t ] );
-		texCoords.push_back( srcTexCoords[ segments + n ] );
-	}
-			
-	// Build bottom face
-	for ( uint32_t t = 0; t < segments; t++ ) {
-		uint32_t n = t + 1 >= segments ? 0 : t + 1;
+		Vec2f texCoord0 = srcTexCoords[ t ];
+		Vec2f texCoord1 = srcTexCoords[ n ];
+		Vec2f texCoord2 = srcTexCoords[ segments + t ];
+		Vec2f texCoord3 = srcTexCoords[ segments + n ];
 
-		normals.push_back( srcNormals[ bottomCenter ] );
-		normals.push_back( srcNormals[ bottomCenter ] );
-		normals.push_back( srcNormals[ bottomCenter ] );
+		Vec3f norm0 = vert0.normalized();
+		Vec3f norm1 = vert1.normalized();
+		Vec3f norm2 = norm0;
+		Vec3f norm3 = norm1;
 
-		positions.push_back( srcPositions[ segments + t ] );
-		positions.push_back( srcPositions[ bottomCenter ] );
-		positions.push_back( srcPositions[ segments + n ] );
+		normals.push_back( norm0 );
+		normals.push_back( norm2 );
+		normals.push_back( norm1 );
+		normals.push_back( norm1 );
+		normals.push_back( norm2 );
+		normals.push_back( norm3 );
 
-		texCoords.push_back( srcTexCoords[ bottomCenter ] );
-		texCoords.push_back( srcTexCoords[ bottomCenter ] );
-		texCoords.push_back( srcTexCoords[ bottomCenter ] );
+		positions.push_back( vert0 + offset );
+		positions.push_back( vert2 + offset );
+		positions.push_back( vert1 + offset );
+		positions.push_back( vert1 + offset );
+		positions.push_back( vert2 + offset );
+		positions.push_back( vert3 + offset );
 
+		texCoords.push_back( texCoord0 );
+		texCoords.push_back( texCoord2 );
+		texCoords.push_back( texCoord1 );
+		texCoords.push_back( texCoord1 );
+		texCoords.push_back( texCoord2 );
+		texCoords.push_back( texCoord2 );
 	}
 
 	for ( uint32_t i = 0; i < positions.size(); i++ ) {
@@ -315,7 +308,6 @@ void BulletTestApp::createCone( size_t segments )
 	indices.clear();
 	normals.clear();
 	positions.clear();
-	srcNormals.clear();
 	srcPositions.clear();
 	srcTexCoords.clear();
 	texCoords.clear();
@@ -648,18 +640,12 @@ void BulletTestApp::setup()
 
 void BulletTestApp::shutdown()
 {
-
-	// Clean up
 	if ( mLight ) {
 		delete mLight;
 	}
 	if ( mTerrain != 0 ) {
-		delete mTerrain;
+		//delete mTerrain;
 	}
-
-	// TO DO remove
-	exit( 1 );
-
 }
 
 void BulletTestApp::update()
