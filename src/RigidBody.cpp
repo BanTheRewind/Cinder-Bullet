@@ -208,7 +208,7 @@ namespace bullet {
 		int32_t height		= mChannel.getHeight();
 		int32_t width		= mChannel.getWidth();
 		float halfHeight	= (float)height * 0.5f;
-		float halfWidth =	(float)width * 0.5f;
+		float halfWidth		= (float)width * 0.5f;
 		
 		for ( int32_t y = 0; y < height; y++ ) {
 			for ( int32_t x = 0; x < width; x++ ) {

@@ -145,6 +145,5 @@ namespace bullet {
 	btSoftBody*										toBulletSoftBody( const CollisionObjectRef &object );
 
 	ci::TriMesh										calcTriMesh( Iter pos );
-	ci::TriMesh										calcTriMesh( const CollisionObject &object );
 	ci::TriMesh										calcTriMesh( const CollisionObjectRef &object );
 }

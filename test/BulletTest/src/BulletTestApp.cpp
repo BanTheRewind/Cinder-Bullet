@@ -67,12 +67,18 @@ public:
 	}
 
 	// Give access to the terrain channel data and texture coordinates
-	ci::Channel32f&				getData() { return mChannel; }
-	std::vector<ci::Vec2f>&		getTexCoords() { return mTexCoords; }
+	ci::Channel32f&				getData() 
+	{ 
+		return mChannel; 
+	}
+	std::vector<ci::Vec2f>&		getTexCoords() 
+	{ 
+		return mTexCoords; 
+	}
 
 	// Bullet automatically updates the terrain from the channel. This 
 	// method will update the VBO, as well.
-	void						update()
+	void						updateMesh()
 	{
 		readChannelData();
 	}
@@ -572,7 +578,7 @@ void BulletTestApp::update()
 		}
 
 		// Update terrain VBO
-		mTerrain->update();
+		mTerrain->updateMesh();
 		mGroundMesh = bullet::calcTriMesh( mTerrain );
 
 	} else if ( mTest == 7 ) {
@@ -586,14 +592,14 @@ void BulletTestApp::update()
 
 			if ( init ) {
 				mTerrain = new DynamicTerrain( Channel32f( 160, 160 ), -1.0f, 1.0f, Vec3f( 2.0f, 70.0f, 2.0f ), 0.0f );
-				mWorld->pushBack( mTerrain );
+				mGround = mWorld->pushBack( mTerrain );
 				btRigidBody* terrain = ( btRigidBody* )mTerrain->getBulletBody();
 				terrain->setAngularFactor( 0.6f );
 				terrain->setFriction( 0.6f );
 			} else {
 				mTerrain->getData().copyFrom( Channel32f( mSurface ), Area( 0, 0, 160, 160 ) );
-				mTerrain->update();
-				mGroundMesh = bullet::calcTriMesh( mTerrain );
+				mTerrain->updateMesh();
+				mGroundMesh = bullet::calcTriMesh( mGround );
 			}
 
 		}
