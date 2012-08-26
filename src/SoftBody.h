@@ -37,14 +37,13 @@
 
 #pragma once
 
-// Includes
 #include "CollisionObject.h"
 #include "DynamicsWorld.h"
-#include "MeshBody.h"
 #include "Utilities.h"
 
-namespace bullet
-{
+namespace bullet {
+	class DynamicsWorld;
+
 	class SoftBody
 	{
 	protected:
@@ -52,7 +51,7 @@ namespace bullet
 			int32_t corners, const ci::Vec3f &position, const ci::Quatf &rotation );
 	};
 
-	class SoftCloth : public CollisionObject, public SoftBody, public MeshBody
+	class SoftCloth : public CollisionObject, public SoftBody
 	{
 	public:
 		static const int32_t	CLOTH_ATTACH_CORNER_NONE	= 0;

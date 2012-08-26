@@ -37,41 +37,47 @@
 
 #pragma once
 
-// Includes
-#include "cinder/TriMesh.h"
 #include "Utilities.h"
-#include "VboMeshManager.h"
 
-namespace bullet
-{
-
+namespace bullet {
 	class DynamicsWorld;
 
 	class CollisionObject
 	{
-
 	public:
+		typedef enum 
+		{
+			PRIMITIVE_NONE, PRIMITIVE_BOX, PRIMITIVE_CONE, PRIMITIVE_CYLINDER, PRIMITIVE_SPHERE
+		} PrimitiveType;
 
 		~CollisionObject();
 
 		btCollisionObject*					getBulletBody();
 		btCollisionObject*					getBulletBody() const;
-		ci::Vec3f							getPosition();
-		ci::Vec3f							getPosition() const;
+		ci::Vec3f							getCenterPosition();
+		ci::Vec3f							getCenterPosition() const;
+		std::vector<size_t>&				getIndices();
+		const std::vector<size_t>&			getIndices() const;
+		std::vector<ci::Vec3f>&				getNormals();
+		const std::vector<ci::Vec3f>&		getNormals() const;
+		std::vector<ci::Vec3f>&				getPositions();
+		const std::vector<ci::Vec3f>&		getPositions() const;
+		PrimitiveType						getPrimitiveType();
+		PrimitiveType						getPrimitiveType() const;
+		std::vector<ci::Vec2f>&				getTexCoords();
+		const std::vector<ci::Vec2f>&		getTexCoords() const;
 		ci::Matrix44f						getTransformMatrix();
 		ci::Matrix44f						getTransformMatrix() const;
-		ci::gl::VboMesh&					getVboMesh();
-		const ci::gl::VboMesh&				getVboMesh() const;
-
+		
+		bool								isMeshBody();
+		bool								isMeshBody() const;
+		bool								isPrimitiveBody();
+		bool								isPrimitiveBody() const;
 		bool								isRigidBody();
 		bool								isRigidBody() const;
 		bool								isSoftBody();
 		bool								isSoftBody() const;
-
 	protected:
-
-		void								update();
-
 		static ci::Matrix44f				getTransformMatrix( const btRigidBody* body );
 		static ci::Matrix44f				getTransformMatrix( const btSoftBody* body );
 
@@ -82,11 +88,18 @@ namespace bullet
 
 		CollisionObject( const ci::Vec3f &position = ci::Vec3f::zero(), const ci::Quatf &rotation = ci::Quatf() );
 
+		void								update();
+
 		btRigidBody							*mRigidBody;
 		btSoftBody							*mSoftBody;
 
+		PrimitiveType						mPrimitiveType;
 		ci::Vec3f							mScale;
-		VboMeshRef							mVboMesh;
+
+		std::vector<size_t>					mIndices;
+		std::vector<ci::Vec3f>				mNormals;
+		std::vector<ci::Vec3f>				mPositions;
+		std::vector<ci::Vec2f>				mTexCoords;
 
 		friend class						DynamicsWorld;
 	};

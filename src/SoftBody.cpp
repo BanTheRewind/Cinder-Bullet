@@ -35,25 +35,17 @@
 * 
 */
 
-// Include header
 #include "SoftBody.h"
 
+#include "bullet/BulletSoftBody/btSoftBodyHelpers.h"
 
-#include "bullet/BulletSoftBody//btSoftBodyHelpers.h"
-
-namespace bullet
-{
-
-	// Import namespaces
+namespace bullet {
 	using namespace ci;
 	using namespace std;
 
-	// Creates soft cloth
 	btSoftBody* SoftBody::createSoftCloth( btSoftBodyWorldInfo &info, const Vec2f &size, const Vec2i &resolution, 
 		int32_t corners, const Vec3f &position, const Quatf &rotation )
 	{
-
-		// Use a matrix to position corners
 		Matrix44f transform;
 		transform.setToIdentity();
 		transform.translate( position );
@@ -61,10 +53,9 @@ namespace bullet
 		transform.translate( position * -1.0f );
 		transform.translate( position );
 
-		// Create and return soft body
 		float h = size.y * 0.5f;
 		float w = size.x * 0.5f;
-		btSoftBody*		body = btSoftBodyHelpers::CreatePatch(
+		btSoftBody* body = btSoftBodyHelpers::CreatePatch(
 			info,
 			toBulletVector3( transform.transformPoint( Vec3f( -w, 0.0f, -h ) ) ), 
 			toBulletVector3( transform.transformPoint( Vec3f(  w, 0.0f, -h ) ) ), 
@@ -75,21 +66,15 @@ namespace bullet
 			);
 
 		return body;
-
 	}
 
 	SoftCloth::SoftCloth( btSoftBodyWorldInfo &info, const Vec2f &size, const Vec2i &resolution, int32_t corners, 
 			const Vec3f &position, const Quatf &rotation ) 
 		: CollisionObject( position, rotation )
 	{
+		mSoftBody	= createSoftCloth( info, size, resolution, corners, position, rotation );
+		mScale		= Vec3f::one();
 
-		// Create body
-		mSoftBody = createSoftCloth( info, size, resolution, corners, position, rotation );
-
-		// Set scale
-		mScale = Vec3f::one();
-
-		// Build mesh
 		Vec3f normal	= Vec3f::zero();
 		Vec2f offset	= size * 0.5f;
 		size_t count	= mSoftBody->m_faces.size();
@@ -119,15 +104,8 @@ namespace bullet
 			mTexCoords.push_back( texCoord0 );
 			mTexCoords.push_back( texCoord1 );
 			mTexCoords.push_back( texCoord2 );
-
 		}
 
-		// Set VBO
-		mVboMesh = VboMeshManager::create( mIndices, mPositions, mNormals, mTexCoords );
-
-		// Update to calculate normals
 		update();
-
 	}
-
 }

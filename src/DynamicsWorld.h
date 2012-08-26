@@ -37,21 +37,15 @@
 
 #pragma once
 
-// Includes
+#include "boost/ptr_container/ptr_container.hpp"
+#include "bullet/BulletSoftBody/btSoftRigidDynamicsWorld.h"
+#include "cinder/gl/gl.h"
+#include "cinder/TriMesh.h"
+
 #include "Constraint.h"
 #include "CollisionObject.h"
 
-#include "bullet/BulletSoftBody/btSoftRigidDynamicsWorld.h"
-
-#include "cinder/gl/gl.h"
-
-#if defined( CINDER_MSW )
-	#include "ppl.h"
-#endif
-#include "boost/ptr_container/ptr_container.hpp"
-
 namespace bullet {
-
 	typedef boost::ptr_vector<CollisionObject>		CollisionObjectList;
 	typedef CollisionObjectList::pointer			CollisionObjectRef;
 	typedef CollisionObjectList::const_iterator		ConstIter;
@@ -93,7 +87,7 @@ namespace bullet {
 
 		void										setInfo( const btSoftBodyWorldInfo &info );
 
-		void										update( float frameRate = 60.0f );
+		void										update( float step = 0.016667f );
 	private:
 		friend DynamicsWorldRef						createWorld();
 
@@ -115,10 +109,6 @@ namespace bullet {
 		btConstraintSolver							*mSolver;
 		btDefaultCollisionConfiguration				*mCollisionConfiguration;
 		btSoftRigidDynamicsWorld					*mWorld;
-
-		static void									trace( float value );
-		static void									trace( const std::string &message );
-
 	};
 
 	DynamicsWorldRef								createWorld();
@@ -126,9 +116,9 @@ namespace bullet {
 	CollisionObjectRef								createRigidBox( const DynamicsWorldRef &world, const ci::Vec3f &dimensions = ci::Vec3f::one(), 
 																	float mass = 1.0f, const ci::Vec3f &position = ci::Vec3f::zero(), 
 																	const ci::Quatf &rotation = ci::Quatf() );
-	CollisionObjectRef								createRigidCone( const DynamicsWorldRef &world, float radius = 1.0f, float height = 1.0f, int32_t segments = 16, 
+	CollisionObjectRef								createRigidCone( const DynamicsWorldRef &world, float radius = 1.0f, float height = 1.0f, 
 																		float mass = 1.0f, const ci::Vec3f &position = ci::Vec3f::zero(), const ci::Quatf &rotation = ci::Quatf() );
-	CollisionObjectRef								createRigidCylinder( const DynamicsWorldRef &world, const ci::Vec3f &scale = ci::Vec3f::one(), int32_t segments = 16, 
+	CollisionObjectRef								createRigidCylinder( const DynamicsWorldRef &world, const ci::Vec3f &scale = ci::Vec3f::one(), 
 																		float mass = 1.0f, const ci::Vec3f &position = ci::Vec3f::zero(), 
 																		const ci::Quatf &rotation = ci::Quatf() );
 	CollisionObjectRef								createRigidHull( const DynamicsWorldRef &world, const ci::TriMesh &mesh, const ci::Vec3f &scale = ci::Vec3f::one(), 
@@ -138,7 +128,7 @@ namespace bullet {
 																	float margin = 0.05f, float mass = 1.0f, 
 																	const ci::Vec3f &position = ci::Vec3f::zero(), 
 																	const ci::Quatf &rotation = ci::Quatf() );
-	CollisionObjectRef								createRigidSphere( const DynamicsWorldRef &world, float radius = 10.0f, int32_t segments = 16, 
+	CollisionObjectRef								createRigidSphere( const DynamicsWorldRef &world, float radius = 10.0f, 
 																		float mass = 1.0f, const ci::Vec3f &position = ci::Vec3f::zero(), 
 																		const ci::Quatf &rotation = ci::Quatf() );
 	CollisionObjectRef								createRigidTerrain( const DynamicsWorldRef &world, const ci::Channel32f &heightField, float minHeight = -1.0f, 
@@ -149,7 +139,12 @@ namespace bullet {
 																	const ci::Vec2i &resolution = ci::Vec2i( 8, 8 ), int32_t corners = 0, 
 																	const ci::Vec3f &position = ci::Vec3f::zero(), const ci::Quatf &rotation = ci::Quatf() );
 
+	btRigidBody*									toBulletRigidBody( Iter pos );
 	btRigidBody*									toBulletRigidBody( const CollisionObjectRef &object );
+	btSoftBody*										toBulletSoftBody( Iter pos );
 	btSoftBody*										toBulletSoftBody( const CollisionObjectRef &object );
 
+	ci::TriMesh										calcTriMesh( Iter pos );
+	ci::TriMesh										calcTriMesh( const CollisionObject &object );
+	ci::TriMesh										calcTriMesh( const CollisionObjectRef &object );
 }

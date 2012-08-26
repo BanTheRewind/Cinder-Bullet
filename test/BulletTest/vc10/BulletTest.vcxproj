@@ -113,19 +113,16 @@
     <ClCompile Include="..\..\..\src\DynamicsWorld.cpp" />
     <ClCompile Include="..\..\..\src\RigidBody.cpp" />
     <ClCompile Include="..\..\..\src\SoftBody.cpp" />
-    <ClCompile Include="..\..\..\src\VboMeshManager.cpp" />
     <ClCompile Include="..\src\BulletTestApp.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\Constraint.h" />
-    <ClInclude Include="..\..\..\src\MeshBody.h" />
     <ClInclude Include="..\..\..\src\Utilities.h" />
     <ClInclude Include="..\..\..\src\CinderBullet.h" />
     <ClInclude Include="..\..\..\src\CollisionObject.h" />
     <ClInclude Include="..\..\..\src\DynamicsWorld.h" />
     <ClInclude Include="..\..\..\src\RigidBody.h" />
     <ClInclude Include="..\..\..\src\SoftBody.h" />
-    <ClInclude Include="..\..\..\src\VboMeshManager.h" />
     <ClInclude Include="..\include\Resources.h" />
   </ItemGroup>
   <ItemGroup>

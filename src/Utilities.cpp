@@ -35,49 +35,44 @@
 * 
 */
 
-// Include header
 #include "Utilities.h"
 
-namespace bullet 
-{
-
-	// Imports
+namespace bullet {
 	using namespace ci;
 	using namespace std;
 
-	Quatf fromBulletQuaternion( const btQuaternion &q )
+	Quatf fromBulletQuaternion( const btQuaternion &quat )
 	{
-		return ci::Quatf( q.getX(), q.getY(), q.getZ(), q.getW() );
+		return ci::Quatf( quat.getX(), quat.getY(), quat.getZ(), quat.getW() );
 	}
 
-	Matrix44f fromBulletTransform( const btTransform &m )
+	Matrix44f fromBulletTransform( const btTransform &matrix )
 	{
 		btTransform trans;
-		Matrix44f matrix;
-		m.getOpenGLMatrix( matrix.m );
-		return matrix;
+		Matrix44f m;
+		matrix.getOpenGLMatrix( m.m );
+		return m;
 	}
 	
-	Vec3f fromBulletVector3( const btVector3 &v )
+	Vec3f fromBulletVector3( const btVector3 &vec )
 	{
-		return Vec3f( v.x(), v.y(), v.z() );
+		return Vec3f( vec.x(), vec.y(), vec.z() );
 	}
 
-	btQuaternion toBulletQuaternion( const Quatf &q )
+	btQuaternion toBulletQuaternion( const Quatf &quat )
 	{
-		return btQuaternion( q.v.x, q.v.y, q.v.z, q.w );
+		return btQuaternion( quat.v.x, quat.v.y, quat.v.z, quat.w );
 	}
 
-	btTransform	toBulletTransform( const ci::Matrix44f &m )
+	btTransform	toBulletTransform( const ci::Matrix44f &matrix )
 	{
 		btTransform trans;
-		trans.setFromOpenGLMatrix( m.m );
+		trans.setFromOpenGLMatrix( matrix.m );
 		return trans;
 	}
 
-	btVector3 toBulletVector3( const Vec3f &v )
+	btVector3 toBulletVector3( const Vec3f &vec )
 	{
-		return btVector3( v.x, v.y, v.z );
+		return btVector3( vec.x, vec.y, vec.z );
 	}
-
 }

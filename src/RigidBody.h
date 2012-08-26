@@ -37,10 +37,9 @@
 
 #pragma once
 
-// Includes
+#include "cinder/TriMesh.h"
 #include "CollisionObject.h"
 #include "DynamicsWorld.h"
-#include "MeshBody.h"
 #include "Utilities.h"
 
 namespace bullet
@@ -51,8 +50,8 @@ namespace bullet
 	protected:
 		static btRigidBody*	create( btCollisionShape* shape, float mass, const ci::Vec3f &position, const ci::Quatf &rotation );
 		static btRigidBody*	createBox( const ci::Vec3f &size, float mass, const ci::Vec3f &position, const ci::Quatf &rotation );
-		static btRigidBody*	createCone( float radius, float height, int32_t segments, float mass, const ci::Vec3f &position, const ci::Quatf &rotation );
-		static btRigidBody*	createCylinder( const ci::Vec3f &scale, int32_t segments, float mass, const ci::Vec3f &position, const ci::Quatf &rotation );
+		static btRigidBody*	createCone( float radius, float height, float mass, const ci::Vec3f &position, const ci::Quatf &rotation );
+		static btRigidBody*	createCylinder( const ci::Vec3f &scale, float mass, const ci::Vec3f &position, const ci::Quatf &rotation );
 		static btRigidBody*	createHull( btConvexHullShape* shape, float mass, const ci::Vec3f &position, const ci::Quatf &rotation );
 		static btRigidBody*	createMesh( btBvhTriangleMeshShape* shape, float mass, const ci::Vec3f &position, const ci::Quatf &rotation );
 		static btRigidBody*	createSphere( float radius, float mass, const ci::Vec3f &position, const ci::Quatf &rotation );
@@ -70,20 +69,20 @@ namespace bullet
 	class RigidCone : public CollisionObject, public RigidBody 
 	{
 	protected:
-		RigidCone( float radius, float height, int32_t segments, float mass, const ci::Vec3f &position, const ci::Quatf &rotation );
-		friend CollisionObjectRef	createRigidCone( const DynamicsWorldRef &world, float radius, float height, int32_t segments, 
+		RigidCone( float radius, float height, float mass, const ci::Vec3f &position, const ci::Quatf &rotation );
+		friend CollisionObjectRef	createRigidCone( const DynamicsWorldRef &world, float radius, float height, 
 													float mass, const ci::Vec3f &position, const ci::Quatf &rotation );
 	};
 
 	class RigidCylinder : public CollisionObject, public RigidBody 
 	{
 	protected:
-		RigidCylinder( const ci::Vec3f &scale, int32_t segments, float mass, const ci::Vec3f &position, const ci::Quatf &rotation );
-		friend CollisionObjectRef	createRigidCylinder( const DynamicsWorldRef &world, const ci::Vec3f &scale, int32_t segments, 
+		RigidCylinder( const ci::Vec3f &scale, float mass, const ci::Vec3f &position, const ci::Quatf &rotation );
+		friend CollisionObjectRef	createRigidCylinder( const DynamicsWorldRef &world, const ci::Vec3f &scale, 
 														float mass, const ci::Vec3f &position, const ci::Quatf &rotation );
 	};
 
-	class RigidHull : public CollisionObject, public RigidBody, public MeshBody
+	class RigidHull : public CollisionObject, public RigidBody
 	{
 	protected:
 		RigidHull( const ci::TriMesh &mesh, const ci::Vec3f &scale, float mass, const ci::Vec3f &position, const ci::Quatf &rotation );
@@ -91,7 +90,7 @@ namespace bullet
 													float mass, const ci::Vec3f &position, const ci::Quatf &rotation );
 	};
 
-	class RigidMesh : public CollisionObject, public RigidBody, public MeshBody
+	class RigidMesh : public CollisionObject, public RigidBody
 	{
 	protected:
 		RigidMesh( const ci::TriMesh &mesh, const ci::Vec3f &scale, float margin, float mass, const ci::Vec3f &position, const ci::Quatf &rotation );
@@ -99,15 +98,15 @@ namespace bullet
 													float margin, float mass, const ci::Vec3f &position, const ci::Quatf &rotation );
 	};
 
-	class RigidSphere : public CollisionObject, public RigidBody 
+	class RigidSphere : public CollisionObject, public RigidBody
 	{
 	protected:
-		RigidSphere( float radius, int32_t segments, float mass, const ci::Vec3f &position, const ci::Quatf &rotation );
-		friend CollisionObjectRef	createRigidSphere( const DynamicsWorldRef &world, float radius, int32_t segments, float mass, 
+		RigidSphere( float radius, float mass, const ci::Vec3f &position, const ci::Quatf &rotation );
+		friend CollisionObjectRef	createRigidSphere( const DynamicsWorldRef &world, float radius, float mass, 
 														const ci::Vec3f &position, const ci::Quatf &rotation );
 	};
 
-	class RigidTerrain : public CollisionObject, public RigidBody, public MeshBody
+	class RigidTerrain : public CollisionObject, public RigidBody
 	{
 	protected:
 		RigidTerrain( const ci::Channel32f &heightField, float minHeight, float maxHeight, const ci::Vec3f &scale, float mass, 
@@ -117,5 +116,4 @@ namespace bullet
 		ci::Channel32f				mChannel;
 		void						readChannelData();
 	};
-
 }

@@ -45,12 +45,11 @@
 #include "cinder/Surface.h"
 #include <vector>
 
-namespace bullet 
-{
-	ci::Quatf								fromBulletQuaternion( const btQuaternion &q );
-	ci::Matrix44f							fromBulletTransform( const btTransform &m );
-	ci::Vec3f								fromBulletVector3( const btVector3 &v );
-	btQuaternion							toBulletQuaternion( const ci::Quatf &q );
-	btVector3								toBulletVector3( const ci::Vec3f &v );
-	btTransform								toBulletTransform( const ci::Matrix44f &m );
+namespace bullet {
+	ci::Quatf								fromBulletQuaternion( const btQuaternion &quat );
+	ci::Matrix44f							fromBulletTransform( const btTransform &matrix );
+	ci::Vec3f								fromBulletVector3( const btVector3 &vec );
+	btQuaternion							toBulletQuaternion( const ci::Quatf &quat );
+	btVector3								toBulletVector3( const ci::Vec3f &vec );
+	btTransform								toBulletTransform( const ci::Matrix44f &matrix );
 } 
