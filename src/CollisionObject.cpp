@@ -43,7 +43,7 @@ namespace bullet
 	using namespace ci;
 	using namespace std;
 
-	CollisionObject::CollisionObject( const Vec3f &position, const Quatf &rotation ) 
+	CollisionObject::CollisionObject() 
 	{
 		mPrimitiveType		= PRIMITIVE_NONE;
 		mRigidBody			= 0;

@@ -109,7 +109,7 @@ namespace bullet {
 	}
 
 	RigidBox::RigidBox( const Vec3f &dimensions, float mass, const Vec3f &position, const Quatf &rotation ) 
-		: CollisionObject( position, rotation )
+		: CollisionObject()
 	{
 		mPrimitiveType		= PRIMITIVE_BOX;
 		mRigidBody			= createBox( dimensions, mass, position, rotation );
@@ -117,7 +117,7 @@ namespace bullet {
 	}
 
 	RigidCone::RigidCone( float radius, float height, float mass, const Vec3f &position, const Quatf &rotation )
-		: CollisionObject( position, rotation )
+		: CollisionObject()
 	{
 		mPrimitiveType		= PRIMITIVE_CONE;
 		mRigidBody			= createCone( radius, height, mass, position, rotation );
@@ -125,7 +125,7 @@ namespace bullet {
 	}
 
 	RigidCylinder::RigidCylinder( const Vec3f &scale, float mass, const Vec3f &position, const Quatf &rotation )
-		: CollisionObject( position, rotation )
+		: CollisionObject()
 	{
 		mPrimitiveType		= PRIMITIVE_CYLINDER;
 		mRigidBody			= createCylinder( scale, mass, position, rotation );
@@ -133,7 +133,7 @@ namespace bullet {
 	}
 
 	RigidHull::RigidHull( const TriMesh &mesh, const Vec3f &scale, float mass, const Vec3f &position, const Quatf &rotation )
-		: CollisionObject( position, rotation )
+		: CollisionObject()
 	{
 		mScale		= scale;
 
@@ -147,7 +147,7 @@ namespace bullet {
 	}
 
 	RigidMesh::RigidMesh( const TriMesh &mesh, const Vec3f &scale, float margin, float mass, const Vec3f &position, const Quatf &rotation )
-		: CollisionObject( position, rotation )
+		: CollisionObject()
 	{
 		mScale		= scale;
 
@@ -162,7 +162,7 @@ namespace bullet {
 	}
 
 	RigidSphere::RigidSphere( float radius, float mass, const Vec3f &position, const Quatf &rotation ) 
-		: CollisionObject( position, rotation )
+		: CollisionObject()
 	{
 		mPrimitiveType		= PRIMITIVE_SPHERE;
 		mRigidBody			= createSphere( radius, mass, position, rotation );
@@ -171,7 +171,7 @@ namespace bullet {
 
 	RigidTerrain::RigidTerrain( const Channel32f &heightField, float minHeight, float maxHeight, const Vec3f &scale, float mass, 
 		const Vec3f &position, const Quatf &rotation )
-		: CollisionObject( position, rotation )
+		: CollisionObject()
 	{
 		mChannel	= heightField;
 		mScale		= scale;

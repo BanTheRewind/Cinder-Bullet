@@ -128,7 +128,6 @@ private:
 
 	bullet::CollisionObjectRef	mGround;
 	btTransform					mGroundTransform;
-	ci::TriMesh					mGroundMesh;
 	bullet::DynamicsWorldRef	mWorld;
 
 	bullet::Constraint			mDragConstraint;
@@ -198,15 +197,6 @@ void BulletTestApp::draw()
 	gl::rotate( Vec3f( -45.0f, 0.0f, 0.0f ) );
 	uint32_t i = 0;
 
-	if ( mGroundMesh.getNumIndices() > 0 ) {
-		gl::pushMatrices();
-		glMultMatrixf( mGround->getTransformMatrix() );
-		bindTexture( 0 );
-		gl::draw( mGroundMesh );
-		unbindTexture( 0 );
-		gl::popMatrices();
-	}
-
 	for ( bullet::Iter iter = mWorld->begin(); iter != mWorld->end(); ++iter, ++i ) {
 		gl::pushMatrices();
 		glMultMatrixf( iter->getTransformMatrix() );
@@ -226,6 +216,9 @@ void BulletTestApp::draw()
 			gl::draw( mSphere );
 			break;
 		default:
+			if ( iter->isMeshBody() ) {
+				gl::draw( bullet::calcTriMesh( iter ) );
+			}
 			break;
 		}
 
@@ -249,6 +242,7 @@ void BulletTestApp::drop()
 		// Add a body
 		CollisionObjectRef body;
 		btRigidBody* shape;
+		btSoftBody* softShape;
 		switch ( mTest ) {
 		case 3:
 			body = bullet::createRigidCylinder( mWorld, Vec3f( size, size * 3, size ), size * size * size, position );
@@ -281,6 +275,25 @@ void BulletTestApp::drop()
 			shape->setFriction( 0.6f );
 			shape->setAngularFactor( 0.95f );
 			break;
+		case 9:
+			body = bullet::createSoftMesh( mWorld, mSoftCube, Vec3f::one() * size );
+			softShape = bullet::toBulletSoftBody( body );
+			softShape->randomizeConstraints();
+
+			softShape->m_materials[ 0 ]->m_kAST	= 0.2f;
+			softShape->m_materials[ 0 ]->m_kLST	= 0.2f;
+			softShape->m_materials[ 0 ]->m_kVST	= 0.2f;
+		
+			softShape->m_cfg.kDF				= 0.9f; 
+			softShape->m_cfg.kSRHR_CL			= 1.0f;
+			softShape->m_cfg.kSR_SPLT_CL		= 0.0f;
+			softShape->m_cfg.collisions			= btSoftBody::fCollision::CL_SS + btSoftBody::fCollision::CL_RS;
+		
+			softShape->getCollisionShape()->setMargin( 0.0001f );
+			softShape->setTotalMass( 100.0f );
+			softShape->generateClusters( 0 );
+
+			return;
 		default:
 			bullet::createRigidBox( mWorld, Vec3f::one() * size, size * size, position );
 			break;
@@ -302,41 +315,34 @@ void BulletTestApp::initTest()
 	Channel32f heightField;
 
 	// Create and add the wobbly box
+	btSoftBody* body = 0;
 	mGroundTransform.setIdentity();
 	switch ( mTest ) {
 	case 0:
 		mGround = bullet::createRigidBox( mWorld, Vec3f( 200.0f, 35.0f, 200.0f ), 0.0f );
 		bullet::createRigidSphere( mWorld, 50.0f, 0.0f, Vec3f( 0.0f, -50.0f, 0.0f ) );
-		mGroundMesh.clear();
 		break;
 	case 1:
 		mGround = bullet::createRigidHull( mWorld, mConvex, Vec3f::one() * 50.0f, 0.0f );
-		mGroundMesh = mConvex;
 		break;
 	case 2:
 		mGround = bullet::createRigidMesh( mWorld, mConcave, Vec3f( 10.0f, 1.0f, 10.0f ), 0.0f, 0.0f );
-		mGroundMesh = mConcave;
 		break;
 	case 3:
 		mGround = bullet::createRigidBox( mWorld, Vec3f( 200.0f, 35.0f, 200.0f ), 0.0f );
-		mGroundMesh.clear();
 		break;
 	case 4:
 		mGround = bullet::createRigidBox( mWorld, Vec3f( 200.0f, 35.0f, 200.0f ), 0.0f );
-		mGroundMesh.clear();
 		break;
 	case 5:
 		heightField = Channel32f( loadImage( loadResource( RES_IMAGE_HEIGHTFIELD_SM ) ) );
 		mGround = bullet::createRigidTerrain( mWorld, heightField, -1.0f, 1.0f, Vec3f( 6.0f, 80.0f, 6.0f ), 0.0f );
-		mGroundMesh = bullet::calcTriMesh( mGround );
 		break;
 	case 6:
-
 		// ADVANCED: To add a custom class, create a standard pointer to it and 
 		// pushBack it into your world. Be sure to delete this pointer when you no longer need it.
 		heightField = Channel32f( loadImage( loadResource( RES_IMAGE_HEIGHTFIELD ) ) );
 		mTerrain = new DynamicTerrain( heightField, -1.0f, 1.0f, Vec3f( 2.0f, 50.0f, 2.0f ), 0.0f );
-		mGroundMesh = bullet::calcTriMesh( mTerrain );
 		mWorld->pushBack( mTerrain );
 		break;
 	case 7:
@@ -352,9 +358,8 @@ void BulletTestApp::initTest()
 		mWorld->getInfo().m_gravity = toBulletVector3( Vec3f( 0.0f, -0.5f, 0.0f ) );
 
 		mGround = bullet::createSoftCloth( mWorld, Vec2f::one() * 180.0f, Vec2i( 18, 20 ), SoftCloth::CLOTH_ATTACH_CORNER_ALL, Vec3f( 0.0f, 0.0f, 40.0f ), Quatf( 0.0f, 0.0f, 0.0f, 0.1f ) );
-		mGroundMesh = bullet::calcTriMesh( mGround );
-
-		btSoftBody* body = toBulletSoftBody( mGround );
+		
+		body = toBulletSoftBody( mGround );
 		
 		body->m_materials[ 0 ]->m_kAST	= 0.2f;
 		body->m_materials[ 0 ]->m_kLST	= 0.2f;
@@ -375,6 +380,10 @@ void BulletTestApp::initTest()
 		material->m_kVST				= 1.0f;
 		body->generateBendingConstraints( 2, material );*/
 
+		break;
+	case 9:
+		heightField = Channel32f( loadImage( loadResource( RES_IMAGE_HEIGHTFIELD_SM ) ) );
+		mGround = bullet::createRigidTerrain( mWorld, heightField, -1.0f, 1.0f, Vec3f( 6.0f, 80.0f, 6.0f ), 0.0f );
 		break;
 	}
 
@@ -397,7 +406,8 @@ void BulletTestApp::loadModels()
 	mCube		= MeshHelper::createCubeVboMesh();
 	mCylinder	= MeshHelper::createCylinderVboMesh( Vec2i( 24, 1 ) );
 	mSphere		= MeshHelper::createSphereVboMesh( Vec2i( 24, 12 ) );
-	mSoftCube	= MeshHelper::createCubeTriMesh( Vec3i( 16, 16, 16 ) );
+
+	mSoftCube	= MeshHelper::createCubeTriMesh( Vec3i( 8, 8, 8 ) );
 }
 
 void BulletTestApp::mouseDown( MouseEvent event )
@@ -474,7 +484,7 @@ void BulletTestApp::setup()
 {
 	mDragging	= false;
 	mFrameRate	= 0.0f;
-	mTest		= 0;
+	mTest		= 9;
 	mTestPrev	= mTest;
 
 	// Set up lighting
@@ -503,7 +513,7 @@ void BulletTestApp::setup()
 	// Parameters
 	mParams = params::InterfaceGl( "Params", Vec2i( 200, 100 ) );
 	mParams.addParam( "Frame Rate",		&mFrameRate,								"", true );
-	mParams.addParam( "Test",			&mTest,										"min=0 max=8 step=1 keyDecr=t keyIncr=T" ); 
+	mParams.addParam( "Test",			&mTest,										"min=0 max=9 step=1 keyDecr=t keyIncr=T" ); 
 	mParams.addButton( "Drop",			bind( &BulletTestApp::drop, this ),			"key=space" );
 	mParams.addButton( "Screen shot",	bind( &BulletTestApp::screenShot, this ),	"key=s" );
 	mParams.addButton( "Quit",			bind( &BulletTestApp::quit, this ),			"key=q" );
@@ -586,7 +596,6 @@ void BulletTestApp::update()
 
 		// Update terrain VBO
 		mTerrain->updateMesh();
-		mGroundMesh = bullet::calcTriMesh( mTerrain );
 
 	} else if ( mTest == 7 ) {
 
@@ -606,13 +615,10 @@ void BulletTestApp::update()
 			} else {
 				mTerrain->getData().copyFrom( Channel32f( mSurface ), Area( 0, 0, 160, 160 ) );
 				mTerrain->updateMesh();
-				mGroundMesh = bullet::calcTriMesh( mGround );
 			}
 
 		}
 
-	} else if ( mTest == 8 ) {
-		mGroundMesh = bullet::calcTriMesh( mGround );
 	}
 	
 	// Update dynamics world

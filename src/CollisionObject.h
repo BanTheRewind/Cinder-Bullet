@@ -86,7 +86,7 @@ namespace bullet {
 			const ci::Vec3f &scale, float margin );
 		static btConvexHullShape*			createConvexHullShape( const std::vector<ci::Vec3f> &vertices, const ci::Vec3f &scale );
 
-		CollisionObject( const ci::Vec3f &position = ci::Vec3f::zero(), const ci::Quatf &rotation = ci::Quatf() );
+		CollisionObject();
 
 		void								update();
 

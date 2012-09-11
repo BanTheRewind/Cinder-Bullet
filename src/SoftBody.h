@@ -74,6 +74,6 @@ namespace bullet {
 		SoftMesh( btSoftBodyWorldInfo &info, const ci::TriMesh &mesh, const ci::Vec3f &scale, float mass, 
 			const ci::Vec3f &position, const ci::Quatf &rotation );
 		friend CollisionObjectRef	createSoftMesh( const DynamicsWorldRef &world, const ci::TriMesh &mesh, const ci::Vec3f &scale, 
-													float margin, float mass, const ci::Vec3f &position, const ci::Quatf &rotation );
+													float mass, const ci::Vec3f &position, const ci::Quatf &rotation );
 	};
 }
