@@ -49,9 +49,10 @@ namespace bullet {
 	protected:
 		static btSoftBody*	createSoftCloth( btSoftBodyWorldInfo &info, const ci::Vec2f &size, const ci::Vec2i &resolution, 
 			int32_t corners, const ci::Vec3f &position, const ci::Quatf &rotation );
+		static btSoftBody*	createSoftHull( btSoftBodyWorldInfo &info, const ci::TriMesh &mesh, const ci::Vec3f &scale, 
+			const ci::Vec3f &position, const ci::Quatf &rotation );
 		static btSoftBody*	createSoftMesh( btSoftBodyWorldInfo &info, const ci::TriMesh &mesh, const ci::Vec3f &scale, 
 			const ci::Vec3f &position, const ci::Quatf &rotation );
-
 	};
 
 	class SoftCloth : public CollisionObject, public SoftBody
@@ -68,6 +69,15 @@ namespace bullet {
 			const ci::Vec3f &position, const ci::Quatf &rotation );
 		friend CollisionObjectRef	createSoftCloth( const DynamicsWorldRef &world, const ci::Vec2f &size, 
 			const ci::Vec2i &resolution, int32_t corners, const ci::Vec3f &position, const ci::Quatf &rotation );
+	};
+
+	class SoftHull : public CollisionObject, public SoftBody
+	{
+	protected:
+		SoftHull( btSoftBodyWorldInfo &info, const ci::TriMesh &mesh, const ci::Vec3f &scale, 
+			const ci::Vec3f &position, const ci::Quatf &rotation );
+		friend CollisionObjectRef	createSoftHull( const DynamicsWorldRef &world, const ci::TriMesh &mesh, const ci::Vec3f &scale, 
+													const ci::Vec3f &position, const ci::Quatf &rotation );
 	};
 
 	class SoftMesh : public CollisionObject, public SoftBody

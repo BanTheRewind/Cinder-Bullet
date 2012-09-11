@@ -85,7 +85,7 @@ public:
 	}
 };
 
-// Bullet physics sample application
+// Cinder-Bullet test application
 class BulletTestApp : public ci::app::AppBasic 
 {
 public:
@@ -94,7 +94,7 @@ public:
 	void						mouseDrag( ci::app::MouseEvent event );
 	void						mouseUp( ci::app::MouseEvent event );
 	void						mouseWheel( ci::app::MouseEvent event );
-	void						prepareSettings( ci::app::AppBasic::Settings * settings );
+	void						prepareSettings( ci::app::AppBasic::Settings *settings );
 	void						resize( ci::app::ResizeEvent event );
 	void						setup();
 	void						shutdown();
@@ -124,7 +124,7 @@ private:
 	ci::TriMesh					mConvex;
 
 	ci::Capture					mCapture;
-	DynamicTerrain*				mTerrain;
+	DynamicTerrain				*mTerrain;
 
 	bullet::CollisionObjectRef	mGround;
 	btTransform					mGroundTransform;
@@ -278,7 +278,10 @@ void BulletTestApp::drop()
 		case 9:
 			body = bullet::createSoftMesh( mWorld, mSoftCube, Vec3f::one() * size, position );
 			softShape = bullet::toBulletSoftBody( body );
-			softShape->randomizeConstraints();
+
+			softShape->m_cfg.collisions			= btSoftBody::fCollision::CL_SS + btSoftBody::fCollision::CL_RS;
+
+			/*softShape->randomizeConstraints();
 
 			softShape->m_materials[ 0 ]->m_kAST	= 0.2f;
 			softShape->m_materials[ 0 ]->m_kLST	= 0.2f;
@@ -287,11 +290,11 @@ void BulletTestApp::drop()
 			softShape->m_cfg.kDF				= 0.9f; 
 			softShape->m_cfg.kSRHR_CL			= 1.0f;
 			softShape->m_cfg.kSR_SPLT_CL		= 0.0f;
-			softShape->m_cfg.collisions			= btSoftBody::fCollision::CL_SS + btSoftBody::fCollision::CL_RS;
-		
+			
+
 			softShape->getCollisionShape()->setMargin( 0.0001f );
-			softShape->setTotalMass( 100.0f );
-			softShape->generateClusters( 0 );
+			softShape->setTotalMass( 1.0f );
+			softShape->generateClusters( 0 );*/
 
 			return;
 		default:
@@ -376,6 +379,10 @@ void BulletTestApp::initTest()
 		body->generateBendingConstraints( 1, material );
 
 		break;
+	case 9:
+		heightField = Channel32f( loadImage( loadResource( RES_IMAGE_HEIGHTFIELD_SM ) ) );
+		mGround = bullet::createRigidTerrain( mWorld, heightField, -1.0f, 1.0f, Vec3f( 6.0f, 80.0f, 6.0f ), 0.0f );
+		break;
 	default:
 		mGround = bullet::createRigidBox( mWorld, Vec3f( 200.0f, 35.0f, 200.0f ), 0.0f );
 		break;
@@ -439,7 +446,7 @@ void BulletTestApp::mouseWheel( MouseEvent event )
 	mCamera.setEyePoint( mCamera.getEyePoint() + Vec3f( 0.0f, 0.0f, event.getWheelIncrement() * 20.0f ) );
 }
 
-void BulletTestApp::prepareSettings( Settings * settings )
+void BulletTestApp::prepareSettings( Settings *settings )
 {
 	settings->setFrameRate( 60.0f );
 	settings->setFullScreen( false );
@@ -505,7 +512,7 @@ void BulletTestApp::setup()
 	mTerrain = 0;
 
 	// Parameters
-	mParams = params::InterfaceGl( "Params", Vec2i( 200, 100 ) );
+	mParams = params::InterfaceGl( "Params", Vec2i( 200, 120 ) );
 	mParams.addParam( "Frame Rate",		&mFrameRate,								"", true );
 	mParams.addParam( "Test",			&mTest,										"min=0 max=9 step=1 keyDecr=t keyIncr=T" ); 
 	mParams.addButton( "Drop",			bind( &BulletTestApp::drop, this ),			"key=space" );
@@ -522,6 +529,9 @@ void BulletTestApp::setup()
 
 void BulletTestApp::shutdown()
 {
+	if ( mCapture && mCapture.isCapturing() ) {
+		mCapture.stop();
+	}
 	if ( mLight ) {
 		delete mLight;
 	}
@@ -616,7 +626,7 @@ void BulletTestApp::update()
 	}
 	
 	// Update dynamics world
-	mWorld->update( 1.0f / mFrameRate );
+	mWorld->update( 1.0f / 300.0f );//mFrameRate );
 
 	/*if ( mGround ) { 
 		Iter iter = mWorld->find( mGround );

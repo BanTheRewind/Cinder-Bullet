@@ -389,6 +389,12 @@ namespace bullet {
 		return world->pushBack( new SoftCloth( world->getInfo(), size, resolution, corners, position, rotation ) );
 	}
 
+	CollisionObjectRef createSoftHull( const DynamicsWorldRef &world, const TriMesh &mesh, const Vec3f &scale, 
+		const Vec3f &position, const Quatf &rotation )
+	{
+		return world->pushBack( new SoftHull( world->getInfo(), mesh, scale, position, rotation ) );
+	}
+
 	CollisionObjectRef createSoftMesh( const DynamicsWorldRef &world, const TriMesh &mesh, const Vec3f &scale, 
 		const Vec3f &position, const Quatf &rotation )
 	{

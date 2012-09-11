@@ -68,15 +68,48 @@ namespace bullet {
 		return body;
 	}
 
+	btSoftBody*	SoftBody::createSoftHull( btSoftBodyWorldInfo &info, const TriMesh &mesh, const Vec3f &scale, 
+		const Vec3f &position, const Quatf &rotation )
+	{
+		Matrix44f transform;
+		transform.setToIdentity();
+		transform.translate( position );
+		transform.rotate( rotation.v );
+		transform.translate( position * -1.0f );
+		transform.translate( position );
+
+		btVector3* positions = new btVector3[ mesh.getNumVertices() ];
+		size_t i = 0;
+		for ( vector<Vec3f>::const_iterator iter = mesh.getVertices().begin(); iter != mesh.getVertices().end(); ++iter, ++i ) {
+			positions[ i ] = toBulletVector3( *iter );
+		}
+
+		btSoftBody* body = btSoftBodyHelpers::CreateFromConvexHull( info, positions, mesh.getNumIndices(), false );
+		body->transform( toBulletTransform( transform ) );
+		body->scale( toBulletVector3( scale ) );
+
+		delete [] positions;
+
+		return body;
+	}
+
 	btSoftBody*	SoftBody::createSoftMesh( btSoftBodyWorldInfo &info, const TriMesh &mesh, const Vec3f &scale, 
 		const Vec3f &position, const Quatf &rotation )
 	{
+		Matrix44f transform;
+		transform.setToIdentity();
+		transform.translate( position );
+		transform.rotate( rotation.v );
+		transform.translate( position * -1.0f );
+		transform.translate( position );
+
 		btScalar* positions	= new btScalar[ mesh.getNumVertices() * 3 ];
 		size_t i = 0;
 		for ( vector<Vec3f>::const_iterator iter = mesh.getVertices().begin(); iter != mesh.getVertices().end(); ++iter, i += 3 ) {
-			positions[ i + 0 ] = iter->x;
-			positions[ i + 1 ] = iter->y;
-			positions[ i + 2 ] = iter->z;
+			Vec3f position = transform.transformPoint( *iter );
+			positions[ i + 0 ] = position.x;
+			positions[ i + 1 ] = position.y;
+			positions[ i + 2 ] = position.z;
 		}
 		
 		int* indices		= new int[ mesh.getIndices().size() ];
@@ -86,16 +119,7 @@ namespace bullet {
 		}
 		
  		btSoftBody* body = btSoftBodyHelpers::CreateFromTriMesh( info, positions, indices, mesh.getNumTriangles() );
-
-		Matrix44f transform;
-		transform.setToIdentity();
-		transform.translate( position );
-		transform.rotate( rotation.v );
-		transform.translate( position * -1.0f );
-		transform.translate( position );
-
-		body->transform( toBulletTransform( transform ) );
-		body->scale( btVector3( scale.x, scale.y, scale.z ) );
+		//body->scale( toBulletVector3( scale ) );
 
 		delete [] indices;
 		delete [] positions;
@@ -132,6 +156,20 @@ namespace bullet {
 			mTexCoords.push_back( texCoord1 );
 			mTexCoords.push_back( texCoord2 );
 		}
+
+		update();
+	}
+
+	SoftHull::SoftHull( btSoftBodyWorldInfo &info, const TriMesh &mesh, const Vec3f &scale, const Vec3f &position, const Quatf &rotation )
+		: CollisionObject()
+	{
+		mSoftBody	= createSoftHull( info, mesh, scale, position, rotation );
+		mScale		= scale;
+
+		mIndices	= mesh.getIndices();
+		mNormals	= mesh.getNormals();
+		mPositions	= mesh.getVertices();
+		mTexCoords	= mesh.getTexCoords();
 
 		update();
 	}
