@@ -1,10 +1,8 @@
-NOTE: The block is undergoing heavy, new development in August. 
-It may be in an unbuildable state while the repo is used
-for backup during this time. A stable (read "buildable") beta is
-expected on or by 2012-8-3.
-
 DOWNLOAD AT YOUR OWN RISK.  This repo is being used as a backup for
 a work in progress.
+
+The included test project requires Cinder-MeshHelper:
+https://github.com/BanTheRewind/Cinder-MeshHelper
 
 This block wraps the Bullet 3D physics engine for Cinder. 
 It has a lot of features but there is a lot to go. The goal 
@@ -23,24 +21,23 @@ BUGS
 TO DO LIST
 
 - IN PROGRESS: Screen -> dynamics world interaction / constraints
-- IN PROGRESS: Soft body convenience methods (cloth complete)
 - Collision callbacks
 - Static lib
 - XCode static lib
-- Samples
+
+- Sample ideas
   - Trampoline magnet
   - Rigid primitive
   - Rigid mesh
   - Dynamic rigid mesh (camera terrain: how to extend an existing body)
-  - Torus (how to create a custom body by extending CollisionObject)
   - Capsule (how to implement Bullet shapes not supported by the block)
   - Soft body (interacts with rigid)
   - Soft body mesh from OBJ
   - Interaction / apply force
   - Ragdoll (springs, collision callback)
-  - Multiple worlds
   - Vehicle
-  - Bullets / fracture
+  - Bullets
+  - Voronoi fracture
 
 More about Bullet here:
 http://bulletphysics.org/wordpress/
