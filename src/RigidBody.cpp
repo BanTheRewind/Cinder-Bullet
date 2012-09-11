@@ -137,8 +137,8 @@ namespace bullet {
 	{
 		mScale		= scale;
 
-		btConvexHullShape* shape = createConvexHullShape( mesh.getVertices(), scale );
-		mRigidBody = createHull( shape, mass, position, rotation );
+		btConvexHullShape* shape	= createConvexHullShape( mesh.getVertices(), scale );
+		mRigidBody					= createHull( shape, mass, position, rotation );
 
 		mIndices	= mesh.getIndices();
 		mNormals	= mesh.getNormals();

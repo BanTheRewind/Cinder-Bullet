@@ -100,4 +100,38 @@ namespace bullet {
 
 		update();
 	}
+
+	SoftMesh::SoftMesh( btSoftBodyWorldInfo &info, const TriMesh &mesh, const Vec3f &scale, float mass, const Vec3f &position, const Quatf &rotation )
+		: CollisionObject( position, rotation )
+	{
+		mScale		= scale;
+
+		mIndices	= mesh.getIndices();
+		mNormals	= mesh.getNormals();
+		mPositions	= mesh.getVertices();
+		mTexCoords	= mesh.getTexCoords();
+
+		btScalar* positionArray	= new btScalar( mesh.getNumVertices() * 3 );
+		size_t i = 0;
+		for ( vector<Vec3f>::const_iterator iter = mesh.getVertices().begin(); iter != mesh.getVertices().end(); ++iter, i += 3 ) {
+			positionArray[ i + 0 ] = iter->x;
+			positionArray[ i + 1 ] = iter->y;
+			positionArray[ i + 2 ] = iter->z;
+		}
+		const btScalar* positions = const_cast<const btScalar*>( positionArray );
+		delete [] positionArray;
+
+		int* indexArray		= new int( mesh.getNumIndices() );
+		for ( vector<size_t>::const_iterator iter = mesh.getIndices().begin(); iter != mesh.getIndices().end(); ++iter ) {
+			indexArray[ i ] = (int)*iter;
+		}
+		const int* indices	= const_cast<const int*>( indexArray );
+		delete [] indexArray;
+
+		btSoftBody*	mSoftBody = btSoftBodyHelpers::CreateFromTriMesh( info, positions, indices, mesh.getNumTriangles() );
+		mSoftBody->scale( btVector3( mScale.x, mScale.y, mScale.z ) );
+		mSoftBody->setTotalMass( mass, true );
+
+		update();
+	}
 }
