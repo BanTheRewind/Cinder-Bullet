@@ -111,7 +111,7 @@ namespace bullet {
 		mPositions	= mesh.getVertices();
 		mTexCoords	= mesh.getTexCoords();
 
-		btScalar* positionArray	= new btScalar( mesh.getNumVertices() * 3 );
+		btScalar* positionArray	= new btScalar[ mesh.getNumVertices() * 3 ];
 		size_t i = 0;
 		for ( vector<Vec3f>::const_iterator iter = mesh.getVertices().begin(); iter != mesh.getVertices().end(); ++iter, i += 3 ) {
 			positionArray[ i + 0 ] = iter->x;
@@ -121,7 +121,7 @@ namespace bullet {
 		const btScalar* positions = const_cast<const btScalar*>( positionArray );
 		delete [] positionArray;
 
-		int* indexArray		= new int( mesh.getNumIndices() );
+		int* indexArray		= new int[ mesh.getNumIndices() ];
 		for ( vector<size_t>::const_iterator iter = mesh.getIndices().begin(); iter != mesh.getIndices().end(); ++iter ) {
 			indexArray[ i ] = (int)*iter;
 		}

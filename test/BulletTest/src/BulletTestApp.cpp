@@ -51,6 +51,7 @@
 #include "cinder/TriMesh.h"
 #include "cinder/Utilities.h"
 #include "CinderBullet.h"
+#include "MeshHelper.h"
 #include "Resources.h"
 
 // This class demonstrates how to use inheritance to expand a body's 
@@ -99,7 +100,7 @@ public:
 	void						shutdown();
 	void						update();
 private:
-	static const uint32_t		MAX_OBJECTS = 300;
+	static const uint32_t		MAX_OBJECTS			= 300;
 	static const uint32_t		MAX_OBJECTS_TERRAIN = 80;
 
 	void						drop();
@@ -111,8 +112,12 @@ private:
 	ci::CameraPersp				mCamera;
 	ci::gl::Light				*mLight;
 
-	void						createCone( size_t segments = 64 );
-	ci::TriMesh					mCone;
+	ci::gl::VboMesh				mCone;
+	ci::gl::VboMesh				mCube;
+	ci::gl::VboMesh				mCylinder;
+	ci::gl::VboMesh				mSphere;
+
+	ci::TriMesh					mSoftCube;
 
 	void						loadModels();
 	ci::TriMesh					mConcave;
@@ -181,138 +186,6 @@ void BulletTestApp::unbindTexture( uint32_t index )
 	}
 }
 
-void BulletTestApp::createCone( size_t segments )
-{
-	// Declare vectors
-	vector<uint32_t> indices;
-	vector<Vec3f> normals;
-	vector<Vec3f> positions;
-	vector<Vec3f> srcPositions;
-	vector<Vec2f> srcTexCoords;
-	vector<Vec2f> texCoords;
-
-	// Set delta size
-	float delta = 1.0f / (float)segments;
-
-	// Iterate layers
-	for ( uint32_t p = 0; p < 2; p++ ) {
-
-		float radius = p == 0 ? 1.0f : 0.0f;
-
-		// Iterate segments
-		uint32_t i = 0;
-		for ( float theta = delta; i < segments; i++, theta += delta ) {
-
-			// Set position
-			float t = 2.0f * (float)M_PI * theta;
-			float cosT = math<float>::cos( t );
-			float sinT = math<float>::sin( t );
-			Vec3f position( 
-				cosT * radius, 
-				(float)p, 
-				sinT * radius 
-				);
-			srcPositions.push_back( position );
-
-			// Set tex coord
-			Vec2f texCoord( theta, position.y );
-			srcTexCoords.push_back( texCoord );
-
-		}
-
-	}
-
-	// Top and bottom center
-	srcPositions.push_back( Vec3f( 0.0f, 0.0f, 0.0f ) );
-	srcPositions.push_back( Vec3f( 0.0f, 1.0f, 0.0f ) );
-	srcTexCoords.push_back( Vec2f( 0.0f, 0.0f ) );
-	srcTexCoords.push_back( Vec2f( 0.0f, 1.0f ) );
-	int32_t bottomCenter = (int32_t)srcPositions.size() - 1;
-	int32_t topCenter = bottomCenter - 1;
-
-	Vec3f offset( 0.0f, -0.5f, 0.0f );
-
-	// Build face
-	Vec3f normal( 0.0f, -1.0f, 0.0f );
-	for ( uint32_t t = 0; t < segments; t++ ) {
-		uint32_t n = t + 1 >= segments ? 0 : t + 1;
-
-		normals.push_back( normal );
-		normals.push_back( normal );
-		normals.push_back( normal );
-
-		positions.push_back( srcPositions[ t ] + offset );
-		positions.push_back( srcPositions[ topCenter ] + offset );
-		positions.push_back( srcPositions[ n ] + offset );
-
-		texCoords.push_back( srcTexCoords[ topCenter ] );
-		texCoords.push_back( srcTexCoords[ topCenter ] );
-		texCoords.push_back( srcTexCoords[ topCenter ] );
-	}
-
-	// Build body
-	for ( uint32_t t = 0; t < segments; t++ ) {
-		uint32_t n = t + 1 >= segments ? 0 : t + 1;
-
-		Vec3f vert0 = srcPositions[ t ];
-		Vec3f vert1 = srcPositions[ n ];
-		Vec3f vert2 = srcPositions[ segments + t ];
-		Vec3f vert3 = srcPositions[ segments + n ];
-
-		Vec2f texCoord0 = srcTexCoords[ t ];
-		Vec2f texCoord1 = srcTexCoords[ n ];
-		Vec2f texCoord2 = srcTexCoords[ segments + t ];
-		Vec2f texCoord3 = srcTexCoords[ segments + n ];
-
-		Vec3f norm0 = vert0.normalized();
-		Vec3f norm1 = vert1.normalized();
-		Vec3f norm2 = norm0;
-		Vec3f norm3 = norm1;
-
-		normals.push_back( norm0 );
-		normals.push_back( norm2 );
-		normals.push_back( norm1 );
-		normals.push_back( norm1 );
-		normals.push_back( norm2 );
-		normals.push_back( norm3 );
-
-		positions.push_back( vert0 + offset );
-		positions.push_back( vert2 + offset );
-		positions.push_back( vert1 + offset );
-		positions.push_back( vert1 + offset );
-		positions.push_back( vert2 + offset );
-		positions.push_back( vert3 + offset );
-
-		texCoords.push_back( texCoord0 );
-		texCoords.push_back( texCoord2 );
-		texCoords.push_back( texCoord1 );
-		texCoords.push_back( texCoord1 );
-		texCoords.push_back( texCoord2 );
-		texCoords.push_back( texCoord2 );
-	}
-
-	for ( uint32_t i = 0; i < positions.size(); i++ ) {
-		indices.push_back( i );
-	}
-	
-	mCone.appendIndices( &indices[ 0 ], indices.size() );
-	for ( vector<Vec3f>::const_iterator iter = normals.begin(); iter != normals.end(); ++iter ) {
-		mCone.appendNormal( *iter );
-	}
-	mCone.appendVertices( &positions[ 0 ], positions.size() );
-	for ( vector<Vec2f>::const_iterator iter = texCoords.begin(); iter != texCoords.end(); ++iter ) {
-		mCone.appendTexCoord( *iter );
-	}
-
-	// Clean up
-	indices.clear();
-	normals.clear();
-	positions.clear();
-	srcPositions.clear();
-	srcTexCoords.clear();
-	texCoords.clear();
-}
-
 void BulletTestApp::draw()
 {
 	gl::enableDepthRead();
@@ -341,16 +214,16 @@ void BulletTestApp::draw()
 		
 		switch ( iter->getPrimitiveType() ) {
 		case CollisionObject::PRIMITIVE_BOX:
-			gl::drawCube( Vec3f::zero(), Vec3f::one() );
+			gl::draw( mCube );
 			break;
 		case CollisionObject::PRIMITIVE_CONE:
 			gl::draw( mCone );
 			break;
 		case CollisionObject::PRIMITIVE_CYLINDER:
-			gl::drawCylinder( 1.0f, 1.0f, 1.0f, 24 );
+			gl::draw( mCylinder );
 			break;
 		case CollisionObject::PRIMITIVE_SPHERE:
-			gl::drawSphere( Vec3f::zero(), 1.0f, 24 );
+			gl::draw( mSphere );
 			break;
 		default:
 			break;
@@ -519,7 +392,12 @@ void BulletTestApp::loadModels()
 	loader.load( &mConvex );
 	loader = ObjLoader( loadResource( RES_OBJ_TORUS )->createStream() );
 	loader.load( &mConcave );
-	createCone();
+	
+	mCone		= MeshHelper::createCylinderVboMesh( Vec2i( 24, 1 ), 0.0f, 1.0f, false, true );
+	mCube		= MeshHelper::createCubeVboMesh();
+	mCylinder	= MeshHelper::createCylinderVboMesh( Vec2i( 24, 1 ) );
+	mSphere		= MeshHelper::createSphereVboMesh( Vec2i( 24, 12 ) );
+	mSoftCube	= MeshHelper::createCubeTriMesh( Vec3i( 16, 16, 16 ) );
 }
 
 void BulletTestApp::mouseDown( MouseEvent event )
