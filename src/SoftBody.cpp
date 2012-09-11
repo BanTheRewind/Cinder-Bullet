@@ -68,6 +68,41 @@ namespace bullet {
 		return body;
 	}
 
+	btSoftBody*	SoftBody::createSoftMesh( btSoftBodyWorldInfo &info, const TriMesh &mesh, const Vec3f &scale, 
+		const Vec3f &position, const Quatf &rotation )
+	{
+		btScalar* positions	= new btScalar[ mesh.getNumVertices() * 3 ];
+		size_t i = 0;
+		for ( vector<Vec3f>::const_iterator iter = mesh.getVertices().begin(); iter != mesh.getVertices().end(); ++iter, i += 3 ) {
+			positions[ i + 0 ] = iter->x;
+			positions[ i + 1 ] = iter->y;
+			positions[ i + 2 ] = iter->z;
+		}
+		
+		int* indices		= new int[ mesh.getIndices().size() ];
+		i = 0;
+		for ( vector<size_t>::const_iterator iter = mesh.getIndices().begin(); iter != mesh.getIndices().end(); ++iter, ++i ) {
+			indices[ i ] = (int)*iter;
+		}
+		
+ 		btSoftBody* body = btSoftBodyHelpers::CreateFromTriMesh( info, positions, indices, mesh.getNumTriangles() );
+
+		Matrix44f transform;
+		transform.setToIdentity();
+		transform.translate( position );
+		transform.rotate( rotation.v );
+		transform.translate( position * -1.0f );
+		transform.translate( position );
+
+		body->transform( toBulletTransform( transform ) );
+		body->scale( btVector3( scale.x, scale.y, scale.z ) );
+
+		delete [] indices;
+		delete [] positions;
+
+		return body;
+	}
+
 	SoftCloth::SoftCloth( btSoftBodyWorldInfo &info, const Vec2f &size, const Vec2i &resolution, int32_t corners, 
 			const Vec3f &position, const Quatf &rotation ) 
 		: CollisionObject()
@@ -101,45 +136,16 @@ namespace bullet {
 		update();
 	}
 
-	SoftMesh::SoftMesh( btSoftBodyWorldInfo &info, const TriMesh &mesh, const Vec3f &scale, float mass, const Vec3f &position, const Quatf &rotation )
+	SoftMesh::SoftMesh( btSoftBodyWorldInfo &info, const TriMesh &mesh, const Vec3f &scale, const Vec3f &position, const Quatf &rotation )
 		: CollisionObject()
 	{
+		mSoftBody	= createSoftMesh( info, mesh, scale, position, rotation );
 		mScale		= scale;
 
 		mIndices	= mesh.getIndices();
 		mNormals	= mesh.getNormals();
 		mPositions	= mesh.getVertices();
 		mTexCoords	= mesh.getTexCoords();
-
-		btScalar* positions	= new btScalar[ mesh.getNumVertices() * 3 ];
-		size_t i = 0;
-		for ( vector<Vec3f>::const_iterator iter = mPositions.begin(); iter != mPositions.end(); ++iter, i += 3 ) {
-			positions[ i + 0 ] = iter->x;
-			positions[ i + 1 ] = iter->y;
-			positions[ i + 2 ] = iter->z;
-		}
-		
-		int* indices		= new int[ mIndices.size() ];
-		i = 0;
-		for ( vector<size_t>::const_iterator iter = mIndices.begin(); iter != mIndices.end(); ++iter, ++i ) {
-			indices[ i ] = (int)*iter;
-		}
-		
- 		mSoftBody = btSoftBodyHelpers::CreateFromTriMesh( info, positions, indices, mesh.getNumTriangles() );
-
-		Matrix44f transform;
-		transform.setToIdentity();
-		transform.translate( position );
-		transform.rotate( rotation.v );
-		transform.translate( position * -1.0f );
-		transform.translate( position );
-		mSoftBody->transform( toBulletTransform( transform ) );
-
-		mSoftBody->scale( btVector3( mScale.x, mScale.y, mScale.z ) );
-		mSoftBody->setTotalMass( mass, true );
-
-		delete [] indices;
-		delete [] positions;
 
 		update();
 	}

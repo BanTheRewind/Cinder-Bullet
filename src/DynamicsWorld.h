@@ -139,7 +139,7 @@ namespace bullet {
 																	const ci::Vec2i &resolution = ci::Vec2i( 8, 8 ), int32_t corners = 0, 
 																	const ci::Vec3f &position = ci::Vec3f::zero(), const ci::Quatf &rotation = ci::Quatf() );
 	CollisionObjectRef								createSoftMesh( const DynamicsWorldRef &world, const ci::TriMesh &mesh, const ci::Vec3f &scale = ci::Vec3f::one(), 
-																	float mass = 1.0f, const ci::Vec3f &position = ci::Vec3f::zero(), const ci::Quatf &rotation = ci::Quatf() );
+																	const ci::Vec3f &position = ci::Vec3f::zero(), const ci::Quatf &rotation = ci::Quatf() );
 
 	btRigidBody*									toBulletRigidBody( Iter pos );
 	btRigidBody*									toBulletRigidBody( const CollisionObjectRef &object );

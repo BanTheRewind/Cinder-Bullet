@@ -49,6 +49,8 @@ namespace bullet {
 	protected:
 		static btSoftBody*	createSoftCloth( btSoftBodyWorldInfo &info, const ci::Vec2f &size, const ci::Vec2i &resolution, 
 			int32_t corners, const ci::Vec3f &position, const ci::Quatf &rotation );
+		static btSoftBody*	createSoftMesh( btSoftBodyWorldInfo &info, const ci::TriMesh &mesh, const ci::Vec3f &scale, 
+			const ci::Vec3f &position, const ci::Quatf &rotation );
 
 	};
 
@@ -71,9 +73,9 @@ namespace bullet {
 	class SoftMesh : public CollisionObject, public SoftBody
 	{
 	protected:
-		SoftMesh( btSoftBodyWorldInfo &info, const ci::TriMesh &mesh, const ci::Vec3f &scale, float mass, 
+		SoftMesh( btSoftBodyWorldInfo &info, const ci::TriMesh &mesh, const ci::Vec3f &scale, 
 			const ci::Vec3f &position, const ci::Quatf &rotation );
 		friend CollisionObjectRef	createSoftMesh( const DynamicsWorldRef &world, const ci::TriMesh &mesh, const ci::Vec3f &scale, 
-													float mass, const ci::Vec3f &position, const ci::Quatf &rotation );
+													const ci::Vec3f &position, const ci::Quatf &rotation );
 	};
 }

@@ -276,7 +276,7 @@ void BulletTestApp::drop()
 			shape->setAngularFactor( 0.95f );
 			break;
 		case 9:
-			body = bullet::createSoftMesh( mWorld, mSoftCube, Vec3f::one() * size );
+			body = bullet::createSoftMesh( mWorld, mSoftCube, Vec3f::one() * size, position );
 			softShape = bullet::toBulletSoftBody( body );
 			softShape->randomizeConstraints();
 
@@ -315,7 +315,8 @@ void BulletTestApp::initTest()
 	Channel32f heightField;
 
 	// Create and add the wobbly box
-	btSoftBody* body = 0;
+	btSoftBody* body				= 0;
+	btSoftBody::Material* material	= 0;
 	mGroundTransform.setIdentity();
 	switch ( mTest ) {
 	case 0:
@@ -327,12 +328,6 @@ void BulletTestApp::initTest()
 		break;
 	case 2:
 		mGround = bullet::createRigidMesh( mWorld, mConcave, Vec3f( 10.0f, 1.0f, 10.0f ), 0.0f, 0.0f );
-		break;
-	case 3:
-		mGround = bullet::createRigidBox( mWorld, Vec3f( 200.0f, 35.0f, 200.0f ), 0.0f );
-		break;
-	case 4:
-		mGround = bullet::createRigidBox( mWorld, Vec3f( 200.0f, 35.0f, 200.0f ), 0.0f );
 		break;
 	case 5:
 		heightField = Channel32f( loadImage( loadResource( RES_IMAGE_HEIGHTFIELD_SM ) ) );
@@ -374,16 +369,15 @@ void BulletTestApp::initTest()
 		body->setTotalMass( 500.0f );
 		body->generateClusters( 0 );
 
-		/*btSoftBody::Material* material	= body->appendMaterial();
+		material						= body->appendMaterial();
 		material->m_kAST				= 0.5f;
 		material->m_kLST				= 0.5f;
 		material->m_kVST				= 1.0f;
-		body->generateBendingConstraints( 2, material );*/
+		body->generateBendingConstraints( 1, material );
 
 		break;
-	case 9:
-		heightField = Channel32f( loadImage( loadResource( RES_IMAGE_HEIGHTFIELD_SM ) ) );
-		mGround = bullet::createRigidTerrain( mWorld, heightField, -1.0f, 1.0f, Vec3f( 6.0f, 80.0f, 6.0f ), 0.0f );
+	default:
+		mGround = bullet::createRigidBox( mWorld, Vec3f( 200.0f, 35.0f, 200.0f ), 0.0f );
 		break;
 	}
 
