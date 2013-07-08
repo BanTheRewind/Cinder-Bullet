@@ -1,7 +1,7 @@
 /*
 * CinderBullet originally created by Peter Holzkorn on 2/16/10
 * 
-* Copyright (c) 2012, Ban the Rewind
+* Copyright (c) 2013, Ban the Rewind
 * All rights reserved.
 * 
 * Redistribution and use in source and binary forms, with or 
@@ -37,6 +37,7 @@
 
 #pragma once
 
+#include "boost/signals2.hpp"
 #include "boost/ptr_container/ptr_container.hpp"
 #include "bullet/BulletSoftBody/btSoftRigidDynamicsWorld.h"
 #include "cinder/gl/gl.h"
@@ -88,7 +89,21 @@ namespace bullet {
 		void										setInfo( const btSoftBodyWorldInfo &info );
 
 		void										update( float step = 0.016667f );
+
+		template<typename T, typename Y>
+		inline uint32_t	addCollisionCallback( T callback, Y* callbackObject )
+		{
+			uint32_t id = mCallbacks.empty() ? 0 : mCallbacks.rbegin()->first + 1;
+			mCallbacks.insert( std::make_pair( id, CallbackRef( new Callback( mSignal.connect( std::bind( callback, callbackObject, std::placeholders::_1, std::placeholders::_2 ) ) ) ) ) );
+			return id;
+		}
+
+		void										removeCallback( uint32_t id );
 	private:
+		typedef boost::signals2::connection			Callback;
+		typedef std::shared_ptr<Callback>			CallbackRef;
+		typedef std::map<uint32_t, CallbackRef>		CallbackList;
+
 		friend DynamicsWorldRef						createWorld();
 
 		DynamicsWorld();
@@ -109,6 +124,11 @@ namespace bullet {
 		btConstraintSolver							*mSolver;
 		btDefaultCollisionConfiguration				*mCollisionConfiguration;
 		btSoftRigidDynamicsWorld					*mWorld;
+
+		std::map<btCollisionObject*, btManifoldPoint>	mCollisions;
+
+		CallbackList									mCallbacks;
+		boost::signals2::signal<void ( btCollisionObject*, const btManifoldPoint& )>	mSignal;
 	};
 
 	DynamicsWorldRef								createWorld();

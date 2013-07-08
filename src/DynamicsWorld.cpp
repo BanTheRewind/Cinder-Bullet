@@ -1,7 +1,7 @@
 /*
 * CinderBullet originally created by Peter Holzkorn on 2/16/10
 * 
-* Copyright (c) 2012, Ban the Rewind
+* Copyright (c) 2013, Ban the Rewind
 * All rights reserved.
 * 
 * Redistribution and use in source and binary forms, with or 
@@ -49,7 +49,7 @@ namespace bullet {
 	using namespace ci;
 	using namespace ci::app;
 	using namespace std;
-
+	
 	/////////////////////////////////////////////////////////////////////////////////////////////////
 
 	DynamicsWorld::DynamicsWorld()
@@ -260,7 +260,7 @@ namespace bullet {
 		mWorld->rayTest( rayFrom, rayTo, rayCallback );
 
 		if ( rayCallback.hasHit() ) {
-			btRigidBody* collisionBody = btRigidBody::upcast( rayCallback.m_collisionObject );
+			/*btRigidBody* collisionBody = btRigidBody::upcast( rayCallback.m_collisionObject );
 			if ( collisionBody ) {
 				btVector3 position	= rayCallback.m_hitPointWorld;
 				btVector3 pivot		= collisionBody->getCenterOfMassTransform().inverse() * position;
@@ -270,7 +270,7 @@ namespace bullet {
 				constraint->mPosition	= fromBulletVector3( rayTo );
 				
 				return true;
-			}
+			}*/
 		}
 		return false;
 	}
@@ -278,6 +278,16 @@ namespace bullet {
 	void DynamicsWorld::removeConstraint( const Constraint &constraint )
 	{
 		mWorld->removeConstraint( constraint.mConstraint );
+	}
+
+	/////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void DynamicsWorld::removeCallback( uint32_t id )
+	{
+		if ( mCallbacks.find( id ) != mCallbacks.end() ) {
+			mCallbacks.find( id )->second->disconnect();
+			mCallbacks.erase( id );
+		}
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////
@@ -312,6 +322,46 @@ namespace bullet {
 		mNumObjects = numObjects;
 
 		mWorld->stepSimulation( 1.0f, 10, step );
+
+		if ( !mCallbacks.empty() ) {
+			map<btCollisionObject*, btManifoldPoint> collisions;
+
+			int32_t numManifolds = mWorld->getDispatcher()->getNumManifolds();
+			for ( int32_t i = 0; i < numManifolds; ++i ) {
+				btPersistentManifold* contactManifold = mWorld->getDispatcher()->getManifoldByIndexInternal( i );
+
+				btCollisionObject* bodyA = const_cast<btCollisionObject*>( contactManifold->getBody0() );
+				btCollisionObject* bodyB = const_cast<btCollisionObject*>( contactManifold->getBody1() );
+
+				int32_t numContacts = contactManifold->getNumContacts();
+				for ( int32_t j = 0; j < numContacts; ++j ) {
+					btManifoldPoint& v = contactManifold->getContactPoint( j );
+					if ( v.getDistance() < 0.0f && collisions.find( bodyB ) == collisions.end() ) {
+						collisions[ bodyB ] = v;
+					}
+				}
+			}
+
+			map<btCollisionObject*, btManifoldPoint>::iterator iter;
+			if ( !collisions.empty() ) {
+				for ( iter = collisions.begin(); iter != collisions.end(); ++iter ) {
+					if ( mCollisions.find( (*iter).first ) == mCollisions.end() ) {
+						mSignal( iter->first, iter->second );
+					} else {
+						mCollisions.erase( (*iter).first );
+					}
+				}
+			}
+
+			if ( !mCollisions.empty() ) {
+				for ( iter = mCollisions.begin(); iter != mCollisions.end(); ++iter ) {
+					mSignal( iter->first, iter->second );
+				}
+				mCollisions.clear();
+			}
+			mCollisions = collisions;
+		}
+
 		mSoftBodyWorldInfo.m_sparsesdf.GarbageCollect();
 	}
 

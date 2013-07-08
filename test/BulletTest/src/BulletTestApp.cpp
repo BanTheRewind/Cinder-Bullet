@@ -1,7 +1,7 @@
 /*
 * CinderBullet originally created by Peter Holzkorn on 2/16/10
 * 
-* Copyright (c) 2012, Ban the Rewind
+* Copyright (c) 2013, Ban the Rewind
 * All rights reserved.
 * 
 * Redistribution and use in source and binary forms, with or 
@@ -40,6 +40,7 @@
 #include "cinder/app/AppBasic.h"
 #include "cinder/gl/Light.h"
 #include "cinder/gl/Texture.h"
+#include "cinder/gl/Vbo.h"
 #include "cinder/Camera.h"
 #include "cinder/Capture.h"
 #include "cinder/ImageIo.h"
@@ -50,6 +51,7 @@
 #include "cinder/Surface.h"
 #include "cinder/TriMesh.h"
 #include "cinder/Utilities.h"
+
 #include "CinderBullet.h"
 #include "MeshHelper.h"
 #include "Resources.h"
@@ -94,8 +96,8 @@ public:
 	void						mouseDrag( ci::app::MouseEvent event );
 	void						mouseUp( ci::app::MouseEvent event );
 	void						mouseWheel( ci::app::MouseEvent event );
-	void						prepareSettings( ci::app::AppBasic::Settings *settings );
-	void						resize( ci::app::ResizeEvent event );
+	void						prepareSettings( ci::app::AppBasic::Settings* settings );
+	void						resize();
 	void						setup();
 	void						shutdown();
 	void						update();
@@ -110,21 +112,19 @@ private:
 
 	ci::Surface					mSurface;
 	ci::CameraPersp				mCamera;
-	ci::gl::Light				*mLight;
+	ci::gl::Light*				mLight;
 
-	ci::gl::VboMesh				mCone;
-	ci::gl::VboMesh				mCube;
-	ci::gl::VboMesh				mCylinder;
-	ci::gl::VboMesh				mSphere;
+	ci::gl::VboMeshRef			mCone;
+	ci::gl::VboMeshRef			mCube;
+	ci::gl::VboMeshRef			mCylinder;
+	ci::gl::VboMeshRef			mSphere;
 
-	ci::TriMesh					mSoftCube;
-
-	void						loadModels();
 	ci::TriMesh					mConcave;
 	ci::TriMesh					mConvex;
+	ci::TriMesh					mSoftCube;
 
 	ci::Capture					mCapture;
-	DynamicTerrain				*mTerrain;
+	DynamicTerrain*				mTerrain;
 
 	bullet::CollisionObjectRef	mGround;
 	btTransform					mGroundTransform;
@@ -333,13 +333,13 @@ void BulletTestApp::initTest()
 		mGround = bullet::createRigidMesh( mWorld, mConcave, Vec3f( 10.0f, 1.0f, 10.0f ), 0.0f, 0.0f );
 		break;
 	case 5:
-		heightField = Channel32f( loadImage( loadResource( RES_IMAGE_HEIGHTFIELD_SM ) ) );
+		heightField = Channel32f( loadImage( loadResource( RES_JPG_HEIGHTFIELD_SM ) ) );
 		mGround = bullet::createRigidTerrain( mWorld, heightField, -1.0f, 1.0f, Vec3f( 6.0f, 80.0f, 6.0f ), 0.0f );
 		break;
 	case 6:
 		// ADVANCED: To add a custom class, create a standard pointer to it and 
 		// pushBack it into your world. Be sure to delete this pointer when you no longer need it.
-		heightField = Channel32f( loadImage( loadResource( RES_IMAGE_HEIGHTFIELD ) ) );
+		heightField = Channel32f( loadImage( loadResource( RES_PNG_HEIGHTFIELD ) ) );
 		mTerrain = new DynamicTerrain( heightField, -1.0f, 1.0f, Vec3f( 2.0f, 50.0f, 2.0f ), 0.0f );
 		mWorld->pushBack( mTerrain );
 		break;
@@ -380,7 +380,7 @@ void BulletTestApp::initTest()
 
 		break;
 	case 9:
-		heightField = Channel32f( loadImage( loadResource( RES_IMAGE_HEIGHTFIELD_SM ) ) );
+		heightField = Channel32f( loadImage( loadResource( RES_JPG_HEIGHTFIELD_SM ) ) );
 		mGround = bullet::createRigidTerrain( mWorld, heightField, -1.0f, 1.0f, Vec3f( 6.0f, 80.0f, 6.0f ), 0.0f );
 		break;
 	default:
@@ -394,21 +394,6 @@ void BulletTestApp::initTest()
 		boxBody->setFriction( 0.95f );
 	}
 
-}
-
-void BulletTestApp::loadModels()
-{
-	ObjLoader loader( loadResource( RES_OBJ_SPHERE )->createStream() );
-	loader.load( &mConvex );
-	loader = ObjLoader( loadResource( RES_OBJ_TORUS )->createStream() );
-	loader.load( &mConcave );
-	
-	mCone		= MeshHelper::createCylinderVboMesh( Vec2i( 24, 1 ), 0.0f, 1.0f, false, true );
-	mCube		= MeshHelper::createCubeVboMesh();
-	mCylinder	= MeshHelper::createCylinderVboMesh( Vec2i( 24, 1 ) );
-	mSphere		= MeshHelper::createSphereVboMesh( Vec2i( 24, 12 ) );
-
-	mSoftCube	= MeshHelper::createCubeTriMesh( Vec3i( 8, 8, 8 ) );
 }
 
 void BulletTestApp::mouseDown( MouseEvent event )
@@ -446,7 +431,7 @@ void BulletTestApp::mouseWheel( MouseEvent event )
 	mCamera.setEyePoint( mCamera.getEyePoint() + Vec3f( 0.0f, 0.0f, event.getWheelIncrement() * 20.0f ) );
 }
 
-void BulletTestApp::prepareSettings( Settings *settings )
+void BulletTestApp::prepareSettings( Settings* settings )
 {
 	settings->setFrameRate( 60.0f );
 	settings->setFullScreen( false );
@@ -454,9 +439,8 @@ void BulletTestApp::prepareSettings( Settings *settings )
 	settings->setWindowSize( 1280, 720 );
 }
 
-void BulletTestApp::resize( ResizeEvent event )
+void BulletTestApp::resize()
 {
-
 	// Reset camera
 	mCamera.setPerspective( 60.0f, getWindowAspectRatio(), 1.0f, 5000.0f );
 	mCamera.lookAt( Vec3f( 0.0f, 0.0f, -200.0f ), Vec3f::zero() );
@@ -473,7 +457,6 @@ void BulletTestApp::resize( ResizeEvent event )
 	gl::enable( GL_NORMALIZE );
 	gl::enableAlphaBlending();
 	glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-
 }
 
 void BulletTestApp::screenShot()
@@ -488,6 +471,36 @@ void BulletTestApp::setup()
 	mTest		= 9;
 	mTestPrev	= mTest;
 
+	// Load meshes
+	try {
+		ObjLoader loader( loadResource( RES_MSH_SPHERE )->createStream() );
+		loader.load( &mConvex );
+	} catch ( ResourceLoadExc ex ) {
+		console() << "Unable to load model: " << ex.what() << endl;	
+		quit();
+	}
+
+	mConcave	= MeshHelper::createTorus( Vec2i( 24, 12 ) );
+	mSoftCube	= MeshHelper::createCube( Vec3i( 8, 8, 8 ) );
+
+	mCone		= gl::VboMesh::create( MeshHelper::createCylinder( Vec2i( 24, 1 ), 0.0f, 1.0f, false, true ) );
+	mCube		= gl::VboMesh::create( MeshHelper::createCube() );
+	mCylinder	= gl::VboMesh::create( MeshHelper::createCylinder( Vec2i( 24, 1 ) ) );
+	mSphere		= gl::VboMesh::create( MeshHelper::createSphere( Vec2i( 24, 12 ) ) );
+
+	// Load textures
+	try {
+		mTexSquare	= gl::Texture( loadImage( loadResource( RES_PNG_SQUARE ) ) );
+		mTexSphere	= gl::Texture( loadImage( loadResource( RES_JPG_SPHERE ) ) );
+		mTexTerrain	= gl::Texture( loadImage( loadResource( RES_JPG_TERRAIN ) ) );
+	} catch ( ResourceLoadExc ex ) {
+		console() << "Unable able to load texture: " << ex.what() << endl;
+		quit();
+		return;
+	}
+	mTexTerrain.setWrap( GL_REPEAT, GL_REPEAT );
+	mTexTerrain.unbind();
+
 	// Set up lighting
 	mLight = new gl::Light( gl::Light::DIRECTIONAL, 0 );
 	mLight->setDirection( Vec3f( 0.0f, 0.1f, 0.3f ).normalized() );
@@ -495,18 +508,8 @@ void BulletTestApp::setup()
 	mLight->setDiffuse( ColorAf( 1.0f, 1.0f, 1.0f, 1.0f ) );
 	mLight->enable();
 
-	// Load meshes
-	loadModels();
-
 	// Create a Bullet dynamics world
 	mWorld = bullet::createWorld();
-
-	// Load texture
-	mTexSquare	= gl::Texture( loadImage( loadResource( RES_TEX_SQUARE ) ) );
-	mTexSphere	= gl::Texture( loadImage( loadResource( RES_TEX_SPHERE ) ) );
-	mTexTerrain	= gl::Texture( loadImage( loadResource( RES_TEX_TERRAIN ) ) );
-	mTexTerrain.setWrap( GL_REPEAT, GL_REPEAT );
-	mTexTerrain.unbind();
 
 	// Init terrain pointer
 	mTerrain = 0;
@@ -523,8 +526,7 @@ void BulletTestApp::setup()
 	initTest();
 
 	// Run first resize to initialize view
-	resize( ResizeEvent( getWindowSize() ) );
-
+	resize();
 }
 
 void BulletTestApp::shutdown()
