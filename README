@@ -12,18 +12,9 @@ initialization, creating and managing VBOs to represent bodies,
 memory management, and interaction is done for you. From there, 
 you just use Bullet directly.
 
-BUGS
-
-- Cone tex coords needs to be fixed
-- Concave mesh body isn't scaling on Y axis
-- Crash on exit
-
 TO DO LIST
 
-- IN PROGRESS: Screen -> dynamics world interaction / constraints
-- Collision callbacks
-- Static lib
-- XCode static lib
+- Constraints
 
 - Sample ideas
   - Trampoline magnet
@@ -42,7 +33,7 @@ TO DO LIST
 More about Bullet here:
 http://bulletphysics.org/wordpress/
 
-http://code.google.com/p/bullet/downloads/detail?name=bullet-2.80-rev2531.zip&can=2&q=
+https://code.google.com/p/bullet/downloads/list
 
 -----------------------------------------
 
