@@ -85,16 +85,16 @@ namespace bullet
 	class RigidHull : public CollisionObject, public RigidBody
 	{
 	protected:
-		RigidHull( const ci::TriMesh &mesh, const ci::Vec3f &scale, float mass, const ci::Vec3f &position, const ci::Quatf &rotation );
-		friend CollisionObjectRef	createRigidHull( const DynamicsWorldRef &world, const ci::TriMesh &mesh, const ci::Vec3f &scale, 
+		RigidHull( const ci::TriMeshRef &mesh, const ci::Vec3f &scale, float mass, const ci::Vec3f &position, const ci::Quatf &rotation );
+		friend CollisionObjectRef	createRigidHull( const DynamicsWorldRef &world, const ci::TriMeshRef &mesh, const ci::Vec3f &scale, 
 													float mass, const ci::Vec3f &position, const ci::Quatf &rotation );
 	};
 
 	class RigidMesh : public CollisionObject, public RigidBody
 	{
 	protected:
-		RigidMesh( const ci::TriMesh &mesh, const ci::Vec3f &scale, float margin, float mass, const ci::Vec3f &position, const ci::Quatf &rotation );
-		friend CollisionObjectRef	createRigidMesh( const DynamicsWorldRef &world, const ci::TriMesh &mesh, const ci::Vec3f &scale, 
+		RigidMesh( const ci::TriMeshRef &mesh, const ci::Vec3f &scale, float margin, float mass, const ci::Vec3f &position, const ci::Quatf &rotation );
+		friend CollisionObjectRef	createRigidMesh( const DynamicsWorldRef &world, const ci::TriMeshRef &mesh, const ci::Vec3f &scale, 
 													float margin, float mass, const ci::Vec3f &position, const ci::Quatf &rotation );
 	};
 

@@ -68,7 +68,7 @@ namespace bullet {
 		return body;
 	}
 
-	btSoftBody*	SoftBody::createSoftHull( btSoftBodyWorldInfo &info, const TriMesh &mesh, const Vec3f &scale, 
+	btSoftBody*	SoftBody::createSoftHull( btSoftBodyWorldInfo &info, const TriMeshRef &mesh, const Vec3f &scale, 
 		const Vec3f &position, const Quatf &rotation )
 	{
 		Matrix44f transform;
@@ -78,13 +78,18 @@ namespace bullet {
 		transform.translate( position * -1.0f );
 		transform.translate( position );
 
-		btVector3* positions = new btVector3[ mesh.getNumVertices() ];
-		size_t i = 0;
-		for ( vector<Vec3f>::const_iterator iter = mesh.getVertices().begin(); iter != mesh.getVertices().end(); ++iter, ++i ) {
-			positions[ i ] = toBulletVector3( *iter );
+		btVector3* positions				= new btVector3[ mesh->getNumVertices() ];
+		const Vec3f* meshPositions			= mesh->getVertices<3>();
+		const Vec3f*const meshPositionsEnd	= meshPositions + mesh->getNumVertices();
+
+		while ( meshPositions != meshPositionsEnd ) {
+			*positions = toBulletVector3( *meshPositions );
+			
+			++positions;
+			++meshPositions;
 		}
 
-		btSoftBody* body = btSoftBodyHelpers::CreateFromConvexHull( info, positions, mesh.getNumIndices(), false );
+		btSoftBody* body = btSoftBodyHelpers::CreateFromConvexHull( info, positions, mesh->getNumIndices(), false );
 		body->transform( toBulletTransform( transform ) );
 		body->scale( toBulletVector3( scale ) );
 
@@ -93,7 +98,7 @@ namespace bullet {
 		return body;
 	}
 
-	btSoftBody*	SoftBody::createSoftMesh( btSoftBodyWorldInfo &info, const TriMesh &mesh, const Vec3f &scale, 
+	btSoftBody*	SoftBody::createSoftMesh( btSoftBodyWorldInfo &info, const TriMeshRef &mesh, const Vec3f &scale, 
 		const Vec3f &position, const Quatf &rotation )
 	{
 		Matrix44f transform;
@@ -103,22 +108,26 @@ namespace bullet {
 		transform.translate( position * -1.0f );
 		transform.translate( position );
 
-		btScalar* positions	= new btScalar[ mesh.getNumVertices() * 3 ];
-		size_t i = 0;
-		for ( vector<Vec3f>::const_iterator iter = mesh.getVertices().begin(); iter != mesh.getVertices().end(); ++iter, i += 3 ) {
-			Vec3f position = transform.transformPoint( *iter );
-			positions[ i + 0 ] = position.x;
-			positions[ i + 1 ] = position.y;
-			positions[ i + 2 ] = position.z;
+		btScalar* positions					= new btScalar[ mesh->getNumVertices() * 3 ];
+		const Vec3f* meshPositions			= mesh->getVertices<3>();
+		const Vec3f*const meshPositionsEnd	= meshPositions + mesh->getNumVertices();
+
+		while ( meshPositions != meshPositionsEnd ) {
+			*positions			= meshPositions->x;
+			*( positions + 1 )	= meshPositions->y;
+			*( positions + 2 )	= meshPositions->z;
+			
+			positions += 3;
+			++meshPositions;
 		}
 		
-		int* indices		= new int[ mesh.getIndices().size() ];
-		i = 0;
-		for ( vector<size_t>::const_iterator iter = mesh.getIndices().begin(); iter != mesh.getIndices().end(); ++iter, ++i ) {
+		int* indices		= new int[ mesh->getNumIndices() ];
+		size_t i = 0;
+		for ( vector<uint32_t>::const_iterator iter = mesh->getIndices().begin(); iter != mesh->getIndices().end(); ++iter, ++i ) {
 			indices[ i ] = (int)*iter;
 		}
 		
- 		btSoftBody* body = btSoftBodyHelpers::CreateFromTriMesh( info, positions, indices, mesh.getNumTriangles() );
+ 		btSoftBody* body = btSoftBodyHelpers::CreateFromTriMesh( info, positions, indices, mesh->getNumTriangles() );
 		//body->scale( toBulletVector3( scale ) );
 
 		delete [] indices;
@@ -160,30 +169,74 @@ namespace bullet {
 		update();
 	}
 
-	SoftHull::SoftHull( btSoftBodyWorldInfo &info, const TriMesh &mesh, const Vec3f &scale, const Vec3f &position, const Quatf &rotation )
+	SoftHull::SoftHull( btSoftBodyWorldInfo &info, const TriMeshRef &mesh, const Vec3f &scale, const Vec3f &position, const Quatf &rotation )
 		: CollisionObject()
 	{
 		mSoftBody	= createSoftHull( info, mesh, scale, position, rotation );
 		mScale		= scale;
 
-		mIndices	= mesh.getIndices();
-		mNormals	= mesh.getNormals();
-		mPositions	= mesh.getVertices();
-		mTexCoords	= mesh.getTexCoords();
+		// copying indices requires casting from uint32_t to size_t
+		mIndices.clear();
+		mIndices.reserve( mesh->getNumIndices() );
+
+		auto itIndices			= mIndices.begin();
+		auto itIndicesEnd		= mIndices.end();
+		auto itMeshIndices		= mesh->getIndices().begin();
+		auto itMeshIndicesEnd	= mesh->getIndices().end();
+
+		while ( itIndices != itIndicesEnd && itMeshIndices != itMeshIndicesEnd ) {
+			*itIndices = static_cast<size_t>( *itMeshIndices );
+			++itIndices;
+			++itMeshIndices;
+		}
+
+		mNormals	= mesh->getNormals();
+
+		const Vec3f	*const pPositions = mesh->getVertices<3>();
+		mPositions	= vector<Vec3f>( pPositions, pPositions + mesh->getNumVertices() );
+
+		if ( mesh->hasTexCoords() ) {
+			if ( mesh->getAttribDims( geom::Attrib::TEX_COORD_0 ) == 2 ) {
+				const Vec2f *const pTexCoords = mesh->getTexCoords0<2>();
+				mTexCoords	= vector<Vec2f>( pTexCoords, pTexCoords + mesh->getNumVertices() );
+			}
+		}
 
 		update();
 	}
 
-	SoftMesh::SoftMesh( btSoftBodyWorldInfo &info, const TriMesh &mesh, const Vec3f &scale, const Vec3f &position, const Quatf &rotation )
+	SoftMesh::SoftMesh( btSoftBodyWorldInfo &info, const TriMeshRef &mesh, const Vec3f &scale, const Vec3f &position, const Quatf &rotation )
 		: CollisionObject()
 	{
 		mSoftBody	= createSoftMesh( info, mesh, scale, position, rotation );
 		mScale		= scale;
 
-		mIndices	= mesh.getIndices();
-		mNormals	= mesh.getNormals();
-		mPositions	= mesh.getVertices();
-		mTexCoords	= mesh.getTexCoords();
+		// copying indices requires casting from uint32_t to size_t
+		mIndices.clear();
+		mIndices.reserve( mesh->getNumIndices() );
+
+		auto itIndices			= mIndices.begin();
+		auto itIndicesEnd		= mIndices.end();
+		auto itMeshIndices		= mesh->getIndices().begin();
+		auto itMeshIndicesEnd	= mesh->getIndices().end();
+
+		while ( itIndices != itIndicesEnd && itMeshIndices != itMeshIndicesEnd ) {
+			*itIndices = static_cast<size_t>( *itMeshIndices );
+			++itIndices;
+			++itMeshIndices;
+		}
+		
+		mNormals	= mesh->getNormals();
+
+		const Vec3f	*const pPositions = mesh->getVertices<3>();
+		mPositions	= vector<Vec3f>( pPositions, pPositions + mesh->getNumVertices() );
+
+		if ( mesh->hasTexCoords() ) {
+			if ( mesh->getAttribDims( geom::Attrib::TEX_COORD_0 ) == 2 ) {
+				const Vec2f *const pTexCoords = mesh->getTexCoords0<2>();
+				mTexCoords	= vector<Vec2f>( pTexCoords, pTexCoords + mesh->getNumVertices() );
+			}
+		}
 
 		update();
 	}

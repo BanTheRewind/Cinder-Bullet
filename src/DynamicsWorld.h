@@ -141,10 +141,10 @@ namespace bullet {
 	CollisionObjectRef								createRigidCylinder( const DynamicsWorldRef &world, const ci::Vec3f &scale = ci::Vec3f::one(), 
 																		float mass = 1.0f, const ci::Vec3f &position = ci::Vec3f::zero(), 
 																		const ci::Quatf &rotation = ci::Quatf() );
-	CollisionObjectRef								createRigidHull( const DynamicsWorldRef &world, const ci::TriMesh &mesh, const ci::Vec3f &scale = ci::Vec3f::one(), 
+	CollisionObjectRef								createRigidHull( const DynamicsWorldRef &world, const ci::TriMeshRef &mesh, const ci::Vec3f &scale = ci::Vec3f::one(), 
 																	float mass = 1.0f, const ci::Vec3f &position = ci::Vec3f::zero(), 
 																	const ci::Quatf &rotation = ci::Quatf() );
-	CollisionObjectRef								createRigidMesh( const DynamicsWorldRef &world, const ci::TriMesh &mesh, const ci::Vec3f &scale = ci::Vec3f::one(), 
+	CollisionObjectRef								createRigidMesh( const DynamicsWorldRef &world, const ci::TriMeshRef &mesh, const ci::Vec3f &scale = ci::Vec3f::one(), 
 																	float margin = 0.05f, float mass = 1.0f, 
 																	const ci::Vec3f &position = ci::Vec3f::zero(), 
 																	const ci::Quatf &rotation = ci::Quatf() );
@@ -158,9 +158,9 @@ namespace bullet {
 	CollisionObjectRef								createSoftCloth( const DynamicsWorldRef &world, const ci::Vec2f &size = ci::Vec2f::one() * 10.0f, 
 																	const ci::Vec2i &resolution = ci::Vec2i( 8, 8 ), int32_t corners = 0, 
 																	const ci::Vec3f &position = ci::Vec3f::zero(), const ci::Quatf &rotation = ci::Quatf() );
-	CollisionObjectRef								createSoftHull( const DynamicsWorldRef &world, const ci::TriMesh &mesh, const ci::Vec3f &scale = ci::Vec3f::one(), 
+	CollisionObjectRef								createSoftHull( const DynamicsWorldRef &world, const ci::TriMeshRef &mesh, const ci::Vec3f &scale = ci::Vec3f::one(), 
 																	const ci::Vec3f &position = ci::Vec3f::zero(), const ci::Quatf &rotation = ci::Quatf() );
-	CollisionObjectRef								createSoftMesh( const DynamicsWorldRef &world, const ci::TriMesh &mesh, const ci::Vec3f &scale = ci::Vec3f::one(), 
+	CollisionObjectRef								createSoftMesh( const DynamicsWorldRef &world, const ci::TriMeshRef &mesh, const ci::Vec3f &scale = ci::Vec3f::one(), 
 																	const ci::Vec3f &position = ci::Vec3f::zero(), const ci::Quatf &rotation = ci::Quatf() );
 
 	btRigidBody*									toBulletRigidBody( Iter pos );
@@ -168,6 +168,6 @@ namespace bullet {
 	btSoftBody*										toBulletSoftBody( Iter pos );
 	btSoftBody*										toBulletSoftBody( const CollisionObjectRef &object );
 
-	ci::TriMesh										calcTriMesh( Iter pos );
-	ci::TriMesh										calcTriMesh( const CollisionObjectRef &object );
+	ci::TriMeshRef									calcTriMesh( Iter pos );
+	ci::TriMeshRef									calcTriMesh( const CollisionObjectRef &object );
 }

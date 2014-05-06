@@ -37,6 +37,7 @@
 
 #include "RigidBody.h"
 
+#include "cinder/Log.h"
 #include "cinder/Utilities.h"
 
 namespace bullet {
@@ -132,33 +133,135 @@ namespace bullet {
 		mScale				= scale;
 	}
 
-	RigidHull::RigidHull( const TriMesh &mesh, const Vec3f &scale, float mass, const Vec3f &position, const Quatf &rotation )
+	RigidHull::RigidHull( const TriMeshRef &mesh, const Vec3f &scale, float mass, const Vec3f &position, const Quatf &rotation )
 		: CollisionObject()
 	{
 		mScale		= scale;
 
-		btConvexHullShape* shape	= createConvexHullShape( mesh.getVertices(), scale );
-		mRigidBody					= createHull( shape, mass, position, rotation );
+		const Vec3f *const pPositions = mesh->getVertices<3>();
+		mPositions	= vector<Vec3f>( pPositions, pPositions + mesh->getNumVertices() );
 
-		mIndices	= mesh.getIndices();
-		mNormals	= mesh.getNormals();
-		mPositions	= mesh.getVertices();
-		mTexCoords	= mesh.getTexCoords();
+		if ( mesh->hasTexCoords() ) {
+			if ( mesh->getAttribDims( geom::Attrib::TEX_COORD_0 ) == 2 ) {
+				const Vec2f *const pTexCoords = mesh->getTexCoords0<2>();
+				mTexCoords	= vector<Vec2f>( pTexCoords, pTexCoords + mesh->getNumVertices() );
+			}
+		}
+
+		// copying indices requires casting from uint32_t to size_t
+		mIndices.clear();
+		mIndices.reserve( mesh->getNumIndices() );
+
+		auto itIndices			= mIndices.begin();
+		auto itIndicesEnd		= mIndices.end();
+		auto itMeshIndices		= mesh->getIndices().begin();
+		auto itMeshIndicesEnd	= mesh->getIndices().end();
+
+		while ( itIndices != itIndicesEnd && itMeshIndices != itMeshIndicesEnd ) {
+			*itIndices = static_cast<size_t>( *itMeshIndices );
+			++itIndices;
+			++itMeshIndices;
+		}
+
+		mNormals	= mesh->getNormals();
+
+		btConvexHullShape* shape	= createConvexHullShape( mPositions, scale );
+		mRigidBody					= createHull( shape, mass, position, rotation );
 	}
 
-	RigidMesh::RigidMesh( const TriMesh &mesh, const Vec3f &scale, float margin, float mass, const Vec3f &position, const Quatf &rotation )
+	//RigidMesh::RigidMesh( const TriMeshRef &mesh, const Vec3f &scale, float margin, float mass, const Vec3f &position, const Quatf &rotation )
+	//	: CollisionObject()
+	//{
+	//	mScale		= scale;
+
+	//	const Vec3f *const pPositions = mesh->getVertices<3>();
+	//	mPositions	= vector<Vec3f>( pPositions, pPositions + mesh->getNumVertices() );
+
+	//	if ( mesh->hasTexCoords() ) {
+	//		if ( mesh->getAttribDims( geom::Attrib::TEX_COORD_0 ) == 2 ) {
+	//			const Vec2f *const pTexCoords = mesh->getTexCoords0<2>();
+	//			mTexCoords	= vector<Vec2f>( pTexCoords, pTexCoords + mesh->getNumVertices() );
+	//		}
+	//	}
+
+	//	// copying indices requires casting from uint32_t to size_t
+	//	mIndices.clear();
+	//	mIndices.reserve( mesh->getNumIndices() );
+
+	//	auto itIndices			= mIndices.begin();
+	//	auto itIndicesEnd		= mIndices.end();
+	//	auto itMeshIndices		= mesh->getIndices().begin();
+	//	auto itMeshIndicesEnd	= mesh->getIndices().end();
+
+	//	while ( itIndices != itIndicesEnd && itMeshIndices != itMeshIndicesEnd ) {
+	//		*itIndices = static_cast<size_t>( *itMeshIndices );
+	//		++itIndices;
+	//		++itMeshIndices;
+	//	}
+
+	//	mNormals	= mesh->getNormals();
+
+	//	Vec3f halfScale = scale * 0.5f;
+	//	btBvhTriangleMeshShape* shape	= createConcaveMeshShape( mPositions, mesh->getIndices(), scale, margin );
+	//	mRigidBody						= createMesh( shape, mass, position, rotation );
+	//}
+
+	RigidMesh::RigidMesh( const TriMeshRef &mesh, const Vec3f &scale, float margin, float mass, const Vec3f &position, const Quatf &rotation )
 		: CollisionObject()
 	{
 		mScale		= scale;
 
-		Vec3f halfScale = scale * 0.5f;
-		btBvhTriangleMeshShape* shape = createConcaveMeshShape( mesh.getVertices(), mesh.getIndices(), scale, margin );
-		mRigidBody = createMesh( shape, mass, position, rotation );
+		const Vec3f *const pPositions = mesh->getVertices<3>();
+		mPositions	= vector<Vec3f>( pPositions, pPositions + mesh->getNumVertices() );
 
-		mIndices	= mesh.getIndices();
-		mNormals	= mesh.getNormals();
-		mPositions	= mesh.getVertices();
-		mTexCoords	= mesh.getTexCoords();
+		if ( mesh->hasTexCoords() ) {
+			if ( mesh->getAttribDims( geom::Attrib::TEX_COORD_0 ) == 2 ) {
+				const Vec2f *const pTexCoords = mesh->getTexCoords0<2>();
+				mTexCoords	= vector<Vec2f>( pTexCoords, pTexCoords + mesh->getNumVertices() );
+			}
+		}
+
+		// copying indices requires casting from uint32_t to size_t
+		mIndices.clear();
+		mIndices.reserve( mesh->getNumIndices() );
+
+		CI_LOG_V( "num tri indices: " << mesh->getNumIndices() << "\nnum indices: " << mIndices.size() );
+
+		auto itIndices			= mIndices.begin();
+		auto itIndicesEnd		= mIndices.end();
+		auto itMeshIndices		= mesh->getIndices().begin();
+		auto itMeshIndicesEnd	= mesh->getIndices().end();
+
+		while ( itIndices != itIndicesEnd && itMeshIndices != itMeshIndicesEnd ) {
+			*itIndices = static_cast<size_t>( *itMeshIndices );
+			++itIndices;
+			++itMeshIndices;
+		}
+
+		mNormals	= mesh->getNormals();
+
+		CI_LOG_V( "numTris: " << mesh->getNumTriangles() << "\nnum indices: " << mesh->getNumIndices() << "\nnum indices / 3: " << mesh->getNumIndices() / 3 );
+
+		btTriangleMesh* btTriMesh		= new btTriangleMesh( true, false );
+		for ( size_t i = 0; i < mesh->getNumTriangles(); ++i ) {
+			Vec3f a, b, c;
+			mesh->getTriangleVertices( i, &a, &b, &c );
+			btTriMesh->addTriangle( 
+				bullet::toBulletVector3( a ),
+				bullet::toBulletVector3( b ),
+				bullet::toBulletVector3( c ),
+				true
+				);
+		}
+
+		btBvhTriangleMeshShape* shape	= new btBvhTriangleMeshShape( btTriMesh, true, true );
+		shape->buildOptimizedBvh();
+
+		btVector3 localScaling = toBulletVector3( scale );
+		shape->setLocalScaling( localScaling );
+		shape->setMargin( margin );
+
+		mRigidBody						= createMesh( shape, mass, position, rotation );
 	}
 
 	RigidSphere::RigidSphere( float radius, float mass, const Vec3f &position, const Quatf &rotation ) 

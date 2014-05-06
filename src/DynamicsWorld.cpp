@@ -412,11 +412,11 @@ namespace bullet {
 		return world->pushBack( new RigidCylinder( scale, mass, position, rotation ) );
 	}
 
-	CollisionObjectRef createRigidHull( const DynamicsWorldRef &world, const TriMesh &mesh, const Vec3f &scale, float mass, const Vec3f &position, const Quatf &rotation )
+	CollisionObjectRef createRigidHull( const DynamicsWorldRef &world, const TriMeshRef &mesh, const Vec3f &scale, float mass, const Vec3f &position, const Quatf &rotation )
 	{
 		return world->pushBack( new RigidHull( mesh, scale, mass, position, rotation ) );
 	}
-	CollisionObjectRef createRigidMesh( const DynamicsWorldRef &world, const TriMesh &mesh, const Vec3f &scale, float margin, float mass, 
+	CollisionObjectRef createRigidMesh( const DynamicsWorldRef &world, const TriMeshRef &mesh, const Vec3f &scale, float margin, float mass, 
 		const Vec3f &position, const Quatf &rotation )
 	{
 		return world->pushBack( new RigidMesh( mesh, scale, margin, mass, position, rotation ) );
@@ -439,13 +439,13 @@ namespace bullet {
 		return world->pushBack( new SoftCloth( world->getInfo(), size, resolution, corners, position, rotation ) );
 	}
 
-	CollisionObjectRef createSoftHull( const DynamicsWorldRef &world, const TriMesh &mesh, const Vec3f &scale, 
+	CollisionObjectRef createSoftHull( const DynamicsWorldRef &world, const TriMeshRef &mesh, const Vec3f &scale, 
 		const Vec3f &position, const Quatf &rotation )
 	{
 		return world->pushBack( new SoftHull( world->getInfo(), mesh, scale, position, rotation ) );
 	}
 
-	CollisionObjectRef createSoftMesh( const DynamicsWorldRef &world, const TriMesh &mesh, const Vec3f &scale, 
+	CollisionObjectRef createSoftMesh( const DynamicsWorldRef &world, const TriMeshRef &mesh, const Vec3f &scale, 
 		const Vec3f &position, const Quatf &rotation )
 	{
 		return world->pushBack( new SoftMesh( world->getInfo(), mesh, scale, position, rotation ) );
@@ -475,34 +475,46 @@ namespace bullet {
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////
 
-	ci::TriMesh calcTriMesh( Iter pos )
+	ci::TriMeshRef calcTriMesh( Iter pos )
 	{
-		TriMesh mesh;
-		mesh.appendIndices( &pos->getIndices()[ 0 ], pos->getIndices().size() );
+		TriMeshRef mesh		= TriMesh::create( TriMesh::Format().positions( 3 ).texCoords( 2 ).normals() );
+		uint32_t* indices	= new uint32_t[ pos->getIndices().size() ];
+		size_t i			= 0;
+		for ( const auto& index : pos->getIndices() ) {
+			indices[ i ]	= static_cast<uint32_t>( index );
+		}
+		mesh->appendIndices( indices, pos->getIndices().size() );
+		delete [] indices;
 		const vector<Vec3f>& normals = pos->getNormals();
 		for ( vector<Vec3f>::const_iterator iter = normals.begin(); iter != normals.end(); ++iter ) {
-			mesh.appendNormal( *iter );
+			mesh->appendNormal( *iter );
 		}
-		mesh.appendVertices( &pos->getPositions()[ 0 ], pos->getPositions().size() );
+		mesh->appendVertices( &pos->getPositions()[ 0 ], pos->getPositions().size() );
 		const vector<Vec2f>& texCoords = pos->getTexCoords();
 		for ( vector<Vec2f>::const_iterator iter = texCoords.begin(); iter != texCoords.end(); ++iter ) {
-			mesh.appendTexCoord( *iter );
+			mesh->appendTexCoord( *iter );
 		}
 		return mesh;
 	}
 
-	ci::TriMesh calcTriMesh( const CollisionObjectRef &object )
+	ci::TriMeshRef calcTriMesh( const CollisionObjectRef &object )
 	{
-		TriMesh mesh;
-		mesh.appendIndices( &object->getIndices()[ 0 ], object->getIndices().size() );
+		TriMeshRef mesh = TriMesh::create( TriMesh::Format().positions( 3 ).texCoords( 2 ).normals() );
+		uint32_t* indices	= new uint32_t[ object->getIndices().size() ];
+		size_t i			= 0;
+		for ( const auto& index : object->getIndices() ) {
+			indices[ i ]	= static_cast<uint32_t>( index );
+		}
+		mesh->appendIndices( indices, object->getIndices().size() );
+		delete [] indices;
 		const vector<Vec3f>& normals = object->getNormals();
 		for ( vector<Vec3f>::const_iterator iter = normals.begin(); iter != normals.end(); ++iter ) {
-			mesh.appendNormal( *iter );
+			mesh->appendNormal( *iter );
 		}
-		mesh.appendVertices( &object->getPositions()[ 0 ], object->getPositions().size() );
+		mesh->appendVertices( &object->getPositions()[ 0 ], object->getPositions().size() );
 		const vector<Vec2f>& texCoords = object->getTexCoords();
 		for ( vector<Vec2f>::const_iterator iter = texCoords.begin(); iter != texCoords.end(); ++iter ) {
-			mesh.appendTexCoord( *iter );
+			mesh->appendTexCoord( *iter );
 		}
 		return mesh;
 	}

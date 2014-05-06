@@ -49,9 +49,9 @@ namespace bullet {
 	protected:
 		static btSoftBody*	createSoftCloth( btSoftBodyWorldInfo &info, const ci::Vec2f &size, const ci::Vec2i &resolution, 
 			int32_t corners, const ci::Vec3f &position, const ci::Quatf &rotation );
-		static btSoftBody*	createSoftHull( btSoftBodyWorldInfo &info, const ci::TriMesh &mesh, const ci::Vec3f &scale, 
+		static btSoftBody*	createSoftHull( btSoftBodyWorldInfo &info, const ci::TriMeshRef &mesh, const ci::Vec3f &scale, 
 			const ci::Vec3f &position, const ci::Quatf &rotation );
-		static btSoftBody*	createSoftMesh( btSoftBodyWorldInfo &info, const ci::TriMesh &mesh, const ci::Vec3f &scale, 
+		static btSoftBody*	createSoftMesh( btSoftBodyWorldInfo &info, const ci::TriMeshRef &mesh, const ci::Vec3f &scale, 
 			const ci::Vec3f &position, const ci::Quatf &rotation );
 	};
 
@@ -74,18 +74,18 @@ namespace bullet {
 	class SoftHull : public CollisionObject, public SoftBody
 	{
 	protected:
-		SoftHull( btSoftBodyWorldInfo &info, const ci::TriMesh &mesh, const ci::Vec3f &scale, 
+		SoftHull( btSoftBodyWorldInfo &info, const ci::TriMeshRef &mesh, const ci::Vec3f &scale, 
 			const ci::Vec3f &position, const ci::Quatf &rotation );
-		friend CollisionObjectRef	createSoftHull( const DynamicsWorldRef &world, const ci::TriMesh &mesh, const ci::Vec3f &scale, 
+		friend CollisionObjectRef	createSoftHull( const DynamicsWorldRef &world, const ci::TriMeshRef &mesh, const ci::Vec3f &scale, 
 													const ci::Vec3f &position, const ci::Quatf &rotation );
 	};
 
 	class SoftMesh : public CollisionObject, public SoftBody
 	{
 	protected:
-		SoftMesh( btSoftBodyWorldInfo &info, const ci::TriMesh &mesh, const ci::Vec3f &scale, 
+		SoftMesh( btSoftBodyWorldInfo &info, const ci::TriMeshRef &mesh, const ci::Vec3f &scale, 
 			const ci::Vec3f &position, const ci::Quatf &rotation );
-		friend CollisionObjectRef	createSoftMesh( const DynamicsWorldRef &world, const ci::TriMesh &mesh, const ci::Vec3f &scale, 
+		friend CollisionObjectRef	createSoftMesh( const DynamicsWorldRef &world, const ci::TriMeshRef &mesh, const ci::Vec3f &scale, 
 													const ci::Vec3f &position, const ci::Quatf &rotation );
 	};
 }
